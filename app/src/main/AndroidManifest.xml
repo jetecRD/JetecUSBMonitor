@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Controller.ConnectStatusActivity"></activity>
+        <activity android:name=".Controller.RecordHistoryActivity"></activity>
+        <activity android:name=".Controller.SettingActivity" />
+        <activity android:name=".Controller.ConnectStatusActivity" />
         <activity android:name=".Controller.WelcomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

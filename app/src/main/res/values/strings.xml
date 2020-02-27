@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">USBMonitor</string>
+    <string name="app_name">USB\nMonitor</string>
     <string name="Temp">Temp.</string>
     <string name="Humidity">Humidity</string>
     <string name="CO2">CO2</string>
@@ -19,4 +19,7 @@
     <string name="gettingDeviceInfo">Getting device information</string>
     <string name="pleaseInputDevice">Please input device.</string>
     <string name="pleaseWait">Please Wait...</string>
+    <string name="record_history">Record history</string>
+    <string name="setting">Setting</string>
+    <string name="advise">Advise</string>
 </resources>

@@ -203,11 +203,23 @@ class Tools() {
                 var drivers: List<UsbSerialDriver>? = null
                 while (deviceIterator.hasNext()) {
                     val device = deviceIterator.next()
-                    customTable.addProduct(
-                        device.vendorId,
-                        device.productId,
-                        CdcAcmSerialDriver::class.java
-                    )
+                    when(MyStatus.usbType){
+                        "CDC"->{
+                            customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
+                        }
+                        "CP21"->{
+                            customTable.addProduct(device.vendorId, device.productId, Cp21xxSerialDriver::class.java)
+                        }
+                        "CH34"->{
+                            customTable.addProduct(device.vendorId, device.productId, Ch34xSerialDriver::class.java)
+                        }
+                        "FTD"->{
+                            customTable.addProduct(device.vendorId, device.productId, FtdiSerialDriver::class.java)
+                        }
+                        "PRO"->{
+                            customTable.addProduct(device.vendorId, device.productId, ProlificSerialDriver::class.java)
+                        }
+                    }
                     var prober: UsbSerialProber = UsbSerialProber(customTable)
                     drivers = prober.findAllDrivers(manager)
                 }
@@ -261,11 +273,24 @@ class Tools() {
                 var drivers: List<UsbSerialDriver>? = null
                 while (deviceIterator.hasNext()) {
                     val device = deviceIterator.next()
-                    customTable.addProduct(
-                        device.vendorId,
-                        device.productId,
-                        CdcAcmSerialDriver::class.java
-                    )
+                    when(MyStatus.usbType){
+                        "CDC"->{
+                            customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
+                        }
+                        "CP21"->{
+                            customTable.addProduct(device.vendorId, device.productId, Cp21xxSerialDriver::class.java)
+                        }
+                        "CH34"->{
+                            customTable.addProduct(device.vendorId, device.productId, Ch34xSerialDriver::class.java)
+                        }
+                        "FTD"->{
+                            customTable.addProduct(device.vendorId, device.productId, FtdiSerialDriver::class.java)
+                        }
+                        "PRO"->{
+                            customTable.addProduct(device.vendorId, device.productId, ProlificSerialDriver::class.java)
+                        }
+                    }
+                    customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
                     var prober: UsbSerialProber = UsbSerialProber(customTable)
                     drivers = prober.findAllDrivers(manager)
                 }

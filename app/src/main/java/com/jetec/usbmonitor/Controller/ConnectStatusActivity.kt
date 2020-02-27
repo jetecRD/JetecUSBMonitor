@@ -238,7 +238,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         var arrayList: ArrayList<ByteArray> = ArrayList()
         var arrayString: ArrayList<String> = ArrayList()
         Thread {
-            SystemClock.sleep(1500)
+            SystemClock.sleep(1000)
             runOnUiThread {
                 arrayList = Tools.sendData("get", 200, this)
                 Log.d(TAG, "$arrayList ");
@@ -252,7 +252,7 @@ class ConnectStatusActivity : AppCompatActivity() {
                 }
 
             }//結束第一個UI線程
-            SystemClock.sleep(1000)
+            SystemClock.sleep(800)
             if (arrayList.size>0){
                 runOnUiThread{
                     var intent = Intent(this,MainActivity::class.java)
