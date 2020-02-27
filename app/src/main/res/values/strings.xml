@@ -1,0 +1,22 @@
+<resources>
+    <string name="app_name">USBMonitor</string>
+    <string name="Temp">Temp.</string>
+    <string name="Humidity">Humidity</string>
+    <string name="CO2">CO2</string>
+    <string name="CO">CO</string>
+    <string name="Pressure">Pressure</string>
+    <string name="PM2_5">PM2.5</string>
+    <string name="PM10">PM10</string>
+    <string name="Noise">Noise</string>
+    <string name="Flow">Flow</string>
+    <string name="Proportional">PROPO</string>
+    <string name="Level">LEVEL</string>
+
+    <string name="connectedDevice">Connected Device</string>
+    <string name="successConnected">Success Connected!</string>
+    <string name="disConnectedDevice">DisConnected Device</string>
+    <string name="tryConnect">Try to connect..</string>
+    <string name="gettingDeviceInfo">Getting device information</string>
+    <string name="pleaseInputDevice">Please input device.</string>
+    <string name="pleaseWait">Please Wait...</string>
+</resources>
