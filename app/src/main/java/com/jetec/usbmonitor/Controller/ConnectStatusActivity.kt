@@ -9,7 +9,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Typeface
 import android.hardware.usb.UsbDevice
-import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -19,15 +18,13 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.Toast
 import com.hoho.android.usbserial.driver.*
-import com.hoho.android.usbserial.util.SerialInputOutputManager
 import com.jetec.usbmonitor.Model.BreathInterpolator
 import com.jetec.usbmonitor.R
-import com.jetec.usbmonitor.Tools.MyStatus
-import com.jetec.usbmonitor.Tools.Tools
+import com.jetec.usbmonitor.Model.Tools.MyStatus
+import com.jetec.usbmonitor.Model.Tools.Tools
 import kotlinx.android.synthetic.main.activity_connect_status.*
 import java.io.IOException
 import java.lang.Exception
-import java.util.concurrent.Executors
 
 class ConnectStatusActivity : AppCompatActivity() {
     val TAG: String = ConnectStatusActivity::class.java.simpleName + "my"
@@ -89,9 +86,9 @@ class ConnectStatusActivity : AppCompatActivity() {
 
         try {
             if (manager.hasPermission(drivers!![0].device)) {
-                var arrayList: ArrayList<ByteArray> = Tools.sendData("Jetec", 20, this)
+                var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this,1)
                 for (i in 0 until arrayList.size) {
-                    if (Tools.ascii2String(arrayList[i])!!.contains("OK")) {
+                    if (arrayList[i]!!.contains("OK")) {
                         Thread {
                             runOnUiThread {
                                 isSuccessConnectedAction()
@@ -235,16 +232,14 @@ class ConnectStatusActivity : AppCompatActivity() {
 
     /**取得裝置資訊*/
     private fun getDeviceInfo() {
-        var arrayList: ArrayList<ByteArray> = ArrayList()
-        var arrayString: ArrayList<String> = ArrayList()
+        var arrayList: ArrayList<String> = ArrayList()
+        var arrayInfo:ArrayList<String> = ArrayList()
         Thread {
             SystemClock.sleep(1000)
             runOnUiThread {
-                arrayList = Tools.sendData("get", 200, this)
-                Log.d(TAG, "$arrayList ");
-                for (i in 0 until arrayList.size) {
-                    Tools.byteArrayToHexStr(arrayList[i])?.let { arrayString.add(it) }
-                }
+                arrayList = Tools.sendData("Request", 200, this,0)
+                arrayInfo = Tools.sendData("Get",200,this,0)
+//                Log.d(TAG, "$arrayList ");
                 if (arrayList.size>0){
                     textView_ConnectInfo.text = getString(R.string.successConnected)
                 }else{
@@ -256,7 +251,8 @@ class ConnectStatusActivity : AppCompatActivity() {
             if (arrayList.size>0){
                 runOnUiThread{
                     var intent = Intent(this,MainActivity::class.java)
-                    intent.putExtra("deviceInfo",arrayString)
+                    intent.putExtra("Value",arrayList)//送值
+                    intent.putExtra("DeviceInfo",arrayInfo)//送參數
                     startActivity(intent)
                     finish()
                 }

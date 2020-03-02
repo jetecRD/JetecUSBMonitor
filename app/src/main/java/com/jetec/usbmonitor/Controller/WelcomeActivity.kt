@@ -12,8 +12,8 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ImageView
 import com.jetec.usbmonitor.R
-import com.jetec.usbmonitor.Tools.MyStatus
-import com.jetec.usbmonitor.Tools.Tools
+import com.jetec.usbmonitor.Model.Tools.MyStatus
+import com.jetec.usbmonitor.Model.Tools.Tools
 import pl.droidsonroids.gif.GifDrawable
 import java.lang.Exception
 

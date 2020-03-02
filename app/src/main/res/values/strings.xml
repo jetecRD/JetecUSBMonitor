@@ -22,4 +22,6 @@
     <string name="record_history">Record history</string>
     <string name="setting">Setting</string>
     <string name="advise">Advise</string>
+
+    <string name="timeMeasrue">Measure Time</string>
 </resources>

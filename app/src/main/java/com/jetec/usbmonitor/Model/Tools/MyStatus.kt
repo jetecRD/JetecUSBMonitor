@@ -1,7 +1,4 @@
-package com.jetec.usbmonitor.Tools
-
-import android.hardware.usb.UsbDeviceConnection
-import com.hoho.android.usbserial.driver.UsbSerialPort
+package com.jetec.usbmonitor.Model.Tools
 
 class MyStatus{
     companion object{

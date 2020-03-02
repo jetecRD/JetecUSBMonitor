@@ -1,7 +1,8 @@
-package com.jetec.usbmonitor.Tools
+package com.jetec.usbmonitor.Model.Tools
 
 import android.app.Activity
 import android.content.Context
+import android.graphics.Color
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbDeviceConnection
 import android.hardware.usb.UsbManager
@@ -10,11 +11,150 @@ import com.hoho.android.usbserial.driver.*
 import com.hoho.android.usbserial.util.SerialInputOutputManager
 import com.jetec.usbmonitor.R
 import java.lang.Exception
+import java.text.DecimalFormat
 import java.util.concurrent.Executors
+import kotlin.math.absoluteValue
 
 class Tools() {
 
+    /**我將所有方法寫在這邊了
+     * 以後有需要改甚麼就統一這邊改
+     * 目錄:
+     *   @see setUnit           判斷顯示單位
+     *   @see setLabel          設置名稱標籤
+     *   @see cleanStatic       清除所有靜態值
+     *   @see id2String         將StringID 轉為字串
+     *   @see byteArrayToHexStr 將傳過來的byteArray轉為16進字串
+     *   @see ascii2String      將傳過來的byteArray轉為一般字串(ASCII)
+     *   @see sendData          發送資料用的模組
+     *   @see setColor          設置icon的顏色
+     *   */
     companion object {
+        fun setColor(intTag:Int):Int{
+            when (intTag) {
+                0 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                1 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                2 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                3 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                4 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                5 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                6 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                7 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                8 -> {
+                    return Color.parseColor("#24936E")
+                }//
+                9 -> {
+                    return Color.parseColor("#CB1B45")
+                }//
+                10 -> {
+                    return Color.parseColor("#CB1B45")
+                }//
+                11 -> {
+                    return Color.parseColor("#0089A7")
+                }//
+                12 -> {
+                    return Color.parseColor("#66327C")
+                }//
+                13 -> {
+                    return Color.parseColor("#66327C")
+                }//
+                14 -> {
+                    return Color.parseColor("#66327C")
+                }//
+                15 -> {
+                    return Color.parseColor("#0C0C0C")
+                }//
+                16 -> {
+                    return Color.parseColor("#0C0C0C")
+                }//
+                18 -> {
+                    return Color.parseColor("#0089A7")
+                }//
+                else -> {
+                    return Color.parseColor("#0C0C0C")
+                }
+            }
+
+        }
+
+        fun setIcon(intTag: Int):Int{
+            when (intTag) {
+                0 -> {
+                    return R.drawable.noun_pressure
+                }//
+                1 -> {
+                    return R.drawable.noun_pressure
+                }//
+                2 -> {
+                    return R.drawable.noun_pressure
+                }//
+                3 -> {
+                    return R.drawable.noun_pressure
+                }//
+                4 -> {
+                    return R.drawable.noun_pressure
+                }//
+                5 -> {
+                    return R.drawable.noun_pressure
+                }//
+                6 -> {
+                    return R.drawable.noun_pressure
+                }//
+                7 -> {
+                    return R.drawable.noun_pressure
+                }//
+                8 -> {
+                    return R.drawable.noun_pressure
+                }//
+                9 -> {
+                    return R.drawable.noun_thermometer
+                }//
+                10 -> {
+                    return R.drawable.noun_thermometer
+                }//
+                11 -> {
+                    return R.drawable.noun_humidity
+                }//
+                12 -> {
+                    return R.drawable.noun_corsican
+                }//
+                13 -> {
+                    return R.drawable.noun_co2
+                }//
+                14 -> {
+                    return R.drawable.noun_air_pollution
+                }//
+                15 -> {
+                    return R.drawable.noun_pressure
+                }//
+                16 -> {
+                    return R.drawable.noun_pressure
+                }//
+                18 -> {
+                    return R.drawable.noun_water
+                }//
+                else -> {
+                    return R.drawable.noun_pressure
+                }
+            }
+        }
+
 
         /**@param intTag 從byteArray解出的數字來此判斷單位*/
         fun setUnit(intTag: Int): String {
@@ -193,8 +333,9 @@ class Tools() {
          * 傳送String模組
          * @param sendWord 欲送出之指令
          * @param delay 延遲時間，太短會收不到值
-         * @param activity 取得該Controller畫面*/
-        fun sendData(sendWord: String, delay: Long, activity: Activity): ArrayList<ByteArray> {
+         * @param activity 取得該Controller畫面
+         * @param returnWho 決定回傳誰；0->byteArray,1->StringArray*/
+        fun sendData(sendWord: String, delay: Long, activity: Activity,returnWho:Int): ArrayList<String> {
             try {
                 val manager: UsbManager = activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
@@ -227,23 +368,31 @@ class Tools() {
                 val connection: UsbDeviceConnection = manager.openDevice(drivers!![0].device)
                 val port: UsbSerialPort = drivers[0].ports[0]
 
-                var arrayList: ArrayList<ByteArray> = ArrayList()
+                var arrayList: ArrayList<String> = ArrayList()
                 try {
                     port.open(connection)
+                    port.setParameters(
+                        9600,
+                        8,
+                        UsbSerialPort.STOPBITS_1,
+                        UsbSerialPort.PARITY_NONE
+                    )
+                    port.write(sendWord.toByteArray(), 200)
                 } catch (e: Exception) {
-                }
-                port.setParameters(
-                    9600,
-                    8,
-                    UsbSerialPort.STOPBITS_1,
-                    UsbSerialPort.PARITY_NONE
-                )
-                port.write(sendWord.toByteArray(), 200)
 
+                }
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
-                            arrayList.add(data)
+                            when(returnWho){
+                                0->{
+                                    byteArrayToHexStr(data)?.let { arrayList.add(it) }
+                                }
+                                else->{
+                                    ascii2String(data)?.let { arrayList.add(it) }
+                                }
+                            }
+
 
                         }
 
@@ -253,6 +402,7 @@ class Tools() {
                 val mExecutor = Executors.newSingleThreadExecutor()
                 mExecutor.submit(sL)
                 SystemClock.sleep(delay)
+
                 return arrayList
             }catch (e:KotlinNullPointerException){
                 return ArrayList()
@@ -263,8 +413,9 @@ class Tools() {
          * 傳送ByteArray模組
          * @param sendWord 欲送出之指令
          * @param delay 延遲時間，太短會收不到值
-         * @param activity 取得該Controller畫面*/
-        fun sendData(sendWord: ByteArray, delay: Long, activity: Activity): ArrayList<ByteArray> {
+         * @param activity 取得該Controller畫面
+         * @param returnWho 決定回傳誰；0->byteArray,1->StringArray*/
+        fun sendData(sendWord: ByteArray, delay: Long, activity: Activity,returnWho: Int): ArrayList<String> {
             try {
                 val manager: UsbManager = activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
@@ -298,23 +449,31 @@ class Tools() {
                 val connection: UsbDeviceConnection = manager.openDevice(drivers!![0].device)
                 val port: UsbSerialPort = drivers[0].ports[0]
 
-                var arrayList: ArrayList<ByteArray> = ArrayList()
+                var arrayList: ArrayList<String> = ArrayList()
                 try {
                     port.open(connection)
+                    port.setParameters(
+                        9600,
+                        8,
+                        UsbSerialPort.STOPBITS_1,
+                        UsbSerialPort.PARITY_NONE
+                    )
+                    port.write(sendWord, 200)
                 } catch (e: Exception) {
                 }
-                port.setParameters(
-                    9600,
-                    8,
-                    UsbSerialPort.STOPBITS_1,
-                    UsbSerialPort.PARITY_NONE
-                )
-                port.write(sendWord, 200)
+
 
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
-                            arrayList.add(data)
+                            when(returnWho){
+                                0->{
+                                    byteArrayToHexStr(data)?.let { arrayList.add(it) }
+                                }
+                                else->{
+                                    ascii2String(data)?.let { arrayList.add(it) }
+                                }
+                            }
 
                         }
 
@@ -330,6 +489,11 @@ class Tools() {
             }
 
         }//sendByteArray
+
+
+        fun hex2Dec(input:String):String{
+            return input.toLong(16).toInt().toString()
+        }
 
     }
 }
