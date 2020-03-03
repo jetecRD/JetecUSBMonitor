@@ -17,11 +17,13 @@
     <string name="disConnectedDevice">DisConnected Device</string>
     <string name="tryConnect">Try to connect..</string>
     <string name="gettingDeviceInfo">Getting device information</string>
-    <string name="pleaseInputDevice">Please input device.</string>
+    <string name="pleaseInputDevice">Please pull in the sensor.</string>
     <string name="pleaseWait">Please Wait...</string>
     <string name="record_history">Record history</string>
     <string name="setting">Setting</string>
     <string name="advise">Advise</string>
 
     <string name="timeMeasrue">Measure Time</string>
+    <string name="sensorHasBeenPullOut">Sensor has been pull out</string>
+    <string name="sensorPullIn">Pull in</string>
 </resources>

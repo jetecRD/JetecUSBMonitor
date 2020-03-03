@@ -406,6 +406,8 @@ class Tools() {
                 return arrayList
             }catch (e:KotlinNullPointerException){
                 return ArrayList()
+            }catch (e:Exception){
+                return ArrayList()
             }
 
         }//sendString

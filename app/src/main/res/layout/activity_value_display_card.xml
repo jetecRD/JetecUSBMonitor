@@ -22,7 +22,7 @@
             android:id="@+id/imageView_AlarmImage"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:padding="20dp"
+            android:padding="15dp"
             app:srcCompat="@drawable/noun_bell" />
 
         <ImageView

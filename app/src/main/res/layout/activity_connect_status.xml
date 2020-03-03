@@ -51,6 +51,7 @@
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textSize="32dp"
         android:textStyle="bold"
+        android:gravity="center"
         app:layout_constraintBottom_toTopOf="@+id/guideline"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
