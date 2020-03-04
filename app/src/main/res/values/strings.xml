@@ -26,4 +26,7 @@
     <string name="timeMeasrue">Measure Time</string>
     <string name="sensorHasBeenPullOut">Sensor has been pull out</string>
     <string name="sensorPullIn">Pull in</string>
+    <string name="autoMeasure">Auto measure</string>
+    <string name="autoMeasuringButton">Auto\nmeasuring</string>
+    <string name="measureButton">Measure</string>
 </resources>

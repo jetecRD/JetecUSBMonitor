@@ -8,6 +8,7 @@ class MyStatus{
         var usbType:String = ""//USB模式，例如:CDC
         var engineerModel:Boolean = false//工程師模式
         var nightModeSwitch:Boolean = false//夜間模式
+        var autoMeasurement:Boolean = false//是否開啟自動偵測(此項目不重置)
 
 
     }

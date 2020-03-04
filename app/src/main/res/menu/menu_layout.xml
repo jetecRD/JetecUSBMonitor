@@ -13,5 +13,16 @@
         android:id="@+id/action_Advise"
         android:title="@string/advise"
         app:showAsAction="never" />
+    <item
+        android:title="@string/autoMeasure"
+        app:showAsAction="never">
+        <group android:checkableBehavior="all">
+            <item android:title="@string/autoMeasure"
+                android:checked="true"
+                android:id="@+id/action_Auto"
+                />
 
+        </group>
+
+    </item>
 </menu>

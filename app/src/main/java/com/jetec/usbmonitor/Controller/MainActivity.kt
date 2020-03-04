@@ -14,19 +14,20 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Vibrator
 import android.util.Log
-import android.view.KeyEvent
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.view.animation.CycleInterpolator
 import android.view.animation.TranslateAnimation
+import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.view.children
+import androidx.core.view.get
+import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
@@ -52,7 +53,6 @@ class MainActivity : AppCompatActivity() {
     val TAG: String = MainActivity::class.java.simpleName + "My"
     val ACTION_USB_PERMISSION: String = "com.jetec.usbmonitor"
     private lateinit var mAdapter: MyAdapter
-    lateinit var settingArray: ArrayList<String>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,9 +67,12 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(usbStatus, filter)
         button_Measure.setOnClickListener {
             meansureModel()
-
+            var vibrator: Vibrator =
+                getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+            vibrator.vibrate(100)
         }
-    }
+        autoAount()//自動偵測(程式內自行判斷)
+    }//onCreate
 
     override fun onDestroy() {
         super.onDestroy()
@@ -199,10 +202,12 @@ class MainActivity : AppCompatActivity() {
     private fun meansureModel() {
         Thread {
             runOnUiThread {
+
                 val sdf = SimpleDateFormat("HH:mm:ss")
                 var current = Date()
 
-                textView_timeInfo.text= getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
+                textView_timeInfo.text =
+                    getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
             }
             val analysisValueInfo = AnalysisValueInfo()
 //            Log.d(TAG, ":${Tools.sendData("Request", 200, this, 0)}");
@@ -254,7 +259,10 @@ class MainActivity : AppCompatActivity() {
         val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
         toolBar.inflateMenu(R.menu.menu_layout)
         textView_toolBarTitle.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")
+
+        toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
         toolBar.setOnMenuItemClickListener {
+
             var intent: Intent?
             when (it.itemId) {
                 R.id.action_recordHistory -> {
@@ -266,6 +274,11 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
 
                 }
+                R.id.action_Auto -> {
+                    it.isChecked = !it.isChecked
+                    MyStatus.autoMeasurement = !MyStatus.autoMeasurement
+                    autoAount()
+                }
 
             }
             false
@@ -273,6 +286,25 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+    /**自動偵測*/
+    fun autoAount() {
+        object : CountDownTimer(1000, 1000) {
+            override fun onFinish() {
+                if (MyStatus.autoMeasurement) {
+                    button_Measure.text = getString(R.string.autoMeasuringButton)
+                    meansureModel()
+                    autoAount()
+                } else {
+                    button_Measure.text = getString(R.string.measureButton)
+                }
+            }
+
+            override fun onTick(p0: Long) {
+            }
+        }.start()
+    }
+
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
@@ -287,6 +319,9 @@ class MainActivity : AppCompatActivity() {
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN -> {
                 meansureModel()
+                var vibrator: Vibrator =
+                    getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+                vibrator.vibrate(100)
                 true
             }
             KeyEvent.KEYCODE_BACK -> {
@@ -336,8 +371,15 @@ class MainActivity : AppCompatActivity() {
 //            Log.d(TAG, ":${mSetting[position].getELValue()} ");
 //            Log.d(TAG, ":${mSetting[position].getTR()} ");
 //            Log.d(TAG, ":${mSetting[position].getTRValue()} ");
-            var displayDouble =
-                mData[position].getmValue().toDouble() + mSetting[position].getPVValue().toDouble()
+            var displayDouble = 0.0
+            try {
+                displayDouble =
+                    mData[position].getmValue().toDouble() + mSetting[position].getPVValue()
+                        .toDouble()
+            } catch (e: Exception) {
+                displayDouble = 0.0
+            }
+
             holder.tvValue.text = displayDouble.toString() + mData[position].getUnit()
             if (displayDouble > mSetting[position].getEHValue().toDouble()
                 || displayDouble < mSetting[position].getELValue().toDouble()
