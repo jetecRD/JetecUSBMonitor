@@ -16,18 +16,12 @@ import android.os.Vibrator
 import android.util.Log
 import android.view.*
 import android.view.animation.Animation
-import android.view.animation.AnimationUtils
 import android.view.animation.CycleInterpolator
 import android.view.animation.TranslateAnimation
-import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.view.children
-import androidx.core.view.get
-import androidx.core.view.size
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
@@ -46,7 +40,6 @@ import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
-import kotlin.coroutines.coroutineContext
 
 
 class MainActivity : AppCompatActivity() {
@@ -287,6 +280,15 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+
+    override fun onStop() {
+        super.onStop()
+        val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
+        MyStatus.autoMeasurement = false
+        toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
+        autoAount()
+    }
+
     /**自動偵測*/
     fun autoAount() {
         object : CountDownTimer(1000, 1000) {
@@ -348,7 +350,7 @@ class MainActivity : AppCompatActivity() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val v = LayoutInflater.from(parent.context)
-                .inflate(R.layout.activity_value_display_card, parent, false)
+                .inflate(R.layout.activity_value_display_item, parent, false)
             return ViewHolder(v)
         }
 
@@ -371,34 +373,35 @@ class MainActivity : AppCompatActivity() {
 //            Log.d(TAG, ":${mSetting[position].getELValue()} ");
 //            Log.d(TAG, ":${mSetting[position].getTR()} ");
 //            Log.d(TAG, ":${mSetting[position].getTRValue()} ");
-            var displayDouble = 0.0
             try {
-                displayDouble =
+                var displayDouble =
                     mData[position].getmValue().toDouble() + mSetting[position].getPVValue()
                         .toDouble()
-            } catch (e: Exception) {
-                displayDouble = 0.0
-            }
-
-            holder.tvValue.text = displayDouble.toString() + mData[position].getUnit()
-            if (displayDouble > mSetting[position].getEHValue().toDouble()
-                || displayDouble < mSetting[position].getELValue().toDouble()
-            ) {
-                holder.igBell.setColorFilter(Color.RED)
+                holder.tvValue.text = displayDouble.toString() + mData[position].getUnit()
+                if (displayDouble > mSetting[position].getEHValue().toDouble()
+                    || displayDouble < mSetting[position].getELValue().toDouble()
+                ) {
+                    holder.igBell.setColorFilter(Color.RED)
 //                var animShack = AnimationUtils.loadAnimation(holder.parent.context, R.anim.shake)
-                var animShack = TranslateAnimation(0f, 10f, 0f, 0f)
-                animShack.interpolator = CycleInterpolator(5f)
-                animShack.duration = 500
-                animShack.repeatCount = Animation.INFINITE
-                holder.igBell.animation = animShack
-                animShack.start()
-                var vibrator: Vibrator =
-                    holder.parent.context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
-                vibrator.vibrate(1500)
+                    var animShack = TranslateAnimation(0f, 10f, 0f, 0f)
+                    animShack.interpolator = CycleInterpolator(5f)
+                    animShack.duration = 500
+                    animShack.repeatCount = Animation.INFINITE
+                    holder.igBell.animation = animShack
+                    animShack.start()
+                    var vibrator: Vibrator =
+                        holder.parent.context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+                    vibrator.vibrate(1500)
 
+                }
+                holder.igSensor.setColorFilter(mData[position].getColor())
+                holder.igSensor.setImageResource(mData[position].getIcon())
+
+            } catch (e: Exception) {
+                Log.d(TAG, ":${e.message} ");
             }
-            holder.igSensor.setColorFilter(mData[position].getColor())
-            holder.igSensor.setImageResource(mData[position].getIcon())
+
+
 
 
         }
