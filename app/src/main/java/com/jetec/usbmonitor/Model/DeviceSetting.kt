@@ -18,6 +18,8 @@ class DeviceSetting {
     private var unit: String = ""
     private var originValue: String = ""
     private var label: String = ""
+    private var value:String = ""
+    private var type:String = ""
 
 
     constructor()
@@ -76,8 +78,16 @@ class DeviceSetting {
     public fun getLabel(): String {
         return label
     }
-
+    public fun getValue():String{
+        return value
+    }
+    public fun getType():String {
+        return type
+    }
 /**================================================================================================*/
+    fun setType(type:String){
+        this.type = type
+    }
 
     public fun setLabel(label: String) {
         this.label = label
@@ -132,6 +142,9 @@ class DeviceSetting {
 
     public fun setOriginValue(originValue: String) {
         this.originValue = originValue
+    }
+    public fun setValue(value:String){
+        this.value = value
     }
 
 

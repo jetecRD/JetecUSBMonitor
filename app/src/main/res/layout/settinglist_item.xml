@@ -1,24 +1,60 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    >
 
     <TextView
         android:id="@+id/textView_SettingLabel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:gravity="center_vertical"
         android:paddingStart="20dp"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:text="TextView\nTrccc"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textSize="20dp" />
 
-    <TextView
-        android:id="@+id/textView_SettingValue"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_weight="1"
-        android:gravity="end"
-        android:paddingEnd="20dp"
-        android:text="TextView"
-        android:textAppearance="@style/TextAppearance.AppCompat.Large" />
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/switch_C2F"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:thumb="@drawable/new_switch_thumb"
+            android:track="@drawable/new_switch_track"
+            android:textOn="°C"
+            android:textOff="°F"
+            android:showText="true"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/textView_SettingValue"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical|end"
+            android:paddingTop="5dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="5dp"
+            android:text="TextView"
+            android:textAppearance="@style/TextAppearance.AppCompat.Large"
+            android:textSize="20dp"
+            android:visibility="gone" />
+    </LinearLayout>
+
 </LinearLayout>

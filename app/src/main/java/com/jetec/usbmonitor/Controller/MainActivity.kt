@@ -37,6 +37,8 @@ import com.jetec.usbmonitor.R
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.IOException
 import java.lang.Exception
+import java.math.BigInteger
+import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -52,6 +54,16 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initSetValue()//初始設置
         setMenu()//設置標題列
+//        //萬一搞壞了這邊手動輸入即可
+        var byte = Tools.fromHexString(
+            String.format("%02x", 2)//排數
+                    + String.format("%02x", 2)//種類
+                    + String.format("%02x", 0)//小數點
+                    + String.format("%04x", 0)//值
+                    + String.format("%02x", 0)//空白
+                    + String.format("%02x", 9)//單位
+        )
+        byte?.let { it1 -> Tools.sendData(it1, 100, this, 0) }
 
         val filter = IntentFilter()
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
@@ -66,7 +78,6 @@ class MainActivity : AppCompatActivity() {
         }
         autoAount()//自動偵測(程式內自行判斷)
     }//onCreate
-
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(usbStatus)
@@ -192,6 +203,7 @@ class MainActivity : AppCompatActivity() {
         return arrayList
     }//getTypeArray 取得型號陣列
 
+    /**取得資訊與介面更動模組*/
     private fun meansureModel() {
         Thread {
             runOnUiThread {
@@ -215,14 +227,13 @@ class MainActivity : AppCompatActivity() {
                     , analysisValueInfo.requestSetting(this, Tools.sendData("Get", 100, this, 0))
                 )
                 dataList.adapter = mAdapter
-                val analysisValueInfo = AnalysisValueInfo()
-//                Log.d(TAG, " ${analysisValueInfo.requestSetting(this
-//                    ,Tools.sendData("Get", 200, this, 0))}")
+
             }
 
         }.start()
     }
 
+    /**跳轉後載入介面*/
     private fun initSetValue() {
 
         var intent = intent
@@ -248,6 +259,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    /**設置標題列*/
     private fun setMenu() {
         val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
         toolBar.inflateMenu(R.menu.menu_layout)
@@ -270,6 +282,11 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_Auto -> {
                     it.isChecked = !it.isChecked
                     MyStatus.autoMeasurement = !MyStatus.autoMeasurement
+                    if (MyStatus.autoMeasurement){
+                        Toast.makeText(this,getString(R.string.autoMeasureOpenLabel),Toast.LENGTH_SHORT).show()
+                    }else {
+                        Toast.makeText(this,getString(R.string.autoMeasureTurnOff),Toast.LENGTH_SHORT).show()
+                    }
                     autoAount()
                 }
 
@@ -280,7 +297,7 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-
+    /**週期進到onStop時若有開啟自動偵測則關閉之*/
     override fun onStop() {
         super.onStop()
         val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
@@ -317,6 +334,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**設置按下音量建功能*/
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN -> {
@@ -334,6 +352,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**設置資訊看板(RecyclerView)*/
     private class MyAdapter(
         val mData: MutableList<DeviceValue>,
         val mSetting: MutableList<DeviceSetting>
@@ -377,9 +396,11 @@ class MainActivity : AppCompatActivity() {
                 var displayDouble =
                     mData[position].getmValue().toDouble() + mSetting[position].getPVValue()
                         .toDouble()
-                holder.tvValue.text = displayDouble.toString() + mData[position].getUnit()
-                if (displayDouble > mSetting[position].getEHValue().toDouble()
-                    || displayDouble < mSetting[position].getELValue().toDouble()
+
+                holder.tvValue.text = Tools.getDecDisplay(mData[position].getDP())
+                    .format(displayDouble)+ mData[position].getUnit()
+                if (displayDouble >= mSetting[position].getEHValue().toDouble()
+                    || displayDouble <= mSetting[position].getELValue().toDouble()
                 ) {
                     holder.igBell.setColorFilter(Color.RED)
 //                var animShack = AnimationUtils.loadAnimation(holder.parent.context, R.anim.shake)
@@ -400,9 +421,6 @@ class MainActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 Log.d(TAG, ":${e.message} ");
             }
-
-
-
 
         }
 

@@ -10,10 +10,13 @@ import android.os.SystemClock
 import com.hoho.android.usbserial.driver.*
 import com.hoho.android.usbserial.util.SerialInputOutputManager
 import com.jetec.usbmonitor.R
-import java.lang.Exception
+import java.math.BigInteger
 import java.text.DecimalFormat
+import java.util.*
 import java.util.concurrent.Executors
-import kotlin.math.absoluteValue
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+
 
 class Tools() {
 
@@ -28,9 +31,116 @@ class Tools() {
      *   @see ascii2String      將傳過來的byteArray轉為一般字串(ASCII)
      *   @see sendData          發送資料用的模組
      *   @see setColor          設置icon的顏色
+     *   @see setSettingLabel   設置設定選項的標籤(EX:PV->補正)
+     *   @see returnValue       將數值乘上小數點
+     *   @see hex2Dec           將16進位轉為10進位
+     *   @see toHex             將10進位轉為短整數16進位
      *   */
     companion object {
-        fun setColor(intTag:Int):Int{
+
+        fun fromHexString(src: String): ByteArray? {
+            val biBytes =
+                BigInteger("10" + src.replace("\\s".toRegex(), ""), 16).toByteArray()
+            return Arrays.copyOfRange(biBytes, 1, biBytes.size)
+        }
+
+        fun toHex(t: Int): String? {
+            val it = Math.round(t.toDouble() * 1).toShort()
+            return String.format("%04x", it)
+        }
+
+        fun hextoDecShort(input: String): String {
+            return input.toLong(16).toShort().toString()
+        }
+
+        fun hex2Dec(input: String): String {
+            return input.toLong(16).toInt().toString()
+        }
+
+        fun getDecDisplay(dp: Int): DecimalFormat {
+            when (dp) {
+                1 -> {
+                    return DecimalFormat("###0.0")
+                }
+                2 -> {
+                    return DecimalFormat("###0.00")
+                }
+                3 -> {
+                    return DecimalFormat("###0.000")
+                }
+                else->{
+                    return DecimalFormat("###0")
+                }
+
+            }
+
+        }
+        fun sendValueMultiplyDP(input:Double,dp: Int):Int{
+            return when (dp) {
+                1 -> {
+                    (input*10).toInt()
+                }
+                2 -> {
+                    (input*100).toInt()
+                }
+                3 -> {
+                    (input*1000).toInt()
+                }
+                else->{
+                    (input*1).toInt()
+                }
+
+            }
+        }
+
+        /**
+         * 將數值乘以小數點
+         * @param dp 小數點
+         * @param input 輸入字串*/
+        fun returnValue(dp: Int, input: String): String {
+            var d: Double = input.toDouble()
+            val decimalFormat = DecimalFormat("###0.0")
+            return when (dp) {
+                1 -> {
+                    decimalFormat.format(d / 10)
+                }
+                2 -> {
+                    decimalFormat.format(d / 100)
+                }
+                3 -> {
+                    decimalFormat.format(d / 1000)
+                }
+                else -> {
+                    decimalFormat.format(d)
+                }
+
+            }
+        }
+
+        fun setSettingLabel(intTag: Int, activity: Activity): String {
+
+            when (intTag) {
+                1 -> {
+                    return id2String(activity, R.string.PV)
+                }
+                2 -> {
+                    return id2String(activity, R.string.EH)
+                }
+                3 -> {
+                    return id2String(activity, R.string.EL)
+                }
+                4 -> {
+                    return id2String(activity, R.string.C2F)
+                }
+                else -> {
+                    return ""
+                }
+            }
+
+
+        }
+
+        fun setColor(intTag: Int): Int {
             when (intTag) {
                 0 -> {
                     return Color.parseColor("#24936E")
@@ -93,7 +203,7 @@ class Tools() {
 
         }
 
-        fun setIcon(intTag: Int):Int{
+        fun setIcon(intTag: Int): Int {
             when (intTag) {
                 0 -> {
                     return R.drawable.noun_pressure
@@ -154,7 +264,6 @@ class Tools() {
                 }
             }
         }
-
 
         /**@param intTag 從byteArray解出的數字來此判斷單位*/
         fun setUnit(intTag: Int): String {
@@ -335,30 +444,56 @@ class Tools() {
          * @param delay 延遲時間，太短會收不到值
          * @param activity 取得該Controller畫面
          * @param returnWho 決定回傳誰；0->byteArray,1->StringArray*/
-        fun sendData(sendWord: String, delay: Long, activity: Activity,returnWho:Int): ArrayList<String> {
+        fun sendData(
+            sendWord: String,
+            delay: Long,
+            activity: Activity,
+            returnWho: Int
+        ): ArrayList<String> {
             try {
-                val manager: UsbManager = activity.getSystemService(Context.USB_SERVICE) as UsbManager
+                val manager: UsbManager =
+                    activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
                 val deviceIterator: Iterator<UsbDevice> = deviceList.values.iterator()
                 var customTable: ProbeTable = ProbeTable()
                 var drivers: List<UsbSerialDriver>? = null
                 while (deviceIterator.hasNext()) {
                     val device = deviceIterator.next()
-                    when(MyStatus.usbType){
-                        "CDC"->{
-                            customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
+                    when (MyStatus.usbType) {
+                        "CDC" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                CdcAcmSerialDriver::class.java
+                            )
                         }
-                        "CP21"->{
-                            customTable.addProduct(device.vendorId, device.productId, Cp21xxSerialDriver::class.java)
+                        "CP21" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                Cp21xxSerialDriver::class.java
+                            )
                         }
-                        "CH34"->{
-                            customTable.addProduct(device.vendorId, device.productId, Ch34xSerialDriver::class.java)
+                        "CH34" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                Ch34xSerialDriver::class.java
+                            )
                         }
-                        "FTD"->{
-                            customTable.addProduct(device.vendorId, device.productId, FtdiSerialDriver::class.java)
+                        "FTD" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                FtdiSerialDriver::class.java
+                            )
                         }
-                        "PRO"->{
-                            customTable.addProduct(device.vendorId, device.productId, ProlificSerialDriver::class.java)
+                        "PRO" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                ProlificSerialDriver::class.java
+                            )
                         }
                     }
                     var prober: UsbSerialProber = UsbSerialProber(customTable)
@@ -384,11 +519,11 @@ class Tools() {
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
-                            when(returnWho){
-                                0->{
+                            when (returnWho) {
+                                0 -> {
                                     byteArrayToHexStr(data)?.let { arrayList.add(it) }
                                 }
-                                else->{
+                                else -> {
                                     ascii2String(data)?.let { arrayList.add(it) }
                                 }
                             }
@@ -404,46 +539,77 @@ class Tools() {
                 SystemClock.sleep(delay)
 
                 return arrayList
-            }catch (e:KotlinNullPointerException){
+            } catch (e: KotlinNullPointerException) {
                 return ArrayList()
-            }catch (e:Exception){
+            } catch (e: Exception) {
                 return ArrayList()
             }
 
         }//sendString
+
         /**
          * 傳送ByteArray模組
          * @param sendWord 欲送出之指令
          * @param delay 延遲時間，太短會收不到值
          * @param activity 取得該Controller畫面
          * @param returnWho 決定回傳誰；0->byteArray,1->StringArray*/
-        fun sendData(sendWord: ByteArray, delay: Long, activity: Activity,returnWho: Int): ArrayList<String> {
+        fun sendData(
+            sendWord: ByteArray,
+            delay: Long,
+            activity: Activity,
+            returnWho: Int
+        ): ArrayList<String> {
             try {
-                val manager: UsbManager = activity.getSystemService(Context.USB_SERVICE) as UsbManager
+                val manager: UsbManager =
+                    activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
                 val deviceIterator: Iterator<UsbDevice> = deviceList.values.iterator()
                 var customTable: ProbeTable = ProbeTable()
                 var drivers: List<UsbSerialDriver>? = null
                 while (deviceIterator.hasNext()) {
                     val device = deviceIterator.next()
-                    when(MyStatus.usbType){
-                        "CDC"->{
-                            customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
+                    when (MyStatus.usbType) {
+                        "CDC" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                CdcAcmSerialDriver::class.java
+                            )
                         }
-                        "CP21"->{
-                            customTable.addProduct(device.vendorId, device.productId, Cp21xxSerialDriver::class.java)
+                        "CP21" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                Cp21xxSerialDriver::class.java
+                            )
                         }
-                        "CH34"->{
-                            customTable.addProduct(device.vendorId, device.productId, Ch34xSerialDriver::class.java)
+                        "CH34" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                Ch34xSerialDriver::class.java
+                            )
                         }
-                        "FTD"->{
-                            customTable.addProduct(device.vendorId, device.productId, FtdiSerialDriver::class.java)
+                        "FTD" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                FtdiSerialDriver::class.java
+                            )
                         }
-                        "PRO"->{
-                            customTable.addProduct(device.vendorId, device.productId, ProlificSerialDriver::class.java)
+                        "PRO" -> {
+                            customTable.addProduct(
+                                device.vendorId,
+                                device.productId,
+                                ProlificSerialDriver::class.java
+                            )
                         }
                     }
-                    customTable.addProduct(device.vendorId, device.productId, CdcAcmSerialDriver::class.java)
+                    customTable.addProduct(
+                        device.vendorId,
+                        device.productId,
+                        CdcAcmSerialDriver::class.java
+                    )
                     var prober: UsbSerialProber = UsbSerialProber(customTable)
                     drivers = prober.findAllDrivers(manager)
                 }
@@ -468,11 +634,11 @@ class Tools() {
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
-                            when(returnWho){
-                                0->{
+                            when (returnWho) {
+                                0 -> {
                                     byteArrayToHexStr(data)?.let { arrayList.add(it) }
                                 }
-                                else->{
+                                else -> {
                                     ascii2String(data)?.let { arrayList.add(it) }
                                 }
                             }
@@ -486,16 +652,12 @@ class Tools() {
                 mExecutor.submit(sL)
                 SystemClock.sleep(delay)
                 return arrayList
-            }catch (e:KotlinNullPointerException){
+            } catch (e: KotlinNullPointerException) {
                 return ArrayList()
             }
 
         }//sendByteArray
 
-
-        fun hex2Dec(input:String):String{
-            return input.toLong(16).toInt().toString()
-        }
 
     }
 }

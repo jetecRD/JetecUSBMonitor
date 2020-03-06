@@ -29,4 +29,12 @@
     <string name="autoMeasure">Auto measure</string>
     <string name="autoMeasuringButton">Auto\nmeasuring</string>
     <string name="measureButton">Measure</string>
+    <string name="autoMeasureOpenLabel">Turn on the auto measurement</string>
+    <string name="autoMeasureTurnOff">Turn off the auto measurement</string>
+
+    <string name="PV">offset</string>
+    <string name="EH">High Alarm</string>
+    <string name="EL">Low Alarm</string>
+    <string name="C2F">Trans to F</string>
+
 </resources>
