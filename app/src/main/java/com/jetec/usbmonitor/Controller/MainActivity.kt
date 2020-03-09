@@ -226,6 +226,8 @@ class MainActivity : AppCompatActivity() {
                         .requestValue(this, Tools.sendData("Request", 100, this, 0))
                     , analysisValueInfo.requestSetting(this, Tools.sendData("Get", 100, this, 0))
                 )
+                Log.d("SettingActivityMy", "Request= "+Tools.sendData("Request", 100, this, 0).toString())
+                Log.d("SettingActivityMy", "GET= "+Tools.sendData("Get", 100, this, 0).toString())
                 dataList.adapter = mAdapter
 
             }

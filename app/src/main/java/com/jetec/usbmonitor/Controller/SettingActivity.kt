@@ -4,6 +4,7 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -21,6 +22,7 @@ import com.jetec.usbmonitor.R
 import kotlinx.android.synthetic.main.activity_setting.*
 import java.math.BigInteger
 import java.util.*
+import kotlin.collections.ArrayList
 
 class SettingActivity : AppCompatActivity() {
     val TAG = SettingActivity::class.java.simpleName + "My"
@@ -31,11 +33,12 @@ class SettingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
         setMenu()
+
         var analysisValueInfo = AnalysisValueInfo()
         settingList = analysisValueInfo
-            .transSetting(this, Tools.sendData("Get", 100, this, 0))
-        Log.d(TAG, "${Tools.sendData("Get", 100, this, 0)} ");
-        val layoutManager = LinearLayoutManager(this)
+            .transSetting(this@SettingActivity, Tools.sendData("Get", 100, this@SettingActivity, 0))
+//        Log.d(TAG, "${Tools.sendData("Get", 100, this, 0)} ");
+        val layoutManager = LinearLayoutManager(this@SettingActivity)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
         val dataList = findViewById<RecyclerView>(R.id.recyclerView_Setting)
         dataList.layoutManager = layoutManager
@@ -43,48 +46,52 @@ class SettingActivity : AppCompatActivity() {
         dataList.adapter = mAdapter
         mAdapter?.setOnItemClickListener(object : MyAdapter.OnItemClickListener {
             override fun onMyItemClick(view: View, position: Int) {
-                if (Tools.hex2Dec(settingList[position].getType()).toInt()!=4){
+                if (Tools.hex2Dec(settingList[position].getType()).toInt() != 4) {
                     normalSettingModify(position)
                 }
             }//
 
-            override fun onSwitchItemClick(view: View, position: Int, boolean: Boolean) {
-                Thread{
-                    var value = 9
-                    if(boolean){
-                        value=9
-                    }else value=10
-
-                    var originValue = settingList[position].getOriginValue()
-                    var byte = Tools.fromHexString(
-                        String.format("%02x", originValue.substring(0, 2).toInt(16))//排數
-                                + String.format("%02x", originValue.substring(2, 4).toInt(16))//種類
-                                + String.format("%02x", originValue.substring(4, 6).toInt(16))//小數點
-                                + String.format("%04x", value)//值
-                                + String.format("%02x", originValue.substring(10, 12).toInt(16))//空白
-                                + String.format("%02x", value)//單位
-                    )
-                        var s =
-                            byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
-                                ?.get(0)
-                        if (getModifyIndex(s) != -1) {
-                            settingList[getModifyIndex(s)]
-                                .setValue(
-                                    Tools.returnValue(
-                                        s!!.substring(4, 6).toInt(),
-                                        Tools.hextoDecShort(s!!.substring(6, 10))
-                                    )
-                                )
-                            runOnUiThread{
-                            mAdapter!!.notifyDataSetChanged()
-                        }
-                    }
-                }.start()
-
-            }
 
 
         })//mAdapterChick
+        mAdapter?.setOnSwitchClickLinster(object :MyAdapter.OnSwitchChangedListener{
+            override fun onSwitchItemClick(view: View, position: Int, boolean: Boolean) {
+                var value = 9
+                if (boolean) {
+                    value = 9
+                } else value = 10
+                var originValue = settingList[position].getOriginValue()
+                var byte = Tools.fromHexString(
+                    String.format("%02x", originValue.substring(0, 2).toInt(16))//排數
+                            + String.format("%02x", originValue.substring(2, 4).toInt(16))//種類
+                            + String.format("%02x", originValue.substring(4, 6).toInt(16))//小數點
+                            + String.format("%04x", value)//值
+                            + String.format("%02x", originValue.substring(10, 12).toInt(16))//空白
+                            + String.format("%02x", value)//單位
+                )
+                var r = byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
+                    ?.get(0)
+                Thread{
+                    var array = Tools.sendData("Get", 100, this@SettingActivity, 0)
+                    for (i in 0 until array.size){
+                        if(getModifyIndex(array[i]) != -1){
+                            settingList[getModifyIndex(array[i])]
+                                .setValue(
+                                    Tools.returnValue(
+                                        array[i]!!.substring(4, 6).toInt(),
+                                        Tools.hextoDecShort(array[i]!!.substring(6, 10))
+                                    )
+                                )
+                            runOnUiThread{
+                                mAdapter?.notifyDataSetChanged()
+                            }
+                        }
+                    }
+                }.start()
+            }//到這
+
+        })
+
     }
 
     private fun normalSettingModify(position: Int) {
@@ -112,7 +119,7 @@ class SettingActivity : AppCompatActivity() {
                         , settingList[position].getDP()
                     )
                 )
-            Log.d(TAG, ":${value} ");
+//            Log.d(TAG, ":${value} ");
             var byte = Tools.fromHexString(
                 String.format("%02x", originValue.substring(0, 2).toInt(16))//排數
                         + String.format("%02x", originValue.substring(2, 4).toInt(16))//種類
@@ -121,20 +128,19 @@ class SettingActivity : AppCompatActivity() {
                         + String.format("%02x", originValue.substring(10, 12).toInt(16))//空白
                         + String.format("%02x", originValue.substring(12, 14).toInt(16))//單位
             )
-            Log.d(TAG, ":${Tools.byteArrayToHexStr(byte)} ");
-            Thread{
-                    var s =
-                        byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
-                            ?.get(0)
-                    if (getModifyIndex(s) != -1) {
-                        settingList[getModifyIndex(s)]
-                            .setValue(
-                                Tools.returnValue(
-                                    s!!.substring(4, 6).toInt(),
-                                    Tools.hextoDecShort(s!!.substring(6, 10))
-                                )
+            Thread {
+                var s =
+                    byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
+                        ?.get(0)
+                if (getModifyIndex(s) != -1) {
+                    settingList[getModifyIndex(s)]
+                        .setValue(
+                            Tools.returnValue(
+                                s!!.substring(4, 6).toInt(),
+                                Tools.hextoDecShort(s!!.substring(6, 10))
                             )
-                        runOnUiThread {
+                        )
+                    runOnUiThread {
                         mAdapter!!.notifyDataSetChanged()
                     }
                 }
@@ -177,12 +183,17 @@ class SettingActivity : AppCompatActivity() {
     class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
         private var mSetting: MutableList<DeviceSetting>
         private lateinit var onItemClickListener: OnItemClickListener
-        private lateinit var onSwitehClickListener:OnItemClickListener
-        val TAG = "SettingActivityMyAdapter"
+        private lateinit var onSwitehClickListener: OnSwitchChangedListener
+        val TAG = "SettingActivityMy"
+
         fun setOnItemClickListener(listener: OnItemClickListener) {
             this.onItemClickListener = listener
-            this.onSwitehClickListener = listener
+
         }
+        fun setOnSwitchClickLinster(check:OnSwitchChangedListener){
+            this.onSwitehClickListener = check
+        }
+
 
         constructor(mSetting: MutableList<DeviceSetting>) : super() {
             this.mSetting = mSetting
@@ -238,11 +249,14 @@ class SettingActivity : AppCompatActivity() {
                 holder.tvValue.text = Tools.getDecDisplay(mSetting[position].getDP())
                     .format(mSetting[position].getValue().toDouble())
             }
+
             holder.parent.setOnClickListener {
                 onItemClickListener?.onMyItemClick(holder.parent, position)
             }
+
             holder.swC2F.setOnCheckedChangeListener { compoundButton: CompoundButton, b: Boolean ->
-                onSwitehClickListener?.onSwitchItemClick(holder.swC2F,position,b)
+                if (!compoundButton.isPressed)return@setOnCheckedChangeListener//解決設定為true時直接被觸發
+                onSwitehClickListener?.onSwitchItemClick(holder.swC2F, position, b)
                 return@setOnCheckedChangeListener
             }
 
@@ -250,7 +264,10 @@ class SettingActivity : AppCompatActivity() {
 
         interface OnItemClickListener {
             fun onMyItemClick(view: View, position: Int)
-            fun onSwitchItemClick(view: View,position: Int,boolean: Boolean)
+
+        }
+        interface OnSwitchChangedListener{
+            fun onSwitchItemClick(view: View, position: Int, boolean: Boolean)
         }
 
     }//MyAdapter
