@@ -54,16 +54,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initSetValue()//初始設置
         setMenu()//設置標題列
-//        //萬一搞壞了這邊手動輸入即可
-        var byte = Tools.fromHexString(
-            String.format("%02x", 2)//排數
-                    + String.format("%02x", 2)//種類
-                    + String.format("%02x", 0)//小數點
-                    + String.format("%04x", 0)//值
-                    + String.format("%02x", 0)//空白
-                    + String.format("%02x", 9)//單位
-        )
-        byte?.let { it1 -> Tools.sendData(it1, 100, this, 0) }
 
         val filter = IntentFilter()
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)

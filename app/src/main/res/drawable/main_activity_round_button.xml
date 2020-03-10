@@ -4,24 +4,24 @@
         android:shape="oval">
         <!--漸層顏色-->
         <gradient
-            android:gradientRadius="150dp"
+            android:gradientRadius="150dip"
             android:type="radial" />
 
         <!-- 文字與邊框的間距 -->
         <padding
-            android:top="5dp"
-            android:right="5dp"
-            android:bottom="5dp"
-            android:left="5dp"/>
+            android:top="5dip"
+            android:right="5dip"
+            android:bottom="5dip"
+            android:left="5dip"/>
         <!-- 形狀大小 -->
         <size
-            android:width="220dp"
-            android:height="220dp" />
+            android:width="150dip"
+            android:height="150dip" />
         <!-- 邊框線 -->
         <stroke
             android:width="3dp"
             android:color="#3A8AC7"
-            android:dashWidth="5dp" />
+            android:dashWidth="5dip" />
 
     <!--基本顏色-->
 

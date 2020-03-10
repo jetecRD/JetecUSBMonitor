@@ -47,7 +47,7 @@
                 android:layout_marginEnd="30dp"
                 android:text="26℃"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large"
-                android:textSize="36sp" />
+                android:textSize="30sp" />
         </LinearLayout>
 
     </LinearLayout>

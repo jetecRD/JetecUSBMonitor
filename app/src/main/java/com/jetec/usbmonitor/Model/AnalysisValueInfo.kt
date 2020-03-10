@@ -122,6 +122,7 @@ class AnalysisValueInfo() {
 
     }
 
+    /**在設定處GET後所回傳的數值*/
     fun transSetting(
         activity: Activity,
         mSetting: ArrayList<String>

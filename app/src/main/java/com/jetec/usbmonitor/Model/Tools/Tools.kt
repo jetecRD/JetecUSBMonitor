@@ -242,10 +242,10 @@ class Tools() {
                     return R.drawable.noun_humidity
                 }//
                 12 -> {
-                    return R.drawable.noun_corsican
+                    return R.drawable.noun_co2
                 }//
                 13 -> {
-                    return R.drawable.noun_co2
+                    return R.drawable.noun_corsican
                 }//
                 14 -> {
                     return R.drawable.noun_air_pollution
