@@ -4,16 +4,24 @@ import kotlin.math.E
 
 class DeviceSetting {
     private var row: Int = 0
-    private var EH: String = ""
-    private var EL: String = ""
-    private var PV: String = ""
-    private var TR:String = ""
-    private var EHValue: String = ""
-    private var ELValue: String = ""
-    private var PVValue: String = ""
-    private var TRValue:String = ""
-    private var dp: Int = 0
 
+    private var EH: String = ""
+    private var EHValue: String = ""
+    private var EHOrigin:String = ""
+
+    private var EL: String = ""
+    private var ELValue: String = ""
+    private var ELOrigin:String = ""
+
+    private var PV: String = ""
+    private var PVValue: String = ""
+    private var PVOrigin:String = ""
+
+    private var TR:String = ""
+    private var TRValue:String = ""
+    private var TROrigin:String = ""
+
+    private var dp: Int = 0
     private var empty: String = ""
     private var unit: String = ""
     private var originValue: String = ""
@@ -25,65 +33,78 @@ class DeviceSetting {
     constructor()
 
 
-    public fun getRow(): Int {
+    fun getRow(): Int {
         return row
     }
 
-    public fun getEH(): String {
+    fun getEH(): String {
         return EH
     }
 
-    public fun getEL(): String {
+    fun getEL(): String {
         return EL
     }
 
-    public fun getPV(): String {
+    fun getPV(): String {
         return PV
     }
-    public fun getTR(): String {
+    fun getTR(): String {
         return TR
     }
-    public fun getTRValue(): String {
+    fun getTRValue(): String {
         return TRValue
     }
 
-    public fun getEHValue(): String {
+    fun getPVOrigin():String{
+        return PVOrigin
+    }
+    fun getTROrigin():String{
+        return TROrigin
+    }
+    fun getEHValue(): String {
         return EHValue
     }
-
-    public fun getELValue(): String {
+    fun getEHOrigin():String{
+        return EHOrigin
+    }
+    fun getELValue(): String {
         return ELValue
     }
-
-    public fun getPVValue(): String {
+    fun getELOrigin():String{
+        return ELOrigin
+    }
+    fun getPVValue(): String {
         return PVValue
     }
 
-    public fun getDP(): Int {
+    fun getDP(): Int {
         return dp
     }
 
-    public fun getEmpty(): String {
+    fun getEmpty(): String {
         return empty
     }
 
-    public fun getUnit(): String {
+    fun getUnit(): String {
         return unit
     }
 
-    public fun getOriginValue(): String {
+    fun getOriginValue(): String {
         return originValue
     }
 
-    public fun getLabel(): String {
+    fun getLabel(): String {
         return label
     }
-    public fun getValue():String{
+    fun getValue():String{
         return value
     }
-    public fun getType():String {
+    fun getType():String {
         return type
     }
+
+
+
 /**================================================================================================*/
     fun setType(type:String){
         this.type = type
@@ -102,17 +123,28 @@ class DeviceSetting {
     public fun setTRValue(TRValue:String){
         this.TRValue = TRValue
     }
+    fun setTROrigin(TROrigin:String){
+        this.TROrigin = TROrigin
+    }
 
     public fun setEH(EH: String) {
         this.EH = EH
+    }
+    fun setEHOrigin(EHOrigin:String){
+        this.EHOrigin = EHOrigin
     }
 
     public fun setEL(EL: String) {
         this.EL = EL
     }
-
+    fun setELOrigin(ELOrigin:String){
+        this.ELOrigin = ELOrigin
+    }
     public fun setPV(PV: String) {
         this.PV = PV
+    }
+    fun setPVOrigin(PVOrigin:String){
+        this.PVOrigin = PVOrigin
     }
 
     public fun setEHValue(EHValue: String) {

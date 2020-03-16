@@ -36,7 +36,7 @@
     <string name="EH">High Alarm</string>
     <string name="EL">Low Alarm</string>
     <string name="C2F">Trans to F</string>
-    
+
     <string name="factoryReset">Factory Reset</string>
     <string name="nightMode">Night Mode</string>
     <string name="cancelButton">Cancel</string>
@@ -45,5 +45,6 @@
     <string name="progressing">Progressing</string>
     <string name="progressDialogMessage">Please wait..</string>
     <string name="factoryResetCheckMessage">It will RESET all of custom setting,continue?</string>
+    <string name="noSensorHint">Need pull in sensor</string>
 
 </resources>

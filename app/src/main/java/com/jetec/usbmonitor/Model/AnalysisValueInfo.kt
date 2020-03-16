@@ -89,24 +89,25 @@ class AnalysisValueInfo() {
                         "PV" -> {
                             mData[i].setPV("PV")
                             mData[i].setPVValue(Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value)))
+                            mData[i].setPVOrigin(mArrayList[i][x])
                         }
                         "EH" -> {
                             mData[i].setEH("EH")
                             mData[i].setEHValue(Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value)))
+                            mData[i].setEHOrigin(mArrayList[i][x])
                         }
                         "EL" -> {
                             mData[i].setEL("EL")
                             mData[i].setELValue(Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value)))
+                            mData[i].setELOrigin(mArrayList[i][x])
                         }
                         "trans℃" -> {
                             mData[i].setTR("TR")
                             mData[i].setTRValue(Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value)))
+                            mData[i].setTROrigin(mArrayList[i][x])
                         }
                     }
-                    mData[i].setRow(row.toInt())
-                    mData[i].setEmpty(empty)
-                    mData[i].setUnit(Tools.setUnit(Tools.hex2Dec(unit).toInt()))
-                    mData[i].setOriginValue(mArrayList[i][x])
+
 
                 }
             }
@@ -121,6 +122,8 @@ class AnalysisValueInfo() {
         }
 
     }
+
+
 
     /**在設定處GET後所回傳的數值*/
     fun transSetting(

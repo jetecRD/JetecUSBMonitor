@@ -11,5 +11,6 @@ class MyStatus{
         var autoMeasurement:Boolean = false//是否開啟自動偵測(此項目不重置)
 
 
+
     }
 }

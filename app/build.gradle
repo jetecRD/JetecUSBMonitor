@@ -44,4 +44,7 @@ dependencies {
 
     implementation "androidx.cardview:cardview:1.0.0"
     //CardView https://developer.android.com/jetpack/androidx/releases/cardview
+
+    implementation 'com.github.clans:fab:1.6.4'
+    //https://github.com/Clans/FloatingActionButton
 }

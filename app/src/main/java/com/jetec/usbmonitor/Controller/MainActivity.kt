@@ -6,7 +6,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Rect
 import android.graphics.Typeface
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
@@ -24,6 +26,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.clans.fab.FloatingActionButton
+import com.github.clans.fab.FloatingActionMenu
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
 import com.hoho.android.usbserial.driver.ProbeTable
 import com.hoho.android.usbserial.driver.UsbSerialDriver
@@ -35,19 +39,21 @@ import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import kotlinx.android.synthetic.main.activity_main.*
+import java.io.ByteArrayOutputStream
 import java.io.IOException
-import java.lang.Exception
-import java.math.BigInteger
-import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
 
 
 class MainActivity : AppCompatActivity() {
     val TAG: String = MainActivity::class.java.simpleName + "My"
     val ACTION_USB_PERMISSION: String = "com.jetec.usbmonitor"
     private lateinit var mAdapter: MyAdapter
+    private var mValue: MutableList<DeviceValue> = ArrayList()
+    private var mSetting: MutableList<DeviceSetting> = ArrayList()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,13 +67,126 @@ class MainActivity : AppCompatActivity() {
         filter.addAction(ACTION_USB_PERMISSION)
         registerReceiver(usbStatus, filter)
         button_Measure.setOnClickListener {
-            meansureModel()
+            meansureModel(1)
             var vibrator: Vibrator =
                 getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
             vibrator.vibrate(100)
         }
-        autoAount()//自動偵測(程式內自行判斷)
+        autoMeasure()//自動偵測(程式內自行判斷)
+        setFloatButton()//設置FloatButton
+
+
     }//onCreate
+    /**跳轉後載入介面*/
+    private fun initSetValue() {
+
+        var intent = intent
+        var infoArrayList = intent.getStringArrayListExtra("DeviceInfo")
+        var valueArrayList = intent.getStringArrayListExtra("Value")
+//        Log.d(TAG, "$infoArrayList ")
+//        Log.d(TAG, "$valueArrayList ")
+        val sdf = SimpleDateFormat("HH:mm:ss")
+        var current = Date()
+        textView_timeInfo.text = getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
+
+        val analysisValueInfo = AnalysisValueInfo()
+        val layoutManager = LinearLayoutManager(this)
+        layoutManager.orientation = LinearLayoutManager.VERTICAL
+        val dataList = findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
+        dataList.layoutManager = layoutManager
+        mValue = analysisValueInfo
+            .requestValue(this, valueArrayList)
+        mSetting = analysisValueInfo.requestSetting(this, infoArrayList)
+
+        mAdapter = MyAdapter(mValue, mSetting)
+        dataList.adapter = mAdapter
+
+    }
+    /**設置FloatButton*/
+    private fun setFloatButton() {
+        val fbFlashSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_flash)
+        val fbSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_normalSave)
+
+        fbFlashSave.setOnClickListener {
+
+
+        }
+        fbSave.setOnClickListener {
+
+            if (mValue.size != 0) {
+
+                var arrayArray = ArrayList<HashMap<String, String>>()
+                for (i in 0 until mValue.size) {
+                    var hashMap = HashMap<String, String>()
+                    var displayDouble =
+                        mValue[i].getmValue().toDouble() + mSetting[i].getPVValue()
+                            .toDouble()
+                    hashMap[RecordActivity.IntentGetTitle] = mValue[i].getLabel()
+                    hashMap[RecordActivity.IntentGetValue] = Tools.getDecDisplay(mValue[i].getDP())
+                        .format(displayDouble)
+                    hashMap[RecordActivity.IntentGetOriginValue] = mValue[i].getOriginValue()
+
+                    hashMap[RecordActivity.IntentPVValue] = mSetting[i].getPVValue()
+                    hashMap[RecordActivity.GetPVOrigin] = mSetting[i].getPVOrigin()
+
+                    hashMap[RecordActivity.IntentEHValue] = mSetting[i].getEHValue()
+                    hashMap[RecordActivity.GetEHOrigin] = mSetting[i].getEHOrigin()
+
+                    hashMap[RecordActivity.IntentELValue] = mSetting[i].getELValue()
+                    hashMap[RecordActivity.GetELOrigin] = mSetting[i].getELValue()
+
+                    arrayArray.add(hashMap)
+                }
+
+                val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
+                var now = Date()
+                val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+                val intent = Intent(this,RecordActivity::class.java)
+                /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
+                floatMenu.close(true)
+                intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
+                intent.putExtra(RecordActivity.IntentMyNowYMd,sdfyMd.format(now))
+                intent.putExtra(RecordActivity.IntentMyNowHms,textView_timeInfo.text
+                    .substring(textView_timeInfo.text.indexOf("\n")+1))
+
+                var bs:ByteArrayOutputStream = ByteArrayOutputStream()
+                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
+                intent.putExtra(RecordActivity.GetScreenShot,bs.toByteArray())
+                startActivity(intent)
+
+            } else {
+                Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+            }
+
+        }
+    }
+
+    private fun getScreenShot(): Bitmap? {
+        //藉由View來Cache全螢幕畫面後放入Bitmap
+        val mView = window.decorView
+        mView.isDrawingCacheEnabled = true
+        mView.buildDrawingCache()
+        val mFullBitmap = mView.drawingCache
+
+        //取得系統狀態列高度
+        val mRect = Rect()
+        window.decorView.getWindowVisibleDisplayFrame(mRect)
+        val mStatusBarHeight: Int = mRect.top
+
+        //取得手機螢幕長寬尺寸
+        val mPhoneWidth = windowManager.defaultDisplay.width
+        val mPhoneHeight = windowManager.defaultDisplay.height
+
+        //將狀態列的部分移除並建立新的Bitmap
+        val mBitmap = Bitmap.createBitmap(
+            mFullBitmap, 0, mStatusBarHeight, mPhoneWidth,
+            mPhoneHeight - mStatusBarHeight
+        )
+        //將Cache的畫面清除
+        mView.destroyDrawingCache()
+        return mBitmap
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         unregisterReceiver(usbStatus)
@@ -95,6 +214,7 @@ class MainActivity : AppCompatActivity() {
                     getString(R.string.sensorHasBeenPullOut),
                     Toast.LENGTH_SHORT
                 ).show()
+
             } else if (action == ACTION_USB_PERMISSION) {
                 connectedFunction()
             }
@@ -124,7 +244,7 @@ class MainActivity : AppCompatActivity() {
                 var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this, 1)
                 for (i in 0 until arrayList.size) {
                     if (arrayList[i]!!.contains("OK")) {
-                        meansureModel()
+                        meansureModel(0)
                     }
                 }
             } else {
@@ -193,8 +313,10 @@ class MainActivity : AppCompatActivity() {
         return arrayList
     }//getTypeArray 取得型號陣列
 
-    /**取得資訊與介面更動模組*/
-    private fun meansureModel() {
+    /**取得資訊與介面更動模組
+     * @param selectChannel 0為創建列表，1為更新列表*/
+    private fun meansureModel(selectChannel: Int) {
+
         Thread {
             runOnUiThread {
 
@@ -206,50 +328,169 @@ class MainActivity : AppCompatActivity() {
             }
             val analysisValueInfo = AnalysisValueInfo()
 //            Log.d(TAG, ":${Tools.sendData("Request", 200, this, 0)}");
+
             runOnUiThread {
-                val layoutManager = LinearLayoutManager(this)
-                layoutManager.orientation = LinearLayoutManager.VERTICAL
-                val dataList = findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
-                dataList.layoutManager = layoutManager
-                mAdapter = MyAdapter(
-                    analysisValueInfo
-                        .requestValue(this, Tools.sendData("Request", 100, this, 0))
-                    , analysisValueInfo.requestSetting(this, Tools.sendData("Get", 100, this, 0))
-                )
-                Log.d("SettingActivityMy", "Request= "+Tools.sendData("Request", 100, this, 0).toString())
-                Log.d("SettingActivityMy", "GET= "+Tools.sendData("Get", 100, this, 0).toString())
-                dataList.adapter = mAdapter
+                if (selectChannel == 1/*刷新數值*/) {
+                    var rValue = Tools.sendData(
+                        "Request"
+                        , 100, this, 0
+                    )
+                    var rSetting = Tools.sendData(
+                        "Get"
+                        , 100, this, 0
+                    )
+                    if (rValue.isEmpty()) {
+                        Toast.makeText(this, getString(R.string.noSensorHint), Toast.LENGTH_SHORT)
+                            .show()
+                        mSetting.clear()
+                        mValue.clear()
+                        mAdapter.notifyDataSetChanged()
+                    }
+                    /**刷新GET的部分*/
+                    val mArrayList: ArrayList<ArrayList<String>> = ArrayList()
+                    for (i in 0 until MyStatus.deviceRow) {
+                        val liArrayList: ArrayList<String> = ArrayList()
+                        for (x in 0 until rSetting.size) {
+                            if (rSetting[x].substring(0, 2).toInt() - 1 == i) {
+                                liArrayList.add(rSetting[x])
+                            }
+                        }
+                        mArrayList.add(liArrayList)
+                    }
+                    for (i in 0 until mArrayList.size) {
+                        for (x in 0 until mArrayList[i].size) {
+                            var row = mArrayList[i][x].substring(0, 4)
+                            var type = mArrayList[i][x].substring(2, 4)
+                            var dp = mArrayList[i][x].substring(4, 6)
+                            var value = mArrayList[i][x].substring(6, 10)
+                            var empty = mArrayList[i][x].substring(10, 12)
+                            var unit = mArrayList[i][x].substring(12, 14)
+                            when (returnType(type.toInt())) {
+                                "PV" -> {
+                                    mSetting[i].setPV("PV")
+                                    mSetting[i].setPVValue(
+                                        Tools.returnValue(
+                                            dp.toInt(),
+                                            Tools.hextoDecShort(value)
+                                        )
+                                    )
+                                    mSetting[i].setPVOrigin(mArrayList[i][x])
+                                }
+                                "EH" -> {
+                                    mSetting[i].setEH("EH")
+                                    mSetting[i].setEHValue(
+                                        Tools.returnValue(
+                                            dp.toInt(),
+                                            Tools.hextoDecShort(value)
+                                        )
+                                    )
+                                    mSetting[i].setEHOrigin(mArrayList[i][x])
+                                }
+                                "EL" -> {
+                                    mSetting[i].setEL("EL")
+                                    mSetting[i].setELValue(
+                                        Tools.returnValue(
+                                            dp.toInt(),
+                                            Tools.hextoDecShort(value)
+                                        )
+                                    )
+                                    mSetting[i].setELOrigin(mArrayList[i][x])
+                                }
+                                "trans℃" -> {
+                                    mSetting[i].setTR("TR")
+                                    mSetting[i].setTRValue(
+                                        Tools.returnValue(
+                                            dp.toInt(),
+                                            Tools.hextoDecShort(value)
+                                        )
+                                    )
+                                    mSetting[i].setTROrigin(mArrayList[i][x])
+                                }
+                            }
+                        }
+                        mAdapter.notifyDataSetChanged()
+                    }
+
+                    /**刷新REQUEST的部分*/
+                    for (i in 0 until rValue.size) {
+                        var row = rValue[i].substring(0, 2)
+                        var type = rValue[i].substring(2, 4)
+                        var dp = rValue[i].substring(4, 6)
+                        var value = rValue[i].substring(6, 10)
+                        var empty = rValue[i].substring(10, 12)
+                        var unit = rValue[i].substring(12, 14)
+
+                        mValue[i] = DeviceValue(
+                            row.toInt()
+                            , returnType(Tools.hex2Dec(type).toInt())
+                            , dp.toInt()
+                            , Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value))
+                            , empty
+                            , Tools.setUnit(Tools.hex2Dec(unit).toInt())
+                            , Tools.setLabel(Tools.hex2Dec(unit).toInt(), this)
+                            , rValue[i]
+                            , Tools.setColor(Tools.hex2Dec(unit).toInt())
+                            , Tools.setIcon(Tools.hex2Dec(unit).toInt())
+                        )
+                        mAdapter.notifyDataSetChanged()
+                    }
+
+                } else {
+                    /**刷新REQUEST的部分*/
+                    val layoutManager = LinearLayoutManager(this)
+                    layoutManager.orientation = LinearLayoutManager.VERTICAL
+                    val dataList = findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
+                    dataList.layoutManager = layoutManager
+                    mValue = analysisValueInfo
+                        .requestValue(
+                            this, Tools.sendData(
+                                "Request"
+                                , 100, this, 0
+                            )
+                        )
+                    mSetting = analysisValueInfo
+                        .requestSetting(
+                            this, Tools.sendData(
+                                "Get"
+                                , 100, this, 0
+                            )
+                        )
+                    mAdapter = MyAdapter(mValue, mSetting)
+                    dataList.adapter = mAdapter
+                }
+
 
             }
 
         }.start()
     }
 
-    /**跳轉後載入介面*/
-    private fun initSetValue() {
+    /**
+     * 將通訊中第二個byte(決定種類:PV/EH/EF...)
+     * @param input 輸入種類*/
+    private fun returnType(input: Int): String {
 
-        var intent = intent
-        var infoArrayList = intent.getStringArrayListExtra("DeviceInfo")
-        var valueArrayList = intent.getStringArrayListExtra("Value")
-//        Log.d(TAG, "$infoArrayList ")
-        Log.d(TAG, "$valueArrayList ")
-        val sdf = SimpleDateFormat("HH:mm:ss")
-        var current = Date()
-        textView_timeInfo.text = getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
-
-        val analysisValueInfo = AnalysisValueInfo()
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        val dataList = findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
-        dataList.layoutManager = layoutManager
-        mAdapter = MyAdapter(
-            analysisValueInfo
-                .requestValue(this, valueArrayList)
-            , analysisValueInfo.requestSetting(this, infoArrayList)
-        )
-        dataList.adapter = mAdapter
-
+        when (input) {
+            1 -> {
+                return "PV"
+            }
+            2 -> {
+                return "EH"
+            }
+            3 -> {
+                return "EL"
+            }
+            4 -> {
+                return "trans℃"
+            }
+            else -> {
+                return "empty"
+            }
+        }
     }
+
+
+
 
     /**設置標題列*/
     private fun setMenu() {
@@ -274,12 +515,20 @@ class MainActivity : AppCompatActivity() {
                 R.id.action_Auto -> {
                     it.isChecked = !it.isChecked
                     MyStatus.autoMeasurement = !MyStatus.autoMeasurement
-                    if (MyStatus.autoMeasurement){
-                        Toast.makeText(this,getString(R.string.autoMeasureOpenLabel),Toast.LENGTH_SHORT).show()
-                    }else {
-                        Toast.makeText(this,getString(R.string.autoMeasureTurnOff),Toast.LENGTH_SHORT).show()
+                    if (MyStatus.autoMeasurement) {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.autoMeasureOpenLabel),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        Toast.makeText(
+                            this,
+                            getString(R.string.autoMeasureTurnOff),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-                    autoAount()
+                    autoMeasure()
                 }
 
             }
@@ -295,17 +544,17 @@ class MainActivity : AppCompatActivity() {
         val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
         MyStatus.autoMeasurement = false
         toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
-        autoAount()
+        autoMeasure()
     }
 
     /**自動偵測*/
-    fun autoAount() {
+    fun autoMeasure() {
         object : CountDownTimer(1000, 1000) {
             override fun onFinish() {
                 if (MyStatus.autoMeasurement) {
                     button_Measure.text = getString(R.string.autoMeasuringButton)
-                    meansureModel()
-                    autoAount()
+                    meansureModel(1)
+                    autoMeasure()
                 } else {
                     button_Measure.text = getString(R.string.measureButton)
                 }
@@ -328,16 +577,19 @@ class MainActivity : AppCompatActivity() {
 
     /**設置按下音量建功能*/
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN -> {
-                meansureModel()
+                meansureModel(1)
                 var vibrator: Vibrator =
                     getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
                 vibrator.vibrate(100)
                 true
             }
             KeyEvent.KEYCODE_BACK -> {
-                finish()
+                if (floatMenu.isOpened) {
+                    floatMenu.close(true)
+                } else finish()
                 true
             }
             else -> false
@@ -346,8 +598,8 @@ class MainActivity : AppCompatActivity() {
 
     /**設置資訊看板(RecyclerView)*/
     private class MyAdapter(
-        val mData: MutableList<DeviceValue>,
-        val mSetting: MutableList<DeviceSetting>
+        val mAData: MutableList<DeviceValue>,
+        val mASetting: MutableList<DeviceSetting>
     ) :
         RecyclerView.Adapter<MyAdapter.ViewHolder>() {
         val TAG = MainActivity::class.java.simpleName + "My"
@@ -366,36 +618,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         override fun getItemCount(): Int {
-            return mData.size
+            return mAData.size
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-//            Log.d(TAG, ":${mData[position].getRow()}" +
-//                    ", ${mData[position].getType()}" +
-//                    ", ${mData[position].getDP()}" +
-//                    ", ${mData[position].getmValue()}" +
-//                    ", ${mData[position].getLabel()}"+
-//                    ", ${mData[position].getUnit()}");
-//            Log.d(TAG, ":${mSetting[position].getPV()} ");
-//            Log.d(TAG, ":${mSetting[position].getPVValue()} ");
-//            Log.d(TAG, ":${mSetting[position].getEH()} ");
-//            Log.d(TAG, ":${mSetting[position].getEHValue()} ");
-//            Log.d(TAG, ":${mSetting[position].getEL()} ");
-//            Log.d(TAG, ":${mSetting[position].getELValue()} ");
-//            Log.d(TAG, ":${mSetting[position].getTR()} ");
-//            Log.d(TAG, ":${mSetting[position].getTRValue()} ");
+
             try {
                 var displayDouble =
-                    mData[position].getmValue().toDouble() + mSetting[position].getPVValue()
+                    mAData[position].getmValue().toDouble() + mASetting[position].getPVValue()
                         .toDouble()
 
-                holder.tvValue.text = Tools.getDecDisplay(mData[position].getDP())
-                    .format(displayDouble)+ mData[position].getUnit()
-                if (displayDouble >= mSetting[position].getEHValue().toDouble()
-                    || displayDouble <= mSetting[position].getELValue().toDouble()
+                holder.tvValue.text = Tools.getDecDisplay(mAData[position].getDP())
+                    .format(displayDouble) + mAData[position].getUnit()
+                if (displayDouble >= mASetting[position].getEHValue().toDouble()
+                    || displayDouble <= mASetting[position].getELValue().toDouble()
                 ) {
                     holder.igBell.setColorFilter(Color.RED)
-//                var animShack = AnimationUtils.loadAnimation(holder.parent.context, R.anim.shake)
                     var animShack = TranslateAnimation(0f, 10f, 0f, 0f)
                     animShack.interpolator = CycleInterpolator(5f)
                     animShack.duration = 500
@@ -406,9 +644,11 @@ class MainActivity : AppCompatActivity() {
                         holder.parent.context.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
                     vibrator.vibrate(1500)
 
+                } else {
+                    holder.igBell.setColorFilter(Color.BLACK)
                 }
-                holder.igSensor.setColorFilter(mData[position].getColor())
-                holder.igSensor.setImageResource(mData[position].getIcon())
+                holder.igSensor.setColorFilter(mAData[position].getColor())
+                holder.igSensor.setImageResource(mAData[position].getIcon())
 
             } catch (e: Exception) {
                 Log.d(TAG, ":${e.message} ");
@@ -418,5 +658,13 @@ class MainActivity : AppCompatActivity() {
 
     }
 
+    /**設置螢幕觸控事件*/
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+        if (event!!.action >= 0 && floatMenu.isOpened) {
+            floatMenu.close(true)
+        }
+        return super.onTouchEvent(event)
+    }
 }
 
