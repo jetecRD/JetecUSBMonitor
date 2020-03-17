@@ -1,7 +1,6 @@
 package com.jetec.usbmonitor.Controller
 
 import android.app.ProgressDialog
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -20,13 +19,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jetec.usbmonitor.Model.AnalysisValueInfo
+import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.Initialization
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
-import kotlinx.android.synthetic.main.activity_setting.*
-import java.text.DecimalFormat
+//import kotlinx.android.synthetic.main.activity_setting.*
 
 
 class SettingActivity : AppCompatActivity() {
@@ -39,6 +38,7 @@ class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
+        CrashHandler.getInstance().init(this)
         setMenu()//設置Toolbar
         setSensorSetting()//設置設定sensor的RecyclerView部分
         applicationSetting()//設置設定應用程式設定部分
@@ -202,45 +202,57 @@ class SettingActivity : AppCompatActivity() {
 
         btCancel.setOnClickListener { dialog.dismiss() }
         btOK.setOnClickListener {
-
-            var originValue = settingList[position].getOriginValue()
-            val value =
-                Tools.toHex(
-                    Tools.sendValueMultiplyDP(
-                        edINput.text.toString().toDouble()
-                        , settingList[position].getDP()
-                    )
-                )
-//            Log.d(TAG, ":${value} ");
-            var byte = Tools.fromHexString(
-                String.format("%02x", originValue.substring(0, 2).toInt(16))//排數
-                        + String.format("%02x", originValue.substring(2, 4).toInt(16))//種類
-                        + String.format("%02x", originValue.substring(4, 6).toInt(16))//小數點
-                        + String.format("%04x", value!!.toLong(16))//值
-                        + String.format("%02x", originValue.substring(10, 12).toInt(16))//空白
-                        + String.format("%02x", originValue.substring(12, 14).toInt(16))//單位
-            )
-            Thread {
-                var s =
-                    byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
-                        ?.get(0)
-                if (getModifyIndex(s) != -1) {
-                    settingList[getModifyIndex(s)]
-                        .setValue(
-                            Tools.returnValue(
-                                s!!.substring(4, 6).toInt(),
-                                Tools.hextoDecShort(s!!.substring(6, 10))
-                            )
+            if(edINput.text.toString().isNotEmpty() && Numornot(edINput.text.toString())){
+                var originValue = settingList[position].getOriginValue()
+                val value =
+                    Tools.toHex(
+                        Tools.sendValueMultiplyDP(
+                            edINput.text.toString().toDouble()
+                            , settingList[position].getDP()
                         )
-                    runOnUiThread {
-                        mAdapter!!.notifyDataSetChanged()
+                    )
+//            Log.d(TAG, ":${value} ");
+                var byte = Tools.fromHexString(
+                    String.format("%02x", originValue.substring(0, 2).toInt(16))//排數
+                            + String.format("%02x", originValue.substring(2, 4).toInt(16))//種類
+                            + String.format("%02x", originValue.substring(4, 6).toInt(16))//小數點
+                            + String.format("%04x", value!!.toLong(16))//值
+                            + String.format("%02x", originValue.substring(10, 12).toInt(16))//空白
+                            + String.format("%02x", originValue.substring(12, 14).toInt(16))//單位
+                )
+                Thread {
+                    var s =
+                        byte?.let { it1 -> Tools.sendData(it1, 100, this@SettingActivity, 0) }
+                            ?.get(0)
+                    if (getModifyIndex(s) != -1) {
+                        settingList[getModifyIndex(s)]
+                            .setValue(
+                                Tools.returnValue(
+                                    s!!.substring(4, 6).toInt(),
+                                    Tools.hextoDecShort(s!!.substring(6, 10))
+                                )
+                            )
+                        runOnUiThread {
+                            mAdapter!!.notifyDataSetChanged()
+                        }
                     }
-                }
+                    dialog.dismiss()
+                }.start()
+
+            }//if
+            else{
                 dialog.dismiss()
-            }.start()
+            }
         }
     }
-
+    fun Numornot(msg: String): Boolean {
+        return try {
+            msg.toDouble()
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
     /**以回傳的值找出特定index的方法*/
     private fun getModifyIndex(s: String?): Int {
         var comp = s!!.substring(0, 4)
@@ -254,7 +266,8 @@ class SettingActivity : AppCompatActivity() {
 
     /**設置標題列*/
     private fun setMenu() {
-        textView_toolBarTitleSetting.typeface = Typeface
+        val tvToolBarTitle = findViewById<TextView>(R.id.textView_toolBarTitleSetting)
+        tvToolBarTitle.typeface = Typeface
             .createFromAsset(this.assets, "segoe_print.ttf")
         var mToolbar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBarSetting)
         mToolbar.title = ""

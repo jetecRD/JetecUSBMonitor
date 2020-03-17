@@ -171,12 +171,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="8dp"
-                    android:singleLine="true"
                     android:hint="請輸入名字"
+                    android:singleLine="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/guideline7"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView7" />
+                    app:layout_constraintStart_toStartOf="parent" />
 
                 <TextView
                     android:id="@+id/textView9"
@@ -191,18 +190,21 @@
 
                 <EditText
                     android:id="@+id/editText_RecordTime"
+                    android:text="time\ndate"
                     android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="8dp"
                     android:ems="10"
                     android:inputType="none"
+                    android:singleLine="false"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/editText_RecordName"
                     app:layout_constraintTop_toBottomOf="@+id/textView9"
                     android:focusable="false"
                     android:focusableInTouchMode="false"
+                    android:scrollbars="vertical"
                     />
 
             </androidx.constraintlayout.widget.ConstraintLayout>

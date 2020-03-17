@@ -20,12 +20,14 @@ import android.view.*
 import android.view.animation.Animation
 import android.view.animation.CycleInterpolator
 import android.view.animation.TranslateAnimation
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.facebook.stetho.Stetho
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
@@ -33,12 +35,13 @@ import com.hoho.android.usbserial.driver.ProbeTable
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import com.hoho.android.usbserial.driver.UsbSerialProber
 import com.jetec.usbmonitor.Model.AnalysisValueInfo
+import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.DeviceValue
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
-import kotlinx.android.synthetic.main.activity_main.*
+//import kotlinx.android.synthetic.main.activity_main.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -58,6 +61,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        Stetho.initializeWithDefaults(this)
+        CrashHandler.getInstance().init(this)
         initSetValue()//初始設置
         setMenu()//設置標題列
 
@@ -66,7 +71,8 @@ class MainActivity : AppCompatActivity() {
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         filter.addAction(ACTION_USB_PERMISSION)
         registerReceiver(usbStatus, filter)
-        button_Measure.setOnClickListener {
+        val btMeaSure = findViewById<Button>(R.id.button_Measure)
+        btMeaSure.setOnClickListener {
             meansureModel(1)
             var vibrator: Vibrator =
                 getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
@@ -87,7 +93,8 @@ class MainActivity : AppCompatActivity() {
 //        Log.d(TAG, "$valueArrayList ")
         val sdf = SimpleDateFormat("HH:mm:ss")
         var current = Date()
-        textView_timeInfo.text = getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
+        val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+        tvTimeinfo.text = getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
 
         val analysisValueInfo = AnalysisValueInfo()
         val layoutManager = LinearLayoutManager(this)
@@ -139,18 +146,19 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
-                var now = Date()
+                val now = Date()
                 val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
                 val intent = Intent(this,RecordActivity::class.java)
                 /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
                 floatMenu.close(true)
                 intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
                 intent.putExtra(RecordActivity.IntentMyNowYMd,sdfyMd.format(now))
-                intent.putExtra(RecordActivity.IntentMyNowHms,textView_timeInfo.text
-                    .substring(textView_timeInfo.text.indexOf("\n")+1))
+                val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+                intent.putExtra(RecordActivity.IntentMyNowHms,tvTimeinfo.text
+                    .substring(tvTimeinfo.text.indexOf("\n")+1))
 
-                var bs:ByteArrayOutputStream = ByteArrayOutputStream()
-                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
+                val bs:ByteArrayOutputStream = ByteArrayOutputStream()
+                 getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
                 intent.putExtra(RecordActivity.GetScreenShot,bs.toByteArray())
                 startActivity(intent)
 
@@ -322,8 +330,8 @@ class MainActivity : AppCompatActivity() {
 
                 val sdf = SimpleDateFormat("HH:mm:ss")
                 var current = Date()
-
-                textView_timeInfo.text =
+                val tvTimeInfo = findViewById<TextView>(R.id.textView_timeInfo)
+                tvTimeInfo.text =
                     getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
             }
             val analysisValueInfo = AnalysisValueInfo()
@@ -496,7 +504,8 @@ class MainActivity : AppCompatActivity() {
     private fun setMenu() {
         val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
         toolBar.inflateMenu(R.menu.menu_layout)
-        textView_toolBarTitle.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")
+        val tvToolBar = findViewById<TextView>(R.id.textView_toolBarTitle)
+        tvToolBar.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")
 
         toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
         toolBar.setOnMenuItemClickListener {
@@ -551,12 +560,13 @@ class MainActivity : AppCompatActivity() {
     fun autoMeasure() {
         object : CountDownTimer(1000, 1000) {
             override fun onFinish() {
+                val btMeaSure = findViewById<Button>(R.id.button_Measure)
                 if (MyStatus.autoMeasurement) {
-                    button_Measure.text = getString(R.string.autoMeasuringButton)
+                    btMeaSure.text = getString(R.string.autoMeasuringButton)
                     meansureModel(1)
                     autoMeasure()
                 } else {
-                    button_Measure.text = getString(R.string.measureButton)
+                    btMeaSure.text = getString(R.string.measureButton)
                 }
             }
 

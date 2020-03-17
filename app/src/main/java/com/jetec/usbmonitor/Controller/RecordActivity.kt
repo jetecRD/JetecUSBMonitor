@@ -1,43 +1,47 @@
 package com.jetec.usbmonitor.Controller
 
+//import kotlinx.android.synthetic.main.activity_record.*
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Environment
 import android.os.SystemClock
 import android.provider.MediaStore
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.core.widget.ContentLoadingProgressBar
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.facebook.stetho.Stetho
+import com.google.gson.Gson
+import com.jetec.usbmonitor.Model.CrashHandler
+import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
+import com.jetec.usbmonitor.Model.Tools.MyStatus
+import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
-import kotlinx.android.synthetic.main.activity_record.*
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
 
 class RecordActivity : AppCompatActivity() {
     val TAG = RecordActivity::class.java.simpleName + "My"
     private var currentImagePath = ""
 
     companion object {
-        const val IMAGE_REQUEST = 1
+        const val IMAGE_REQUEST = 100
         const val REQUEST_FINE_LOCATION_PERMISSION = 101;
         const val INTENTNOW = "NowData"
         const val IntentGetTitle = "Title"
@@ -61,52 +65,71 @@ class RecordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record)
-
+        CrashHandler.getInstance().init(this)
+        Stetho.initializeWithDefaults(this)
         getIntentValue()
         takePicture()
 
-        button_RecordSave.setOnClickListener { buttonSOnClick }
-        button_RecordCancel.setOnClickListener { buttonSOnClick }
     }
 
+
+    @SuppressLint("SetTextI18n")
     private fun getIntentValue() {
-        var intent = intent
-        var infoArrayList:ArrayList<HashMap<String,String>>
+        val intent = intent
+        val infoArrayList:ArrayList<HashMap<String,String>>
                 = intent.getStringArrayListExtra(INTENTNOW)as ArrayList<HashMap<String,String>>
-        var date = intent.getStringExtra(IntentMyNowYMd)
-        var time = intent.getStringExtra(IntentMyNowHms)
-        var b = intent.getByteArrayExtra(GetScreenShot)
-        var SSB = BitmapFactory.decodeByteArray(b, 0, b.size);
+        val date = intent.getStringExtra(IntentMyNowYMd)
+        val time = intent.getStringExtra(IntentMyNowHms)
+        val b = intent.getByteArrayExtra(GetScreenShot)
+//        val bs:ByteArrayOutputStream = ByteArrayOutputStream()
+//                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
+//                intent.putExtra(RecordActivity.GetScreenShot,bs.toByteArray())
+        var screenShot = BitmapFactory.decodeByteArray(b, 0, b.size);
         //        imageView_RecordTakePhoto.setImageBitmap(SSB)
-        Log.d(TAG, ": $infoArrayList");
-        Log.d(TAG, ": $date");
-        Log.d(TAG, ": $time");
-
-        val layoutManager = LinearLayoutManager(this)
-        layoutManager.orientation = LinearLayoutManager.VERTICAL
-        val data = findViewById<RecyclerView>(R.id.recyclerView_RecordData)
-        data.layoutManager = layoutManager
+        var edTime = findViewById<EditText>(R.id.editText_RecordTime)
+            edTime.setText("$date $time")
+        val layoutManager = StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL);
+        val recyclerView = findViewById<RecyclerView>(R.id.recyclerView_RecordData)
+        recyclerView.layoutManager = layoutManager
         val mAdapter = MyRecyclerView(infoArrayList)
+        recyclerView.adapter = mAdapter
 
-
-
-
+        val btRecordSave = findViewById<Button>(R.id.button_RecordSave)
+        val btRecordCancel = findViewById<Button>(R.id.button_RecordCancel)
+        btRecordSave.setOnClickListener {
+            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = date+time)
+        }
+        btRecordCancel.setOnClickListener {
+            finish()
+        }
     }
 
-    private var buttonSOnClick = View.OnClickListener {
-        var itemId = it.id
-
-        when(itemId){
-            R.id.button_RecordSave->{
-
-            }
-            R.id.button_RecordCancel->{
-                finish()
-            }
+    private fun saveData2DataBase(inforArray:ArrayList<HashMap<String,String>>
+                                  ,screenShot:ByteArray,dateTime:String){
+        val deivceName = Tools.sendData("Name",200,this,0)
+        val edName = findViewById<EditText>(R.id.editText_RecordName)
+        val edNote = findViewById<EditText>(R.id.editText_RecordNotes)
+        val imageView = findViewById<ImageView>(R.id.imageView_RecordTakePhoto)
+        val cameraBitmap = (imageView.drawable as BitmapDrawable).bitmap//拍照的
+        val cameraBs: ByteArrayOutputStream = ByteArrayOutputStream()//拍照的
+        cameraBitmap.compress(Bitmap.CompressFormat.JPEG,100,cameraBs)//拍照的
+        var camera = cameraBs.toByteArray()//拍照的
+        val json = Gson().toJson(inforArray)
+        if (edName.text.isEmpty()){
+            edName.setText("~!@#$%^&*()_+")
+        }
+        if (edNote.text.isEmpty()){
+            edNote.setText("~!@#$%^&*()_+")
         }
 
-    }
+        Thread{
+            DataBase.getInstance(this).dataUao.insertData(
+                deivceName[1],MyStatus.deviceType,edName.text.toString(),json,screenShot
+                ,"camera".toByteArray(),edNote.text.toString(),dateTime)
 
+        }.start()
+
+    }
     private fun takePicture() {
         var hasGone = checkSelfPermission(Manifest.permission.CAMERA)
         if (hasGone != PackageManager.PERMISSION_GRANTED) {
@@ -137,7 +160,6 @@ class RecordActivity : AppCompatActivity() {
                 }
             }
         }
-
     }
 
     @Throws(IOException::class)
@@ -154,37 +176,40 @@ class RecordActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (currentImagePath.isNotEmpty()){
-            val progress = findViewById<ContentLoadingProgressBar>(R.id.progress_horizontal)
-            progress.visibility = View.VISIBLE
-            progress.show()
-            Thread{
-                progress.progress = 0
-                val imageView = findViewById<ImageView>(R.id.imageView_RecordTakePhoto)
-                progress.progress = 10
-                var bitmap:AtomicReference<Bitmap> = AtomicReference(BitmapFactory.decodeFile(currentImagePath))
-                progress.progress = 40
-                var matrix = Matrix()
-                progress.progress = 60
-                matrix.setRotate(90f)
-                progress.progress = 80
-                SystemClock.sleep(200)
-                runOnUiThread {
+//        Log.d(TAG, ":$resultCode ");
+        if (requestCode == IMAGE_REQUEST && resultCode == -1){
+            if (currentImagePath.isNotEmpty()){
+                val progress = findViewById<ContentLoadingProgressBar>(R.id.progress_horizontal)
+                progress.visibility = View.VISIBLE
+                progress.show()
+                Thread{
+                    progress.progress = 0
+                    val imageView = findViewById<ImageView>(R.id.imageView_RecordTakePhoto)
+                    progress.progress = 10
+                    var bitmap:AtomicReference<Bitmap> = AtomicReference(BitmapFactory.decodeFile(currentImagePath))
+                    progress.progress = 40
+                    var matrix = Matrix()
+                    progress.progress = 60
+                    matrix.setRotate(90f)
+                    progress.progress = 80
+                    SystemClock.sleep(200)
                     bitmap.set(Bitmap.createBitmap(bitmap.get(), 0, 0, bitmap.get().width
                         , bitmap.get().height, matrix,
-                            true))
+                        true))
                     progress.progress = 100
-                    imageView.setImageBitmap(bitmap.get())
-                    progress.hide()
-                }
-            }.start()
-
-
+                    runOnUiThread {
+                        imageView.setImageBitmap(bitmap.get())
+                        progress.hide()
+                    }
+                }.start()
+            }
+        }else{
+            Toast.makeText(this,"未拍攝任何圖像",Toast.LENGTH_SHORT).show()
         }
     }
 
     private class MyRecyclerView(val mData:ArrayList<HashMap<String,String>>): RecyclerView.Adapter<MyRecyclerView.ViewHolder>() {
-
+        val TAG = RecordActivity::class.java.simpleName + "My"
         class ViewHolder (v:View): RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_item_RecordTitle)
             val tvPV = v.findViewById<TextView>(R.id.textView_item_RecordPV)
@@ -203,8 +228,13 @@ class RecordActivity : AppCompatActivity() {
             return mData.size
         }
 
+        @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-
+            var unit = Tools.setUnit(Tools.hex2Dec(mData[position][IntentGetOriginValue]!!.substring(12,14)).toInt())
+            holder.tvTitle.text ="${mData[position][IntentGetTitle]}:\n${mData[position][IntentGetValue]+unit}"
+            holder.tvPV.text ="補正: ${mData[position][IntentPVValue]}"
+            holder.tvEH.text ="上限: ${mData[position][IntentEHValue]}"
+            holder.tvEL.text ="下限: ${mData[position][IntentELValue]}"
         }
     }
 }

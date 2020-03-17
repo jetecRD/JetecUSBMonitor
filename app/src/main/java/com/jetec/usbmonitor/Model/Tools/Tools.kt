@@ -371,10 +371,10 @@ class Tools() {
                     return id2String(activity, R.string.Humidity)
                 }//
                 12 -> {
-                    return id2String(activity, R.string.CO)
+                    return id2String(activity, R.string.CO2)
                 }//
                 13 -> {
-                    return id2String(activity, R.string.CO2)
+                    return id2String(activity, R.string.CO)
                 }//
                 14 -> {
                     return id2String(activity, R.string.PM2_5)

@@ -47,4 +47,21 @@ dependencies {
 
     implementation 'com.github.clans:fab:1.6.4'
     //https://github.com/Clans/FloatingActionButton
+
+    implementation 'com.facebook.stetho:stetho:1.5.1'
+    //https://github.com/facebook/stetho
+
+    implementation 'com.google.code.gson:gson:2.8.6'//使用GSON,來源->
+    // https://github.com/google/gson
+
+    //Room資料庫
+    def room_version = "2.2.1"
+    def lifecycle_version = "2.2.0"
+
+    implementation "androidx.room:room-runtime:$room_version"
+    annotationProcessor "androidx.room:room-compiler:$room_version"
+    androidTestImplementation "androidx.room:room-testing:$room_version"
+    // Lifecycle components
+    implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
+    annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
 }
