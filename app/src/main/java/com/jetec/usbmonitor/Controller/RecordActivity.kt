@@ -3,6 +3,7 @@ package com.jetec.usbmonitor.Controller
 //import kotlinx.android.synthetic.main.activity_record.*
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -11,8 +12,10 @@ import android.graphics.Matrix
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Environment
+import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -97,7 +100,7 @@ class RecordActivity : AppCompatActivity() {
         val btRecordSave = findViewById<Button>(R.id.button_RecordSave)
         val btRecordCancel = findViewById<Button>(R.id.button_RecordCancel)
         btRecordSave.setOnClickListener {
-            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = date+time)
+            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = "$date#$time")
         }
         btRecordCancel.setOnClickListener {
             finish()
@@ -106,26 +109,40 @@ class RecordActivity : AppCompatActivity() {
 
     private fun saveData2DataBase(inforArray:ArrayList<HashMap<String,String>>
                                   ,screenShot:ByteArray,dateTime:String){
-        val deivceName = Tools.sendData("Name",200,this,0)
+        val deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
+        val deivceName = Tools.sendData("Name",200,this,1)
+//        Log.d(TAG, ":$deivceUUID ");
+//        Log.d(TAG, ":$deivceName ");
         val edName = findViewById<EditText>(R.id.editText_RecordName)
         val edNote = findViewById<EditText>(R.id.editText_RecordNotes)
         val imageView = findViewById<ImageView>(R.id.imageView_RecordTakePhoto)
-        val cameraBitmap = (imageView.drawable as BitmapDrawable).bitmap//拍照的
-        val cameraBs: ByteArrayOutputStream = ByteArrayOutputStream()//拍照的
-        cameraBitmap.compress(Bitmap.CompressFormat.JPEG,100,cameraBs)//拍照的
-        var camera = cameraBs.toByteArray()//拍照的
+//        val cameraBitmap = (imageView.drawable as BitmapDrawable).bitmap//拍照的
+//        val cameraBs: ByteArrayOutputStream = ByteArrayOutputStream()//拍照的
+//        cameraBitmap.compress(Bitmap.CompressFormat.JPEG,100,cameraBs)//拍照的
+//        var camera = cameraBs.toByteArray()//拍照的
         val json = Gson().toJson(inforArray)
-        if (edName.text.isEmpty()){
-            edName.setText("~!@#$%^&*()_+")
-        }
-        if (edNote.text.isEmpty()){
-            edNote.setText("~!@#$%^&*()_+")
-        }
+        var nameString = edName.text.toString()
+        var noteString = edNote.text.toString()
 
+        var dialog = ProgressDialog.show(this,"存取中","請稍後",true)
         Thread{
             DataBase.getInstance(this).dataUao.insertData(
-                deivceName[1],MyStatus.deviceType,edName.text.toString(),json,screenShot
-                ,"camera".toByteArray(),edNote.text.toString(),dateTime)
+                deivceUUID[0]
+                ,deivceName[1].substring(4)
+                ,MyStatus.deviceType
+                ,nameString
+                ,json
+                ,screenShot
+                ,currentImagePath
+                ,noteString
+                ,dateTime)
+            runOnUiThread{
+                dialog.dismiss()
+                finish()
+            }
+            Looper.prepare()
+            Toast.makeText(this,"儲存成功",Toast.LENGTH_LONG).show()
+            Looper.loop()
 
         }.start()
 
@@ -237,5 +254,6 @@ class RecordActivity : AppCompatActivity() {
             holder.tvEL.text ="下限: ${mData[position][IntentELValue]}"
         }
     }
+
 }
 

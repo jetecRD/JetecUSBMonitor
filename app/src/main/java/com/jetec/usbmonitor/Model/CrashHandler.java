@@ -78,7 +78,7 @@ public class CrashHandler implements Thread.UncaughtExceptionHandler{
             return;
         }
 
-        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date());
+        String time = new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date());
         File file = new File(PATH + File.separator + time +mContext.getString(R.string.app_name)+ FILE_NAME_SUFFIX);
 
         try

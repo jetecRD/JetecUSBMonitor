@@ -9,13 +9,14 @@ public class Data {
 
     @PrimaryKey(autoGenerate = true)
     private int id;//id
-    private String deviceUUID;//裝置ID
-    private String deviceType;//裝置型號
+    private String deviceUUID;//裝置ID(跟裝置跑的)
+    private String deviceName;//裝置名字(跟裝置跑的)
+    private String deviceType;//裝置型號(跟裝置跑的)
     private String name;//記錄人名字
     private String json_MySave;//當下的儲存值
 
     private byte[] screenShot;//螢幕截圖
-    private byte[] takeImage;//自己拍的
+    private String takeImage;//自己拍的(存路徑)
     private String note;//備註欄
 
     private String dateTime;//紀錄時間
@@ -60,11 +61,11 @@ public class Data {
         this.screenShot = screenShot;
     }
 
-    public byte[] getTakeImage() {
+    public String getTakeImage() {
         return takeImage;
     }
 
-    public void setTakeImage(byte[] takeImage) {
+    public void setTakeImage(String takeImage) {
         this.takeImage = takeImage;
     }
 
@@ -90,5 +91,13 @@ public class Data {
 
     public void setDeviceUUID(String deviceUUID) {
         this.deviceUUID = deviceUUID;
+    }
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
     }
 }
