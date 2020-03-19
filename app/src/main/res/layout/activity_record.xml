@@ -22,7 +22,7 @@
             android:id="@+id/textView_toolBarTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="紀錄當前資料"
+            android:text="@string/record_data"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textSize="20dp" />
     </androidx.appcompat.widget.Toolbar>
@@ -93,7 +93,7 @@
             android:layout_weight="1"
             android:background="@drawable/roundlayout_for_record_button"
             android:backgroundTint="#F44336"
-            android:text="save"
+            android:text="@string/save"
             android:textColor="@android:color/white"
             android:textSize="18dip" />
     </LinearLayout>
@@ -104,7 +104,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="將存入的資料:"
+        android:text="@string/write_data"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textSize="18sp"
         app:layout_constraintStart_toStartOf="parent"
@@ -153,7 +153,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="記錄人"
+                    android:text="@string/recorder"
+                    android:textColor="@android:color/background_dark"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body1"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -171,7 +172,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="24dp"
                     android:layout_marginEnd="8dp"
-                    android:hint="請輸入名字"
+                    android:hint="@string/please_input"
                     android:singleLine="true"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/guideline7"
@@ -183,7 +184,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
                     android:layout_marginTop="8dp"
-                    android:text="紀錄時間"
+                    android:text="@string/date_time"
                     android:textAppearance="@style/TextAppearance.AppCompat.Body2"
                     app:layout_constraintStart_toStartOf="@+id/guideline7"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -215,7 +216,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
-                android:text="備註欄"
+                android:text="@string/note"
+                android:textColor="@android:color/background_dark"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
 

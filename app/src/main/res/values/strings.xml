@@ -46,5 +46,18 @@
     <string name="progressDialogMessage">Please wait..</string>
     <string name="factoryResetCheckMessage">It will RESET all of custom setting,continue?</string>
     <string name="noSensorHint">Need pull in sensor</string>
+    <string name="unfilled">unfilled</string>
+    <string name="tester">Tester</string>
+    <string name="deviceId">"Device ID: "</string>
+    <string name="deviceName">"Device Name: "</string>
+    <string name="measureTime">"Measure time: "</string>
+    <string name="measureValue">"Measure value: "</string>
+    <string name="write_data">Write data</string>
+    <string name="recorder">Recorder:</string>
+    <string name="date_time">Date-Time</string>
+    <string name="note">Note</string>
+    <string name="please_input">Please input...</string>
+    <string name="record_data">Record Data</string>
+    <string name="save">save</string>
 
 </resources>

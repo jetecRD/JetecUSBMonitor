@@ -57,6 +57,9 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.11.0'//Glide圖片加載
     // https://github.com/bumptech/glide
 
+    implementation 'com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1'//RecyclerView側滑出現選單
+    //https://github.com/chthai64/SwipeRevealLayout
+
     //Room資料庫
     def room_version = "2.2.1"
     def lifecycle_version = "2.2.0"

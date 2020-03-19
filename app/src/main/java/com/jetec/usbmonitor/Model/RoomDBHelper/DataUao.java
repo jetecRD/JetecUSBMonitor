@@ -34,5 +34,7 @@ public interface DataUao {
     @Query("SELECT * FROM "+tableName+" WHERE deviceUUID = :deviceUUID")
         List<Data> searchByUUID(String deviceUUID);
 
+    @Query("DELETE  FROM "+tableName+" WHERE id = :id")
+    void deleteByID(int id);
 
 }

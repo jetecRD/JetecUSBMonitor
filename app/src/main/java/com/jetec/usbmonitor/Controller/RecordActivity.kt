@@ -232,6 +232,7 @@ class RecordActivity : AppCompatActivity() {
             val tvPV = v.findViewById<TextView>(R.id.textView_item_RecordPV)
             val tvEH = v.findViewById<TextView>(R.id.textView_item_RecordEH)
             val tvEL = v.findViewById<TextView>(R.id.textView_item_RecordEL)
+            val parent = v
 
         }
 
@@ -249,9 +250,10 @@ class RecordActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             var unit = Tools.setUnit(Tools.hex2Dec(mData[position][IntentGetOriginValue]!!.substring(12,14)).toInt())
             holder.tvTitle.text ="${mData[position][IntentGetTitle]}:\n${mData[position][IntentGetValue]+unit}"
-            holder.tvPV.text ="補正: ${mData[position][IntentPVValue]}"
-            holder.tvEH.text ="上限: ${mData[position][IntentEHValue]}"
-            holder.tvEL.text ="下限: ${mData[position][IntentELValue]}"
+            val context=  holder.parent.context
+            holder.tvPV.text =context.getString(R.string.PV)+": "+ mData[position][IntentPVValue]
+            holder.tvEH.text = context.getString(R.string.EH)+": " + mData[position][IntentEHValue]
+            holder.tvEL.text = context.getString(R.string.EL)+": "+ mData[position][IntentELValue]
         }
     }
 

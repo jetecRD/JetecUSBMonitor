@@ -1,17 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.chauthai.swipereveallayout.SwipeRevealLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    app:dragEdge="right"
+    app:mode="same_level"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:layout_gravity="center_horizontal"
+    android:id="@+id/swipe_layout"
+    >
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:orientation="vertical">
+
+
+        <Button
+            android:id="@+id/button_RH_Delete"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#FD5454"
+            android:text="刪除"
+            android:textColor="@android:color/background_light" />
+
+        <Button
+            android:id="@+id/button_RH_Review"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#5869C8"
+            android:textColor="@android:color/background_light"
+            android:text="檢視" />
+
+        <Button
+            android:id="@+id/button_RH_Modify"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:backgroundTint="#4DA251"
+            android:textColor="@android:color/background_light"
+            android:text="修改" />
+    </LinearLayout>
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="5dp"
-        android:padding="10dp"
-        app:cardCornerRadius="15dp"
-        app:cardElevation="7dp"
+        android:layout_margin="10dp"
+        app:cardCornerRadius="1dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -70,76 +109,23 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="8dp"
-                android:text="測量數值:"
+                android:text="@string/measureValue"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView_RH_Time" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView_RH_child"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
+                android:layout_marginStart="32dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/guideline17"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/textView19" />
-
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/guideline17"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.8" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="@+id/guideline17"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <Button
-                    android:id="@+id/button_RH_Look"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/roundforlayout_for_setting_dialog_background"
-                    android:backgroundTint="#2196F3"
-                    android:text="檢視"
-                    android:textColor="?attr/colorBackgroundFloating" />
-
-                <Button
-                    android:id="@+id/button_RH_Modify"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/roundforlayout_for_setting_dialog_background"
-                    android:backgroundTint="#4CAF50"
-                    android:padding="10dp"
-                    android:text="修改"
-                    android:textColor="?attr/colorBackgroundFloating" />
-
-                <Button
-                    android:id="@+id/button_RH_Delete"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/roundforlayout_for_setting_dialog_background"
-                    android:backgroundTint="#F44336"
-                    android:padding="10dp"
-                    android:text="刪除"
-                    android:textColor="?attr/colorBackgroundFloating" />
-            </LinearLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</com.chauthai.swipereveallayout.SwipeRevealLayout>
