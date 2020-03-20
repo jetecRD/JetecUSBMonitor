@@ -14,8 +14,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
+import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -34,6 +36,7 @@ import java.sql.RowId
 class ConnectStatusActivity : AppCompatActivity() {
     val TAG: String = ConnectStatusActivity::class.java.simpleName + "my"
     val ACTION_USB_PERMISSION: String = "com.jetec.usbmonitor"
+    lateinit var btGoHistory:Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,13 +47,18 @@ class ConnectStatusActivity : AppCompatActivity() {
             WindowManager.LayoutParams.FLAG_FULLSCREEN
         )
         setContentView(R.layout.activity_connect_status)
+        btGoHistory = findViewById(R.id.button_Start2History)
+        btGoHistory.setOnClickListener {
+            val intent = Intent(this,RecordHistoryActivity::class.java)
+            startActivity(intent)
+        }
         val filter = IntentFilter()
         filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED)
         filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED)
         filter.addAction(ACTION_USB_PERMISSION)
         registerReceiver(usbStatus, filter)
         val tvTitle = findViewById<TextView>(R.id.textView_Title)
-        tvTitle.setTypeface(Typeface.createFromAsset(this.assets, "segoe_print.ttf"))//設置字形
+        tvTitle.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")//設置字形
 
         val intent = intent
         var status: Boolean = intent.getBooleanExtra("ConnectedStatus", false)
@@ -127,6 +135,7 @@ class ConnectStatusActivity : AppCompatActivity() {
 
     /**已插入裝置但未認證時的畫面*/
     private fun isConnectedAction() {
+        btGoHistory.visibility = View.GONE
         val constraintBack = findViewById<ConstraintLayout>(R.id.constraintBack)
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         constraintBack.setBackgroundResource(R.drawable.background_y)
@@ -135,6 +144,7 @@ class ConnectStatusActivity : AppCompatActivity() {
 
     /**未插入裝置畫面*/
     private fun disConnectedAction() {
+        btGoHistory.visibility = View.VISIBLE
         val constraintBack = findViewById<ConstraintLayout>(R.id.constraintBack)
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         constraintBack.setBackgroundResource(R.drawable.background_r)
@@ -144,6 +154,7 @@ class ConnectStatusActivity : AppCompatActivity() {
 
     /**已通過認證後的行為*/
     private fun isSuccessConnectedAction() {
+        btGoHistory.visibility = View.GONE
         val constraintBack = findViewById<ConstraintLayout>(R.id.constraintBack)
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         constraintBack.setBackgroundResource(R.drawable.background_g)

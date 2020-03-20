@@ -20,6 +20,7 @@ public interface DataUao {
 
     @Query("INSERT INTO "+tableName+"(deviceUUID,deviceName,deviceType,name,json_MySave,screenShot,takeImage,note,dateTime) " +
             "VALUES (:deviceUUID,:deviceName,:deviceType,:name,:json_MySave,:screenShot,:takeImage,:note,:dateTime)")
+
     void insertData(
             @NotNull String deviceUUID
             ,@NotNull String deviceName
@@ -36,5 +37,8 @@ public interface DataUao {
 
     @Query("DELETE  FROM "+tableName+" WHERE id = :id")
     void deleteByID(int id);
+
+    @Query("SELECT * FROM "+tableName+" WHERE id = :id")
+    List<Data> searchById(int id);
 
 }

@@ -61,7 +61,6 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        Stetho.initializeWithDefaults(this)
         CrashHandler.getInstance().init(this)
         initSetValue()//初始設置
         setMenu()//設置標題列
@@ -502,9 +501,9 @@ class MainActivity : AppCompatActivity() {
 
     /**設置標題列*/
     private fun setMenu() {
-        val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
+        val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar_RecordActivity)
         toolBar.inflateMenu(R.menu.menu_layout)
-        val tvToolBar = findViewById<TextView>(R.id.textView_toolBarTitle)
+        val tvToolBar = findViewById<TextView>(R.id.textView_RecordToolBarTitle)
         tvToolBar.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")
 
         toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
@@ -550,7 +549,7 @@ class MainActivity : AppCompatActivity() {
     /**週期進到onStop時若有開啟自動偵測則關閉之*/
     override fun onStop() {
         super.onStop()
-        val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar)
+        val toolBar = findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolBar_RecordActivity)
         MyStatus.autoMeasurement = false
         toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
         autoMeasure()

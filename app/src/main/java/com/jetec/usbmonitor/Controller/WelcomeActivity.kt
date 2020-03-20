@@ -16,6 +16,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.facebook.stetho.Stetho
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
@@ -36,6 +37,7 @@ class WelcomeActivity : AppCompatActivity() {
         CrashHandler.getInstance().init(this)
         Tools.cleanStatic()
         setContentView(R.layout.activity_welcome)
+        Stetho.initializeWithDefaults(this)
         setGif()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)

@@ -9,6 +9,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.graphics.Typeface
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Environment
@@ -17,6 +18,7 @@ import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
@@ -72,10 +74,27 @@ class RecordActivity : AppCompatActivity() {
         Stetho.initializeWithDefaults(this)
         getIntentValue()
         takePicture()
+        setMenu()
 
     }
-
-
+    private fun setMenu() {
+        val tvToolBarTitle = findViewById<TextView>(R.id.textView_RecordToolBarTitle)
+        tvToolBarTitle.typeface = Typeface
+            .createFromAsset(this.assets, "segoe_print.ttf")
+        var mToolbar = findViewById<androidx.appcompat
+        .widget.Toolbar>(R.id.toolBar_RecordActivity)
+        mToolbar.title = ""
+        setSupportActionBar(mToolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+    }
+    /**ToolBar的內容物點擊*/
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if (item.itemId == android.R.id.home) {
+            finish()
+            return true
+        }
+        return super.onOptionsItemSelected(item)
+    }
     @SuppressLint("SetTextI18n")
     private fun getIntentValue() {
         val intent = intent
