@@ -41,4 +41,11 @@ public interface DataUao {
     @Query("SELECT * FROM "+tableName+" WHERE id = :id")
     List<Data> searchById(int id);
 
+    @Query("UPDATE "+tableName+" SET name=:name ,takeImage=:takeImage ,note = :note WHERE id = :id")
+    void updateData(
+            @NotNull int id,
+            @Nullable String name,
+            @Nullable String takeImage,
+            @Nullable String note);
+
 }

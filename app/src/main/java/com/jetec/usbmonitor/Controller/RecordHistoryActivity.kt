@@ -34,10 +34,14 @@ import org.json.JSONArray
 
 class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
+
     companion object{
         val RESULT_CODE = 1
+        const val IMAGE_REQUEST = 100
+        const val REQUEST_FINE_LOCATION_PERMISSION = 101;
 
     }
+    lateinit var imageView: ImageView
 
     private lateinit var mAdapter: MyAdapter
 
@@ -46,7 +50,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_record_history)
         CrashHandler.getInstance().init(this)
         setMenu()
-
+        /**讀取DB內資料*/
         var dialog = ProgressDialog.show(this, "", "讀取中...", true)
         Thread {
             val savedData: MutableList<Data> = DataBase.getInstance(this).dataUao.allData
@@ -89,7 +93,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-
+    /**設置使用者碰到螢幕後要做的事*/
     override fun onTouchEvent(event: MotionEvent?): Boolean {
         val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
         if (event!!.action >=0 && floatMenu.isOpened){
@@ -110,7 +114,16 @@ class RecordHistoryActivity : AppCompatActivity() {
             this.data = data
             this.activity = activity
         }
+        public fun updateList(){
+            Thread{
+                data = DataBase.getInstance(activity).dataUao.allData
+                activity.runOnUiThread{
+                    notifyDataSetChanged()
+                }
+            }.start()
 
+
+        }
 
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_RH_Title)
@@ -143,12 +156,13 @@ class RecordHistoryActivity : AppCompatActivity() {
             setClick(holder, position, holder.parent.context)//設置點擊事件(們)
 
         }
-
+        /**設置RecyclerView按鈕內的點擊事件*/
         private fun setClick(
             holder: ViewHolder,
             position: Int,
             context: Context
         ) {
+            /**刪除*/
             holder.btDelete.setOnClickListener {
                 holder.swipeLayout.close(true)
                 val builder = AlertDialog.Builder(context)
@@ -166,7 +180,7 @@ class RecordHistoryActivity : AppCompatActivity() {
                     .setNegativeButton(context.getString(R.string.cancelButton), null)
                     .show()
             }//onC1
-
+            /**檢視*/
             holder.btReview.setOnClickListener {
                 val intent = Intent(activity, ReviewDataActivity::class.java)
                 intent.putExtra("searchID", data[position].id)
@@ -174,16 +188,17 @@ class RecordHistoryActivity : AppCompatActivity() {
                 holder.swipeLayout.close(true)
 
             }//onC2
+            /**修改*/
             holder.btModify.setOnClickListener {
                 val id = data[position].id
                 val intent = Intent(activity,ModifyHistoryDataActivity::class.java)
                 intent.putExtra("position",id)
-                Log.d(TAG, ":GO ");
                 activity.startActivityForResult(intent,RESULT_CODE)
+                holder.swipeLayout.close(true)
 
             }//onC3
         }
-
+        /**填入數值*/
         private fun setValue(
             holder: ViewHolder,
             position: Int
@@ -215,7 +230,7 @@ class RecordHistoryActivity : AppCompatActivity() {
                 .into(holder.igPicture)
 
         }
-
+        /**設置第二個RecyclerView*/
         private fun setSecondRecyclerView(
             position: Int,
             holder: ViewHolder
@@ -249,18 +264,15 @@ class RecordHistoryActivity : AppCompatActivity() {
 
                 holder.recyclerChild.adapter = cAdapter
             }
-
-
         }
-
-
     }
-
+    /**回傳修改後的值*/
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        Log.d(TAG, ":$requestCode $resultCode ${data?.getStringExtra("RESULT")} ");
+//        Log.d(TAG, ":$requestCode $resultCode ${data?.getStringExtra("RESULT")} ");
         if (requestCode == RESULT_CODE&&resultCode == 1){
-
+            val id = data?.getIntExtra("modifiedIndex",0)
+            mAdapter.updateList()
         }
     }
 
@@ -306,4 +318,6 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         }
     }
+
+
 }
