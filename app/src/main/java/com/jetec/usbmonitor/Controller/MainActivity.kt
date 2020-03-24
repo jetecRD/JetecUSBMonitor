@@ -1,6 +1,7 @@
 package com.jetec.usbmonitor.Controller
 
 import android.app.PendingIntent
+import android.app.ProgressDialog
 import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -10,11 +11,10 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.Typeface
+import android.hardware.camera2.params.RecommendedStreamConfigurationMap
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.os.Vibrator
+import android.os.*
 import android.util.Log
 import android.view.*
 import android.view.animation.Animation
@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.facebook.stetho.Stetho
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
+import com.google.gson.Gson
 import com.hoho.android.usbserial.driver.CdcAcmSerialDriver
 import com.hoho.android.usbserial.driver.ProbeTable
 import com.hoho.android.usbserial.driver.UsbSerialDriver
@@ -38,6 +39,7 @@ import com.jetec.usbmonitor.Model.AnalysisValueInfo
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.DeviceValue
+import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
@@ -82,6 +84,7 @@ class MainActivity : AppCompatActivity() {
 
 
     }//onCreate
+
     /**跳轉後載入介面*/
     private fun initSetValue() {
 
@@ -108,64 +111,131 @@ class MainActivity : AppCompatActivity() {
         dataList.adapter = mAdapter
 
     }
+
     /**設置FloatButton*/
     private fun setFloatButton() {
         val fbFlashSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_flash)
         val fbSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_normalSave)
-
+        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
         fbFlashSave.setOnClickListener {
+            floatMenu.close(true)
+            if (mValue.size != 0) {
+
+                var dialog = ProgressDialog.show(
+                    this, ""
+                    , getString(R.string.pleaseWait), true
+                )
+                Thread {
+
+                    SystemClock.sleep(300)
+                    val bs: ByteArrayOutputStream = ByteArrayOutputStream()
+                    getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+
+                    val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
+                    val now = Date()
+                    val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+                    var arrayArray = returnValueList()
+                    var deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
+                    var deivceName = Tools.sendData("Name",200,this,1)
+                    while (deivceName.isEmpty()){
+                        deivceName = Tools.sendData("Name",200,this,1)
+                    }
+                    while (deivceUUID.isEmpty()){
+                        deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
+                    }
+
+
+                    val json = Gson().toJson(arrayArray)
+                    val timeDate = "${sdfyMd.format(now)}#${tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)}"
+
+
+                    Log.d(TAG, ":$timeDate ");
+                    DataBase.getInstance(this).dataUao.insertData(
+                        deivceUUID[0],
+                        deivceName[1].substring(4),
+                        MyStatus.deviceType,
+                        "",
+                        json,
+                        bs.toByteArray(),
+                        "",
+                        getString(R.string.flashSavetoNote),
+                        timeDate
+                    )
+
+                    dialog.dismiss()
+                    Looper.prepare()
+                    Toast.makeText(this,getString(R.string.succesSaved),Toast.LENGTH_SHORT).show()
+                    Looper.loop()
+
+                }.start()
+
+
+            } else {
+                Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+            }
 
 
         }
         fbSave.setOnClickListener {
-
+            floatMenu.close(true)
             if (mValue.size != 0) {
+                Thread {
+                    SystemClock.sleep(300)
+                    val bs: ByteArrayOutputStream = ByteArrayOutputStream()
+                    getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                    var arrayArray = returnValueList()
 
-                var arrayArray = ArrayList<HashMap<String, String>>()
-                for (i in 0 until mValue.size) {
-                    var hashMap = HashMap<String, String>()
-                    var displayDouble =
-                        mValue[i].getmValue().toDouble() + mSetting[i].getPVValue()
-                            .toDouble()
-                    hashMap[RecordActivity.IntentGetTitle] = mValue[i].getLabel()
-                    hashMap[RecordActivity.IntentGetValue] = Tools.getDecDisplay(mValue[i].getDP())
-                        .format(displayDouble)
-                    hashMap[RecordActivity.IntentGetOriginValue] = mValue[i].getOriginValue()
+                    val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
+                    val now = Date()
+                    val intent = Intent(this, RecordActivity::class.java)
+                    /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
 
-                    hashMap[RecordActivity.IntentPVValue] = mSetting[i].getPVValue()
-                    hashMap[RecordActivity.GetPVOrigin] = mSetting[i].getPVOrigin()
+                    intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
+                    intent.putExtra(RecordActivity.IntentMyNowYMd, sdfyMd.format(now))
+                    val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+                    intent.putExtra(
+                        RecordActivity.IntentMyNowHms, tvTimeinfo.text
+                            .substring(tvTimeinfo.text.indexOf("\n") + 1)
+                    )
 
-                    hashMap[RecordActivity.IntentEHValue] = mSetting[i].getEHValue()
-                    hashMap[RecordActivity.GetEHOrigin] = mSetting[i].getEHOrigin()
-
-                    hashMap[RecordActivity.IntentELValue] = mSetting[i].getELValue()
-                    hashMap[RecordActivity.GetELOrigin] = mSetting[i].getELValue()
-
-                    arrayArray.add(hashMap)
-                }
-
-                val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
-                val now = Date()
-                val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
-                val intent = Intent(this,RecordActivity::class.java)
-                /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
-                floatMenu.close(true)
-                intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
-                intent.putExtra(RecordActivity.IntentMyNowYMd,sdfyMd.format(now))
-                val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
-                intent.putExtra(RecordActivity.IntentMyNowHms,tvTimeinfo.text
-                    .substring(tvTimeinfo.text.indexOf("\n")+1))
-
-                val bs:ByteArrayOutputStream = ByteArrayOutputStream()
-                 getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
-                intent.putExtra(RecordActivity.GetScreenShot,bs.toByteArray())
-                startActivity(intent)
+                    intent.putExtra(RecordActivity.GetScreenShot, bs.toByteArray())
+                    runOnUiThread {
+                        startActivity(intent)
+                    }
+                }.start()
 
             } else {
                 Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
             }
 
         }
+    }
+
+    /**紀錄時取得值的基本資訊*/
+    private fun returnValueList(): ArrayList<HashMap<String, String>> {
+        var arrayArray = ArrayList<HashMap<String, String>>()
+        for (i in 0 until mValue.size) {
+            var hashMap = HashMap<String, String>()
+            var displayDouble =
+                mValue[i].getmValue().toDouble() + mSetting[i].getPVValue()
+                    .toDouble()
+            hashMap[RecordActivity.IntentGetTitle] = mValue[i].getLabel()
+            hashMap[RecordActivity.IntentGetValue] = Tools.getDecDisplay(mValue[i].getDP())
+                .format(displayDouble)
+            hashMap[RecordActivity.IntentGetOriginValue] = mValue[i].getOriginValue()
+
+            hashMap[RecordActivity.IntentPVValue] = mSetting[i].getPVValue()
+            hashMap[RecordActivity.GetPVOrigin] = mSetting[i].getPVOrigin()
+
+            hashMap[RecordActivity.IntentEHValue] = mSetting[i].getEHValue()
+            hashMap[RecordActivity.GetEHOrigin] = mSetting[i].getEHOrigin()
+
+            hashMap[RecordActivity.IntentELValue] = mSetting[i].getELValue()
+            hashMap[RecordActivity.GetELOrigin] = mSetting[i].getELValue()
+
+            arrayArray.add(hashMap)
+        }
+        return arrayArray
     }
 
     private fun getScreenShot(): Bitmap? {
@@ -495,8 +565,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 
 
     /**設置標題列*/

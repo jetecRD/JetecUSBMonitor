@@ -143,7 +143,8 @@ class RecordActivity : AppCompatActivity() {
         var nameString = edName.text.toString()
         var noteString = edNote.text.toString()
 
-        var dialog = ProgressDialog.show(this,"存取中","請稍後",true)
+        var dialog = ProgressDialog.show(this,getString(R.string.saving),getString(R.string.pleaseWait),true)
+        dialog.setCancelable(true)
         Thread{
             DataBase.getInstance(this).dataUao.insertData(
                 deivceUUID[0]
@@ -160,7 +161,7 @@ class RecordActivity : AppCompatActivity() {
                 finish()
             }
             Looper.prepare()
-            Toast.makeText(this,"儲存成功",Toast.LENGTH_LONG).show()
+            Toast.makeText(this,getString(R.string.succesSaved),Toast.LENGTH_LONG).show()
             Looper.loop()
 
         }.start()
@@ -240,7 +241,7 @@ class RecordActivity : AppCompatActivity() {
                 }.start()
             }
         }else{
-            Toast.makeText(this,"未拍攝任何圖像",Toast.LENGTH_SHORT).show()
+            Toast.makeText(this,getString(R.string.noImageWasTaken),Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -264,6 +265,7 @@ class RecordActivity : AppCompatActivity() {
         override fun getItemCount(): Int {
             return mData.size
         }
+
 
         @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {

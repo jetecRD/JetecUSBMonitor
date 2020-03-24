@@ -15,6 +15,7 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -52,18 +53,54 @@ class RecordHistoryActivity : AppCompatActivity() {
         setMenu()
         /**讀取DB內資料*/
         var dialog = ProgressDialog.show(this, "", "讀取中...", true)
+        dialog.setCancelable(true)
         Thread {
             val savedData: MutableList<Data> = DataBase.getInstance(this).dataUao.allData
+
+            var arrayTotal = ArrayList<ArrayList<HashMap<String,String>>> ()
+            for (i in 0 until savedData.size){//表示有幾個儲存
+                var arrayList = ArrayList<HashMap<String,String>>()
+                var jsonArray = JSONArray(savedData[i].json_MySave)
+                for (x in 0 until jsonArray.length()){//分解json的內容
+                   val jsonObject = jsonArray.getJSONObject(x)
+                    val hashMap = HashMap<String, String>()
+                    val strValue = jsonObject.getString("value")
+                    val strPV = jsonObject.getString("PV")
+                    val strEH = jsonObject.getString("EH")
+                    val strEL = jsonObject.getString("EL")
+                    val strTitle = jsonObject.getString("Title")
+                    val strOrigin = jsonObject.getString("Origin")
+                    hashMap["value"] = strValue
+                    hashMap["PV"] = strPV
+                    hashMap["EH"] = strEH
+                    hashMap["EL"] = strEL
+                    hashMap["Title"] = strTitle
+                    hashMap["Origin"] = strOrigin
+                    arrayList.add(hashMap)
+                }
+                arrayTotal.add(arrayList)
+            }
+
             val layoutManager = LinearLayoutManager(this)
             layoutManager.orientation = LinearLayoutManager.VERTICAL
             val recycler = findViewById<RecyclerView>(R.id.recyclerView_RecordHistoryDisplay)
             layoutManager.recycleChildrenOnDetach = true
             recycler.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
             recycler.layoutManager = layoutManager
-            dialog.setCancelable(true)
-            mAdapter = MyAdapter(savedData, this)
+            recycler.addOnScrollListener(object: RecyclerView.OnScrollListener(){
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    val floatingActionMenu
+                            = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+                    if (isSlideToBottom(recyclerView)){
+                        floatingActionMenu.hideMenu(true)
+                    }else floatingActionMenu.showMenu(true)
+                }
+            })
+            recycler.isNestedScrollingEnabled = false
+            mAdapter = MyAdapter(savedData, this,arrayTotal)
             runOnUiThread {
-
+                mAdapter.setHasStableIds(false)
                 recycler.adapter = mAdapter
             }
             SystemClock.sleep(1000)
@@ -72,7 +109,13 @@ class RecordHistoryActivity : AppCompatActivity() {
         }.start()
 
     }
-
+    fun isSlideToBottom(recyclerView: RecyclerView):Boolean{
+        if (recyclerView == null) return false
+        if (recyclerView.computeVerticalScrollExtent() +
+            recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange())
+            return true
+        return false
+    }
 
     /**設置標題列*/
     private fun setMenu() {
@@ -83,6 +126,16 @@ class RecordHistoryActivity : AppCompatActivity() {
         mToolbar.title = ""
         setSupportActionBar(mToolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+    }
+    /**設置使用者碰到螢幕後要做的事*/
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+
+        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+        if (ev!!.action >=0 && floatMenu.isOpened){
+            floatMenu.close(true)
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     /**ToolBar的內容物點擊*/
@@ -93,14 +146,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
-    /**設置使用者碰到螢幕後要做的事*/
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
-        if (event!!.action >=0 && floatMenu.isOpened){
-            floatMenu.close(true)
-        }
-        return super.onTouchEvent(event)
-    }
+
 
     /**第一個RecyclerView*/
     private class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
@@ -109,10 +155,12 @@ class RecordHistoryActivity : AppCompatActivity() {
         private var data: MutableList<Data>
         private val binderHelper = ViewBinderHelper()
         private val activity: Activity
+        private val arrayList:ArrayList<ArrayList<HashMap<String,String>>>
 
-        constructor(data: MutableList<Data>, activity: Activity) : super() {
+        constructor(data: MutableList<Data>, activity: Activity,arrayList:ArrayList<ArrayList<HashMap<String,String>>>) : super() {
             this.data = data
             this.activity = activity
+            this.arrayList = arrayList
         }
         public fun updateList(){
             Thread{
@@ -145,8 +193,21 @@ class RecordHistoryActivity : AppCompatActivity() {
             return ViewHolder(view)
         }
 
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
+
         override fun getItemCount(): Int {
             return data.size
+        }
+
+        override fun getItemViewType(position: Int): Int {
+            return position
+        }
+
+        override fun onViewDetachedFromWindow(holder: ViewHolder) {
+            super.onViewDetachedFromWindow(holder)
+            holder.setIsRecyclable(false)
         }
 
         @SuppressLint("SetTextI18n")
@@ -230,40 +291,24 @@ class RecordHistoryActivity : AppCompatActivity() {
                 .into(holder.igPicture)
 
         }
+
         /**設置第二個RecyclerView*/
         private fun setSecondRecyclerView(
             position: Int,
             holder: ViewHolder
         ) {
-
-            val jsonArray = JSONArray(data[position].json_MySave)
-            val arrayList = ArrayList<HashMap<String, String>>()
-            for (i in 0 until jsonArray.length()) {
-                val hashMap = HashMap<String, String>()
-                val jsonObject = jsonArray.getJSONObject(i)
-                val strValue = jsonObject.getString("value")
-                val strPV = jsonObject.getString("PV")
-                val strEH = jsonObject.getString("EH")
-                val strEL = jsonObject.getString("EL")
-                val strTitle = jsonObject.getString("Title")
-                val strOrigin = jsonObject.getString("Origin")
-                hashMap["value"] = strValue
-                hashMap["PV"] = strPV
-                hashMap["EH"] = strEH
-                hashMap["EL"] = strEL
-                hashMap["Title"] = strTitle
-                hashMap["Origin"] = strOrigin
-                arrayList.add(hashMap)
-
-
+            Thread{
                 val layoutManager =
                     StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
                 layoutManager.orientation = LinearLayoutManager.VERTICAL
-                val cAdapter = ChildRecyclerView(arrayList)
+                val cAdapter = ChildRecyclerView(arrayList[position])
                 holder.recyclerChild.layoutManager = layoutManager
-
                 holder.recyclerChild.adapter = cAdapter
-            }
+
+
+            }.start()
+
+
         }
     }
     /**回傳修改後的值*/
@@ -282,6 +327,7 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         val TAG = RecordHistoryActivity::class.java.simpleName + "My"
 
+
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_item_RecordTitle)
             val tvPV = v.findViewById<TextView>(R.id.textView_item_RecordPV)
@@ -291,15 +337,23 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         }
 
+        override fun getItemViewType(position: Int): Int {
+            return position
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val v = LayoutInflater.from(parent.context)
                 .inflate(R.layout.activity_save_record_item, parent, false)
             return ViewHolder(v)
         }
 
+        override fun getItemId(position: Int): Long {
+            return position.toLong()
+        }
         override fun getItemCount(): Int {
             return recordInfo.size
         }
+
 
         @SuppressLint("SetTextI18n")
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -314,7 +368,6 @@ class RecordHistoryActivity : AppCompatActivity() {
                 holder.parent.context.getString(R.string.EH) + ": " + recordInfo[position]["EH"]
             holder.tvEL.text =
                 holder.parent.context.getString(R.string.EL) + ": " + recordInfo[position]["EL"]
-
 
         }
     }

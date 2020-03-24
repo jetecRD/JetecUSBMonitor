@@ -59,5 +59,10 @@
     <string name="please_input">Please input...</string>
     <string name="record_data">Record Data</string>
     <string name="save">save</string>
+    <string name="flashSavetoNote">By flash save.</string>
+    <string name="saving">Saving..</string>
+    <string name="succesSaved">Success saved!</string>
+    <string name="successModify">Success modified</string>
+    <string name="noImageWasTaken">No image was taken</string>
 
 </resources>

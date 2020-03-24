@@ -1,6 +1,7 @@
 package com.jetec.usbmonitor.Controller
 
 import android.annotation.SuppressLint
+import android.app.ProgressDialog
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -9,6 +10,7 @@ import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
+import android.os.Looper
 import android.os.SystemClock
 import android.provider.MediaStore
 import android.util.Log
@@ -117,7 +119,8 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                     }
                     /**儲存*/
                     btSave.setOnClickListener {
-
+                        var dialog = ProgressDialog.show(this,getString(R.string.saving),getString(R.string.pleaseWait),true)
+                        dialog.setCancelable(true)
                         Thread{
                             val mdTester = edTester.text.toString()
                             val mdNote =edNote.text.toString()
@@ -134,8 +137,14 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                             setResult(1, intent)
 
                             runOnUiThread {
+                                dialog.dismiss()
                                 finish()
+
+
                             }
+                            Looper.prepare()
+                            Toast.makeText(this,getString(R.string.successModify),Toast.LENGTH_LONG).show()
+                            Looper.loop()
                         }.start()
 
 
@@ -253,7 +262,8 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
     /**回傳圖像*/
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == RecordActivity.IMAGE_REQUEST && resultCode == -1) {
+//        Log.d(TAG, ":$requestCode , $resultCode ");
+        if (requestCode == IMAGE_REQUEST && resultCode == -1) {
             if (currentImagePath.isNotEmpty()) {
                 val progress = findViewById<ContentLoadingProgressBar>(R.id.progress_horizontal)
                 progress.visibility = View.VISIBLE
@@ -285,8 +295,10 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                     }
                 }.start()
             } else {
-                Toast.makeText(this, "未拍攝任何圖像", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, getString(R.string.noImageWasTaken), Toast.LENGTH_SHORT).show()
             }
+        }else {
+            Toast.makeText(this, getString(R.string.noImageWasTaken), Toast.LENGTH_SHORT).show()
         }
     }
 }
