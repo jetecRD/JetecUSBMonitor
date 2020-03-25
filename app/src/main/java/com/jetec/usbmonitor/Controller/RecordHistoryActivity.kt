@@ -6,14 +6,15 @@ import android.app.AlertDialog
 import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.SystemClock
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -23,6 +24,7 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
+import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
@@ -36,12 +38,13 @@ import org.json.JSONArray
 class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
 
-    companion object{
+    companion object {
         val RESULT_CODE = 1
         const val IMAGE_REQUEST = 100
         const val REQUEST_FINE_LOCATION_PERMISSION = 101;
 
     }
+
     lateinit var imageView: ImageView
 
     private lateinit var mAdapter: MyAdapter
@@ -51,18 +54,68 @@ class RecordHistoryActivity : AppCompatActivity() {
         setContentView(R.layout.activity_record_history)
         CrashHandler.getInstance().init(this)
         setMenu()
-        /**讀取DB內資料*/
+        readData()
+        setClick()
+    }
+
+    /**設置點擊事件*/
+    private fun setClick() {
+        val floatingActionMenu =
+            findViewById<FloatingActionButton>(R.id.floatingActionMenuButton_Filter)
+        floatingActionMenu.setOnClickListener {
+            filterEvent()
+
+        }
+    }
+
+    /**設置篩選功能*/
+    private fun filterEvent() {
+        val mBuilder = AlertDialog.Builder(this)
+        val view = layoutInflater.inflate(R.layout.history_filter_dialog, null)
+        mBuilder.setView(view)
+        val dialog = mBuilder.create()
+        var spID: Spinner = view.findViewById(R.id.spinner_FilterId)
+        var spName: Spinner = view.findViewById(R.id.spinner_FilterId)
+        var spDate: Spinner = view.findViewById(R.id.spinner_FilterId)
+        var spTester: Spinner = view.findViewById(R.id.spinner_FilterId)
+        val btCancel: Button = view.findViewById(R.id.button_SettingDialogCancel)
+        val btOK: Button = view.findViewById(R.id.button_SettingDialogOK)
+        btCancel.setOnClickListener { dialog.dismiss() }
+        Thread{
+            var arrayList = ArrayList<String>()
+            val data = DataBase.getInstance(this).dataUao.allData
+            for (i in 0 until data.size){
+                arrayList.add(data[i].name)
+            }
+            Log.d(TAG, ":${arrayList} ");
+
+        }.start()
+
+
+
+
+        dialog.show()
+        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(dm)
+        dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+    }
+
+
+
+    /**讀取DB內資料*/
+    private fun readData() {
         var dialog = ProgressDialog.show(this, "", "讀取中...", true)
         dialog.setCancelable(true)
         Thread {
             val savedData: MutableList<Data> = DataBase.getInstance(this).dataUao.allData
 
-            var arrayTotal = ArrayList<ArrayList<HashMap<String,String>>> ()
-            for (i in 0 until savedData.size){//表示有幾個儲存
-                var arrayList = ArrayList<HashMap<String,String>>()
+            var arrayTotal = ArrayList<ArrayList<HashMap<String, String>>>()
+            for (i in 0 until savedData.size) {//表示有幾個儲存
+                var arrayList = ArrayList<HashMap<String, String>>()
                 var jsonArray = JSONArray(savedData[i].json_MySave)
-                for (x in 0 until jsonArray.length()){//分解json的內容
-                   val jsonObject = jsonArray.getJSONObject(x)
+                for (x in 0 until jsonArray.length()) {//分解json的內容
+                    val jsonObject = jsonArray.getJSONObject(x)
                     val hashMap = HashMap<String, String>()
                     val strValue = jsonObject.getString("value")
                     val strPV = jsonObject.getString("PV")
@@ -87,18 +140,18 @@ class RecordHistoryActivity : AppCompatActivity() {
             layoutManager.recycleChildrenOnDetach = true
             recycler.addItemDecoration(DividerItemDecoration(this, DividerItemDecoration.VERTICAL))
             recycler.layoutManager = layoutManager
-            recycler.addOnScrollListener(object: RecyclerView.OnScrollListener(){
+            recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
-                    val floatingActionMenu
-                            = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
-                    if (isSlideToBottom(recyclerView)){
-                        floatingActionMenu.hideMenu(true)
-                    }else floatingActionMenu.showMenu(true)
+                    val floatingActionMenu =
+                        findViewById<FloatingActionButton>(R.id.floatingActionMenuButton_Filter)
+                    if (isSlideToBottom(recyclerView)) {
+                        floatingActionMenu.hide(true)
+                    } else floatingActionMenu.show(true)
                 }
             })
             recycler.isNestedScrollingEnabled = false
-            mAdapter = MyAdapter(savedData, this,arrayTotal)
+            mAdapter = MyAdapter(savedData, this, arrayTotal)
             runOnUiThread {
                 mAdapter.setHasStableIds(false)
                 recycler.adapter = mAdapter
@@ -107,12 +160,14 @@ class RecordHistoryActivity : AppCompatActivity() {
             dialog.dismiss()
 
         }.start()
-
     }
-    fun isSlideToBottom(recyclerView: RecyclerView):Boolean{
+
+    /**判斷RecyclerView是否已到底*/
+    fun isSlideToBottom(recyclerView: RecyclerView): Boolean {
         if (recyclerView == null) return false
         if (recyclerView.computeVerticalScrollExtent() +
-            recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange())
+            recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
+        )
             return true
         return false
     }
@@ -128,13 +183,10 @@ class RecordHistoryActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
     }
+
     /**設置使用者碰到螢幕後要做的事*/
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
 
-        val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
-        if (ev!!.action >=0 && floatMenu.isOpened){
-            floatMenu.close(true)
-        }
         return super.dispatchTouchEvent(ev)
     }
 
@@ -147,7 +199,6 @@ class RecordHistoryActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-
     /**第一個RecyclerView*/
     private class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
@@ -155,17 +206,22 @@ class RecordHistoryActivity : AppCompatActivity() {
         private var data: MutableList<Data>
         private val binderHelper = ViewBinderHelper()
         private val activity: Activity
-        private val arrayList:ArrayList<ArrayList<HashMap<String,String>>>
+        private val arrayList: ArrayList<ArrayList<HashMap<String, String>>>
 
-        constructor(data: MutableList<Data>, activity: Activity,arrayList:ArrayList<ArrayList<HashMap<String,String>>>) : super() {
+        constructor(
+            data: MutableList<Data>,
+            activity: Activity,
+            arrayList: ArrayList<ArrayList<HashMap<String, String>>>
+        ) : super() {
             this.data = data
             this.activity = activity
             this.arrayList = arrayList
         }
-        public fun updateList(){
-            Thread{
+
+        public fun updateList() {
+            Thread {
                 data = DataBase.getInstance(activity).dataUao.allData
-                activity.runOnUiThread{
+                activity.runOnUiThread {
                     notifyDataSetChanged()
                 }
             }.start()
@@ -217,6 +273,7 @@ class RecordHistoryActivity : AppCompatActivity() {
             setClick(holder, position, holder.parent.context)//設置點擊事件(們)
 
         }
+
         /**設置RecyclerView按鈕內的點擊事件*/
         private fun setClick(
             holder: ViewHolder,
@@ -252,13 +309,14 @@ class RecordHistoryActivity : AppCompatActivity() {
             /**修改*/
             holder.btModify.setOnClickListener {
                 val id = data[position].id
-                val intent = Intent(activity,ModifyHistoryDataActivity::class.java)
-                intent.putExtra("position",id)
-                activity.startActivityForResult(intent,RESULT_CODE)
+                val intent = Intent(activity, ModifyHistoryDataActivity::class.java)
+                intent.putExtra("position", id)
+                activity.startActivityForResult(intent, RESULT_CODE)
                 holder.swipeLayout.close(true)
 
             }//onC3
         }
+
         /**填入數值*/
         private fun setValue(
             holder: ViewHolder,
@@ -266,15 +324,8 @@ class RecordHistoryActivity : AppCompatActivity() {
         ) {
             binderHelper.bind(holder.swipeLayout, position.toString())
             binderHelper.setOpenOnlyOne(true)
-            var title = ""
+            val title =holder.parent.context.getString(R.string.tester) + ": " + data[position].name
             val context = holder.parent.context
-            if (data[position].name.isEmpty()) {
-
-                title =
-                    context.getString(R.string.tester) + ": " + holder.parent.context.getString(R.string.unfilled)
-            } else {
-                title = context.getString(R.string.tester) + ": " + data[position].name
-            }
             val deviceID = context.getString(R.string.deviceId) + data[position].deviceUUID
             val deviceName = context.getString(R.string.deviceName) + data[position].deviceName
             val time =
@@ -297,7 +348,7 @@ class RecordHistoryActivity : AppCompatActivity() {
             position: Int,
             holder: ViewHolder
         ) {
-            Thread{
+            Thread {
                 val layoutManager =
                     StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
                 layoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -311,12 +362,13 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         }
     }
+
     /**回傳修改後的值*/
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 //        Log.d(TAG, ":$requestCode $resultCode ${data?.getStringExtra("RESULT")} ");
-        if (requestCode == RESULT_CODE&&resultCode == 1){
-            val id = data?.getIntExtra("modifiedIndex",0)
+        if (requestCode == RESULT_CODE && resultCode == 1) {
+            val id = data?.getIntExtra("modifiedIndex", 0)
             mAdapter.updateList()
         }
     }
@@ -350,6 +402,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         override fun getItemId(position: Int): Long {
             return position.toLong()
         }
+
         override fun getItemCount(): Int {
             return recordInfo.size
         }
@@ -371,6 +424,5 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         }
     }
-
 
 }

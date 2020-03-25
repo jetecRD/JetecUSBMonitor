@@ -74,6 +74,10 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(usbStatus, filter)
         val btMeaSure = findViewById<Button>(R.id.button_Measure)
         btMeaSure.setOnClickListener {
+            val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+            if (floatMenu.isOpened) {
+                floatMenu.close(true)
+            }
             meansureModel(1)
             var vibrator: Vibrator =
                 getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
@@ -117,6 +121,7 @@ class MainActivity : AppCompatActivity() {
         val fbFlashSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_flash)
         val fbSave = findViewById<FloatingActionButton>(R.id.floatingActionActionButton_normalSave)
         val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+
         fbFlashSave.setOnClickListener {
             floatMenu.close(true)
             if (mValue.size != 0) {
@@ -154,7 +159,7 @@ class MainActivity : AppCompatActivity() {
                         deivceUUID[0],
                         deivceName[1].substring(4),
                         MyStatus.deviceType,
-                        "",
+                        getString(R.string.unfilled),
                         json,
                         bs.toByteArray(),
                         "",

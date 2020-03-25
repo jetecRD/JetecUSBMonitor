@@ -30,6 +30,13 @@
     </androidx.appcompat.widget.Toolbar>
 
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.6" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/linearLayout"
         android:layout_width="0dp"
@@ -45,6 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"
             android:gravity="center"
             android:paddingTop="10dp"
             android:text="@string/timeMeasrue"
@@ -64,19 +72,11 @@
             android:nestedScrollingEnabled="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintStart_toStartOf="parent">
 
         </androidx.recyclerview.widget.RecyclerView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline4"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.75" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -103,46 +103,44 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.github.clans.fab.FloatingActionMenu
-            android:id="@+id/floatingActionMenu_Menu"
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/floatingActionMenu_Menu"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu_colorNormal="#8260BF"
+        app:menu_colorPressed="#8970B6"
+        app:menu_colorRipple="#99FFFFFF"
+        app:menu_labels_hideAnimation="@anim/fab_slide_out_to_left"
+        app:menu_labels_position="right"
+        app:menu_labels_showAnimation="@anim/fab_slide_in_from_right">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingActionActionButton_flash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:menu_labels_hideAnimation="@anim/fab_slide_out_to_left"
-            app:menu_labels_position="right"
-            app:menu_labels_showAnimation="@anim/fab_slide_in_from_right"
-            app:menu_colorNormal="#8260BF"
-            app:menu_colorPressed="#8970B6"
-            app:menu_colorRipple="#99FFFFFF"
-            >
+            android:src="@drawable/noun_fast_download"
+            app:fab_colorNormal="#4CAF50"
+            app:fab_colorPressed="#72A675"
+            app:fab_colorRipple="#99FFFFFF"
+            app:fab_label="Flash save"
+            app:fab_size="mini" />
 
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/floatingActionActionButton_flash"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fab_label="Flash save"
-                app:fab_size="mini"
-                app:fab_colorNormal="#4CAF50"
-                app:fab_colorPressed="#72A675"
-                app:fab_colorRipple="#99FFFFFF"
-                android:src="@drawable/noun_fast_download"
-                />
-
-            <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/floatingActionActionButton_normalSave"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:fab_colorNormal="#D2481C"
-                app:fab_colorPressed="#FD815A"
-                app:fab_colorRipple="#99FFFFFF"
-                android:src="@drawable/noun_save"
-                app:fab_label="Save"
-                app:fab_size="mini" />
-        </com.github.clans.fab.FloatingActionMenu>
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/floatingActionActionButton_normalSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/noun_save"
+            app:fab_colorNormal="#D2481C"
+            app:fab_colorPressed="#FD815A"
+            app:fab_colorRipple="#99FFFFFF"
+            app:fab_label="Save"
+            app:fab_size="mini" />
+    </com.github.clans.fab.FloatingActionMenu>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

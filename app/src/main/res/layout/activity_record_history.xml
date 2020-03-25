@@ -41,34 +41,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/toolBarSetting" />
 
-    <com.github.clans.fab.FloatingActionMenu
+    <com.github.clans.fab.FloatingActionButton
         android:id="@+id/floatingActionMenuButton_Filter"
+        android:src="@drawable/noun_filter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        app:fab_colorPressed="#E75043"
+        app:fab_colorRipple="#99FFFFFF"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floatingActionActionButton_FilterByUUID"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_colorNormal="#4CAF50"
-            app:fab_colorPressed="#72A675"
-            app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以產品編號顯示"
-            app:fab_size="mini" />
-
-        <com.github.clans.fab.FloatingActionButton
-            android:id="@+id/floatingActionActionButton_FilterByDeviceName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:fab_colorNormal="#D2481C"
-            app:fab_colorPressed="#FD815A"
-            app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以名稱顯示"
-            app:fab_size="mini" />
-
-    </com.github.clans.fab.FloatingActionMenu>
+        app:layout_constraintEnd_toEndOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

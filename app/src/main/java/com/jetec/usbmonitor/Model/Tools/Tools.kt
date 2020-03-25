@@ -527,8 +527,6 @@ class Tools() {
                                     ascii2String(data)?.let { arrayList.add(it) }
                                 }
                             }
-
-
                         }
 
                         override fun onRunError(e: Exception) {}

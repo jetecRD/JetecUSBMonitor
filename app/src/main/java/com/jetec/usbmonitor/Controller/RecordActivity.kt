@@ -143,6 +143,9 @@ class RecordActivity : AppCompatActivity() {
         var nameString = edName.text.toString()
         var noteString = edNote.text.toString()
 
+        if (nameString.isEmpty()){
+            nameString = getString(R.string.unfilled)
+        }
         var dialog = ProgressDialog.show(this,getString(R.string.saving),getString(R.string.pleaseWait),true)
         dialog.setCancelable(true)
         Thread{

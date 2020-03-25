@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -176,8 +177,10 @@ class SettingActivity : AppCompatActivity() {
         var tvTitle = view.findViewById<TextView>(R.id.textView_SettingDialogTitle)
         val dialog = mBuilder.create()
         dialog.show()
+        val dm = DisplayMetrics()
+        windowManager.defaultDisplay.getMetrics(dm)
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.window!!.setLayout(900, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window!!.setLayout(dm.widthPixels-180, ViewGroup.LayoutParams.WRAP_CONTENT)
         tvTitle.text = settingList[position].getLabel()
         dpFilter = settingList[position].getDP()
         edINput.hint =
