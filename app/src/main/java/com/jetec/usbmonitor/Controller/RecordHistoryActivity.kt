@@ -16,7 +16,6 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,17 +24,23 @@ import com.bumptech.glide.Glide
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.github.clans.fab.FloatingActionButton
-import com.github.clans.fab.FloatingActionMenu
 import com.jetec.usbmonitor.Model.CrashHandler
+import com.jetec.usbmonitor.Model.GetSavedHashArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
+import com.jetec.usbmonitor.Model.SpinnerClickActivity
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
+import java.lang.Exception
+import java.util.*
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
 
 //import kotlinx.android.synthetic.main.activity_setting.*
 
-class RecordHistoryActivity : AppCompatActivity() {
+class RecordHistoryActivity : AppCompatActivity(){
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
 
     companion object {
@@ -69,36 +74,76 @@ class RecordHistoryActivity : AppCompatActivity() {
     }
 
     /**設置篩選功能*/
-    private fun filterEvent() {
+    private fun filterEvent(){
         val mBuilder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.history_filter_dialog, null)
         mBuilder.setView(view)
         val dialog = mBuilder.create()
-        var spID: Spinner = view.findViewById(R.id.spinner_FilterId)
-        var spName: Spinner = view.findViewById(R.id.spinner_FilterId)
-        var spDate: Spinner = view.findViewById(R.id.spinner_FilterId)
-        var spTester: Spinner = view.findViewById(R.id.spinner_FilterId)
+        val spID: Spinner = view.findViewById(R.id.spinner_FilterId)
+        val spName: Spinner = view.findViewById(R.id.spinner_FilterName)
+        val spDate: Spinner = view.findViewById(R.id.spinner_FilterDate)
+        val spTester: Spinner = view.findViewById(R.id.spinner_FilterTester)
         val btCancel: Button = view.findViewById(R.id.button_SettingDialogCancel)
         val btOK: Button = view.findViewById(R.id.button_SettingDialogOK)
         btCancel.setOnClickListener { dialog.dismiss() }
-        Thread{
-            var arrayList = ArrayList<String>()
-            val data = DataBase.getInstance(this).dataUao.allData
-            for (i in 0 until data.size){
-                arrayList.add(data[i].name)
+
+        GetSavedHashArray(this,object :GetSavedHashArray.AsyncResponse{
+            override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
+                Log.d(TAG, "得到的回傳 $hashArray");
+
+                try {
+                    val uuidArray =toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
+                    val deviceNameArray = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
+                    val testerArray = toArrayList(hashArray[GetSavedHashArray.TESTER])
+                    val dateTimeArray = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+                    uuidArray.add(0,"---Please select---")
+                    deviceNameArray.add(0,"---Please select---")
+                    testerArray.add(0,"---Please select---")
+                    dateTimeArray.add(0,"---Please select---")
+
+                    val uuidAdapter = ArrayAdapter(this@RecordHistoryActivity
+                        ,android.R.layout.simple_dropdown_item_1line, uuidArray )
+                    spID.adapter = uuidAdapter
+
+                    val deviceAdapter =  ArrayAdapter(this@RecordHistoryActivity
+                        ,android.R.layout.simple_dropdown_item_1line, deviceNameArray )
+                    spName.adapter = deviceAdapter
+
+                    val testerAdapter = ArrayAdapter(this@RecordHistoryActivity
+                        ,android.R.layout.simple_dropdown_item_1line, testerArray )
+                    spTester.adapter = testerAdapter
+
+                    val dateAdapter = ArrayAdapter(this@RecordHistoryActivity
+                        ,android.R.layout.simple_dropdown_item_1line, dateTimeArray )
+                    spDate.adapter = dateAdapter
+                    runOnUiThread {
+                        spID.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_UUID,this@RecordHistoryActivity)
+                        spName.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_NAME,this@RecordHistoryActivity)
+                        spTester.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TESTER,this@RecordHistoryActivity)
+                        spDate.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TIME_DATE,this@RecordHistoryActivity)
+                    }
+
+                }catch (e:Exception){
+                    Toast.makeText(this@RecordHistoryActivity,"ERROR?",Toast.LENGTH_SHORT).show()
+                    Log.w(TAG, e.message);
+                }
             }
-            Log.d(TAG, ":${arrayList} ");
-
-        }.start()
-
-
-
-
+        }).execute()
         dialog.show()
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
         dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+    }
+    /**將HashSet轉為ArrayList*/
+    fun toArrayList(input: HashSet<String>?):ArrayList<String>{
+        val hashSet = input?.toArray()as Array<out Any>
+        var arrayList = ArrayList<String>()
+
+        for (element in hashSet) arrayList.add(element.toString())
+        return arrayList
+
     }
 
 
@@ -218,7 +263,7 @@ class RecordHistoryActivity : AppCompatActivity() {
             this.arrayList = arrayList
         }
 
-        public fun updateList() {
+        fun updateList() {
             Thread {
                 data = DataBase.getInstance(activity).dataUao.allData
                 activity.runOnUiThread {
@@ -424,5 +469,7 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         }
     }
+
+
 
 }

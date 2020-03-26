@@ -53,6 +53,10 @@ public interface DataUao {
     @Query("SELECT * FROM " + tableName + " WHERE name = :tester" )
     List<Data> searchByTester (String tester);
 
+    /**以時間(TimeDate)搜尋資料*/
+    @Query("SELECT * FROM "+tableName+" WHERE dateTime = :timeDate")
+    List<Data> searchByTimeDate(String timeDate);
+
     /**
      * 以ID刪除
      */
