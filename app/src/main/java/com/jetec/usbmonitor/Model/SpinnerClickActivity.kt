@@ -4,10 +4,7 @@ import android.R
 import android.app.Activity
 import android.util.Log
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
 import java.lang.Exception
@@ -16,13 +13,23 @@ class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
     private var search = 100
     val TAG = SpinnerClickActivity::class.java.simpleName
     private val activity:Activity
+    private var arrayUUID:ArrayList<String>
+    private var arrayDeviceName:ArrayList<String>
+    private var arrayTester:ArrayList<String>
+    private var arrayDateTime:ArrayList<String>
 
 
-
-    constructor(search:Int,activity: Activity){
+    constructor(search:Int,activity: Activity
+                ,arrayUUID:ArrayList<String>,
+                arrayDeviceName:ArrayList<String>,
+                arrayTester:ArrayList<String>,
+                arrayDateTime:ArrayList<String>){
         this.search = search
         this.activity = activity
-
+        this.arrayUUID = arrayUUID
+        this.arrayDeviceName = arrayDeviceName
+        this.arrayTester = arrayTester
+        this.arrayDateTime = arrayDateTime
 
     }
     override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -30,36 +37,45 @@ class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
     }
 
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
-        Log.d(TAG, ": $p2");
+
         if (p2 !=0){
             val getString = p0?.getItemAtPosition(p2) as String
             GetSavedHashArray(activity,getString,object :GetSavedHashArray.AsyncResponse{
                 override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
                     Log.d(TAG, "得到的回傳2 $hashArray");
                     try {
-
-                        val uuidArray =toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
+                        arrayUUID.clear()
+                        arrayDeviceName.clear()
+                        arrayTester.clear()
+                        arrayDateTime.clear()
+                        for (i in 0 until toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID]).size){
+                            arrayUUID.add(toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])[i])
+                        }
                         val deviceNameArray = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
                         val testerArray = toArrayList(hashArray[GetSavedHashArray.TESTER])
                         val dateTimeArray = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
-                        uuidArray.add(0,"---Please select---")
-                        deviceNameArray.add(0,"---Please select---")
-                        testerArray.add(0,"---Please select---")
-                        dateTimeArray.add(0,"---Please select---")
+                        for (i in 0 until deviceNameArray.size){
+                            arrayDeviceName.add(deviceNameArray[i])
+                        }
+                        for (i in 0 until testerArray.size){
+                            arrayTester.add(testerArray[i])
+                        }
+                        for (i in 0 until dateTimeArray.size){
+                            arrayDateTime.add(dateTimeArray[i])
+                        }
+                        arrayUUID.add(0,"---Please select---")
+                        arrayDeviceName.add(0,"---Please select---")
+                        arrayTester.add(0,"---Please select---")
+                        arrayDateTime.add(0,"---Please select---")
 
-                        val uuidAdapter = ArrayAdapter(activity
-                            ,R.layout.simple_dropdown_item_1line, uuidArray )
+                        activity.runOnUiThread{
+                            val view = activity.layoutInflater.inflate(com.jetec.usbmonitor.R.layout.history_filter_dialog, null)
+                            val btOK: Button = view.findViewById(com.jetec.usbmonitor.R.id.button_SettingDialogOK)
+                            btOK.setOnClickListener {
+                                Log.d(TAG, ":OK ");
+                            }
+                        }
 
-
-                        val deviceAdapter =  ArrayAdapter(activity
-                            ,R.layout.simple_dropdown_item_1line, deviceNameArray )
-
-                        val testerAdapter = ArrayAdapter(activity
-                            ,R.layout.simple_dropdown_item_1line, testerArray )
-
-
-                        val dateAdapter = ArrayAdapter(activity
-                            ,R.layout.simple_dropdown_item_1line, dateTimeArray )
 
                     }catch (e: Exception){
                         Toast.makeText(activity,"ERROR?", Toast.LENGTH_SHORT).show()

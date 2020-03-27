@@ -119,7 +119,7 @@ class RecordActivity : AppCompatActivity() {
         val btRecordSave = findViewById<Button>(R.id.button_RecordSave)
         val btRecordCancel = findViewById<Button>(R.id.button_RecordCancel)
         btRecordSave.setOnClickListener {
-            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = "$date#$time")
+            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = "$date $time")
         }
         btRecordCancel.setOnClickListener {
             finish()
@@ -158,7 +158,8 @@ class RecordActivity : AppCompatActivity() {
                 ,screenShot
                 ,currentImagePath
                 ,noteString
-                ,dateTime)
+                ,dateTime.substring(0,dateTime.indexOf(" "))
+                ,dateTime.substring(dateTime.indexOf(" ")))
             runOnUiThread{
                 dialog.dismiss()
                 finish()

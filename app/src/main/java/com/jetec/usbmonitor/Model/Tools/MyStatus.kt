@@ -9,6 +9,8 @@ class MyStatus{
         var engineerModel:Boolean = false//工程師模式
         var nightModeSwitch:Boolean = false//夜間模式
         var autoMeasurement:Boolean = false//是否開啟自動偵測(此項目不重置)
+        var lock:Boolean = true//將部分設定功能上鎖
+        var password = "000000"//密碼(此項目不重置)
 
 
 

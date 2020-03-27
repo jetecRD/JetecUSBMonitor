@@ -64,7 +64,8 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                 Toast.makeText(this, "錯誤，請重試或聯絡開發者人員", Toast.LENGTH_SHORT).show()
             } else {
                 var tester = savedData[0].name
-                var dateTime = savedData[0].dateTime.replace("#", "\n")
+                var date = savedData[0].date
+                var time = savedData[0].time
                 var note = savedData[0].note
                 val jsonArray = JSONArray(savedData[0].json_MySave)
                 currentImagePath = savedData[0].takeImage
@@ -103,7 +104,7 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                 imageView = findViewById(R.id.imageView_RecordTakePhoto)
                 runOnUiThread {
                     edTester.setText(tester)
-                    edDateTime.setText(dateTime)
+                    edDateTime.setText("$date\n$time")
                     edNote.setText(note)
                     Glide.with(this).load(currentImagePath).fitCenter()
                         .placeholder(R.drawable.create_image)

@@ -19,7 +19,24 @@ public class Data {
     private String takeImage;//自己拍的(存路徑)
     private String note;//備註欄
 
-    private String dateTime;//紀錄時間
+    private String date;//紀錄日期
+    private String time;//紀錄時間
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
 
     public int getId() {
         return id;
@@ -77,13 +94,6 @@ public class Data {
         this.note = note;
     }
 
-    public String getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(String dateTime) {
-        this.dateTime = dateTime;
-    }
 
     public String getDeviceUUID() {
         return deviceUUID;

@@ -24,8 +24,8 @@ public interface DataUao {
     /**
      * 加入資料
      */
-    @Query("INSERT INTO " + tableName + "(deviceUUID,deviceName,deviceType,name,json_MySave,screenShot,takeImage,note,dateTime) " +
-            "VALUES (:deviceUUID,:deviceName,:deviceType,:name,:json_MySave,:screenShot,:takeImage,:note,:dateTime)")
+    @Query("INSERT INTO " + tableName + "(deviceUUID,deviceName,deviceType,name,json_MySave,screenShot,takeImage,note,date,time) " +
+            "VALUES (:deviceUUID,:deviceName,:deviceType,:name,:json_MySave,:screenShot,:takeImage,:note,:date,:time)")
     void insertData(
             @NotNull String deviceUUID
             , @NotNull String deviceName
@@ -35,7 +35,8 @@ public interface DataUao {
             , @NotNull byte[] screenShot
             , @Nullable String takeImage
             , @Nullable String note
-            , @NotNull String dateTime);
+            , @NotNull String date
+            , @NotNull String time);
 
     /**
      * 以UUID搜尋資料
@@ -54,8 +55,8 @@ public interface DataUao {
     List<Data> searchByTester (String tester);
 
     /**以時間(TimeDate)搜尋資料*/
-    @Query("SELECT * FROM "+tableName+" WHERE dateTime = :timeDate")
-    List<Data> searchByTimeDate(String timeDate);
+    @Query("SELECT * FROM "+tableName+" WHERE date = :date ")
+    List<Data> searchByTimeDate(String date);
 
     /**
      * 以ID刪除

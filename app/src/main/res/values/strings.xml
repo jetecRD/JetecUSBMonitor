@@ -64,5 +64,9 @@
     <string name="succesSaved">Success saved!</string>
     <string name="successModify">Success modified</string>
     <string name="noImageWasTaken">No image was taken</string>
+    <string name="lockTester">Lock Tester</string>
+    <string name="changePassword">Change Password</string>
+    <string name="changeTester">Change Tester</string>
+    <string name="changeDeviceName">Change DeviceName</string>
 
 </resources>

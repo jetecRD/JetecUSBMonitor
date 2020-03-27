@@ -89,7 +89,7 @@ class GetSavedHashArray : AsyncTask<Int, Int, List<Data>> {
                 }//
                 TIME_DATE -> {
                     for (i in result?.indices!!) {
-                        hashSet3.add(result[i].dateTime.substring(0,result[i].dateTime.lastIndexOf("#")))
+                        hashSet3.add(result[i].date)
                     }
                     hsMap[index] = hashSet3
                 }

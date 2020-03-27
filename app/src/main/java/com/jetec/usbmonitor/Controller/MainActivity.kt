@@ -151,10 +151,10 @@ class MainActivity : AppCompatActivity() {
 
 
                     val json = Gson().toJson(arrayArray)
-                    val timeDate = "${sdfyMd.format(now)}#${tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)}"
+                    val date = sdfyMd.format(now)
+                    val time = tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)
 
 
-                    Log.d(TAG, ":$timeDate ");
                     DataBase.getInstance(this).dataUao.insertData(
                         deivceUUID[0],
                         deivceName[1].substring(4),
@@ -164,7 +164,8 @@ class MainActivity : AppCompatActivity() {
                         bs.toByteArray(),
                         "",
                         getString(R.string.flashSavetoNote),
-                        timeDate
+                        date,
+                        time
                     )
 
                     dialog.dismiss()

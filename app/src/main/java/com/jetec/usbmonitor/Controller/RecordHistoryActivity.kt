@@ -92,10 +92,11 @@ class RecordHistoryActivity : AppCompatActivity(){
                 Log.d(TAG, "得到的回傳 $hashArray");
 
                 try {
-                    val uuidArray =toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
-                    val deviceNameArray = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
-                    val testerArray = toArrayList(hashArray[GetSavedHashArray.TESTER])
-                    val dateTimeArray = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+                    var uuidArray =toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
+                    var deviceNameArray = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
+                    var testerArray = toArrayList(hashArray[GetSavedHashArray.TESTER])
+                    var dateTimeArray = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+
                     uuidArray.add(0,"---Please select---")
                     deviceNameArray.add(0,"---Please select---")
                     testerArray.add(0,"---Please select---")
@@ -117,11 +118,18 @@ class RecordHistoryActivity : AppCompatActivity(){
                         ,android.R.layout.simple_dropdown_item_1line, dateTimeArray )
                     spDate.adapter = dateAdapter
                     runOnUiThread {
-                        spID.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_UUID,this@RecordHistoryActivity)
-                        spName.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_NAME,this@RecordHistoryActivity)
-                        spTester.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TESTER,this@RecordHistoryActivity)
-                        spDate.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TIME_DATE,this@RecordHistoryActivity)
-                    }
+                        spID.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_UUID
+                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
+                        spName.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_NAME
+                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
+                        spTester.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TESTER
+                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
+                        spDate.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TIME_DATE
+                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
+                        btOK.setOnClickListener {
+                            Log.d(TAG, ": ${spID.selectedItem}");
+                        }
+                    }//runOnUI
 
                 }catch (e:Exception){
                     Toast.makeText(this@RecordHistoryActivity,"ERROR?",Toast.LENGTH_SHORT).show()
@@ -374,7 +382,7 @@ class RecordHistoryActivity : AppCompatActivity(){
             val deviceID = context.getString(R.string.deviceId) + data[position].deviceUUID
             val deviceName = context.getString(R.string.deviceName) + data[position].deviceName
             val time =
-                context.getString(R.string.measureTime) + data[position].dateTime.replace("#", " ")
+                context.getString(R.string.measureTime) + data[position].date+" "+data[position].time
 
             holder.tvTitle.text = title
             holder.tvID.text = deviceID

@@ -66,7 +66,8 @@ class ReviewDataActivity : AppCompatActivity() {
                 val tester = saved[0].name
                 val uuid = saved[0].deviceUUID
                 val deviceName = saved[0].deviceName
-                val time = saved[0].dateTime.replace("#", " ")
+                val date = saved[0].date
+                val time = saved[0].time
                 val note = saved[0].note
                 val jsonS = JSONArray(saved[0].json_MySave)
 
@@ -106,7 +107,7 @@ class ReviewDataActivity : AppCompatActivity() {
                     tvTester.text = tester
                     tvUUID.text = uuid
                     tvDeviceName.text = deviceName
-                    tvTime.text = time
+                    tvTime.text = date+" "+time
                     edNote.setText(note)
                     Glide.with(this).load(saved[0].screenShot).fitCenter()
                         .placeholder(R.drawable.create_image).into(imageScreenShot)

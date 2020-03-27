@@ -50,7 +50,11 @@ class SettingActivity : AppCompatActivity() {
     private fun applicationSetting() {
         var norSetting: ArrayList<String> = ArrayList()
         /**若需要新增APP設定就放這邊*/
-        norSetting.add(getString(R.string.factoryReset))
+        norSetting.add(getString(R.string.factoryReset))//恢復原廠
+        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
+        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
+        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
+        norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
 //        norSetting.add(getString(R.string.nightMode))
         /**若需要新增APP設定就放這邊*/
         val layoutManager = LinearLayoutManager(this@SettingActivity)
@@ -98,6 +102,16 @@ class SettingActivity : AppCompatActivity() {
                         }
                         mBuilder.setNegativeButton(getString(R.string.cancelButton), null)
                         mBuilder.show()
+                    }
+                    getString(R.string.lockTester)->{}
+                    getString(R.string.changePassword)->{
+
+                    }
+                    getString(R.string.changeTester)->{
+
+                    }
+                    getString(R.string.changeDeviceName)->{
+
                     }
                 }
             }
@@ -413,13 +427,12 @@ class SettingActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.tvTitle.text = norSetting[position]
-            if (!holder.tvTitle.text.toString()
-                    .contains(Tools.id2String(holder.parent.context, R.string.nightMode))
-            ) {
-                holder.checkBox.visibility = View.GONE
-            } else {
+            var title = holder.tvTitle.text.toString()
+            if (title.contains(holder.parent.context.getString(R.string.nightMode))){
                 holder.checkBox.visibility = View.VISIBLE
-            }
+            }else if (title.contains(holder.parent.context.getString(R.string.lockTester))){
+                holder.checkBox.visibility = View.VISIBLE
+            }else holder.checkBox.visibility = View.GONE
 
 
             holder.parent.setOnClickListener {
