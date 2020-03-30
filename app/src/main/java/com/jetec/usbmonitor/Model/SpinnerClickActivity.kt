@@ -7,6 +7,8 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.get
+import com.jetec.usbmonitor.Controller.RecordHistoryActivity
+import com.jetec.usbmonitor.Controller.SettingActivity
 import java.lang.Exception
 
 class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
@@ -17,6 +19,7 @@ class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
     private var arrayDeviceName:ArrayList<String>
     private var arrayTester:ArrayList<String>
     private var arrayDateTime:ArrayList<String>
+
 
 
     constructor(search:Int,activity: Activity
@@ -30,6 +33,7 @@ class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
         this.arrayDeviceName = arrayDeviceName
         this.arrayTester = arrayTester
         this.arrayDateTime = arrayDateTime
+
 
     }
     override fun onNothingSelected(p0: AdapterView<*>?) {
@@ -72,7 +76,7 @@ class SpinnerClickActivity: AdapterView.OnItemSelectedListener{
                             val view = activity.layoutInflater.inflate(com.jetec.usbmonitor.R.layout.history_filter_dialog, null)
                             val btOK: Button = view.findViewById(com.jetec.usbmonitor.R.id.button_SettingDialogOK)
                             btOK.setOnClickListener {
-                                Log.d(TAG, ":OK ");
+
                             }
                         }
 

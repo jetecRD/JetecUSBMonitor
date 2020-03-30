@@ -16,6 +16,8 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isNotEmpty
+import androidx.core.view.size
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +26,7 @@ import com.bumptech.glide.Glide
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
 import com.github.clans.fab.FloatingActionButton
+import com.github.clans.fab.FloatingActionMenu
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.GetSavedHashArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
@@ -40,7 +43,7 @@ import kotlin.collections.HashSet
 
 //import kotlinx.android.synthetic.main.activity_setting.*
 
-class RecordHistoryActivity : AppCompatActivity(){
+class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
 
     companion object {
@@ -66,77 +69,42 @@ class RecordHistoryActivity : AppCompatActivity(){
     /**設置點擊事件*/
     private fun setClick() {
         val floatingActionMenu =
-            findViewById<FloatingActionButton>(R.id.floatingActionMenuButton_Filter)
-        floatingActionMenu.setOnClickListener {
-            filterEvent()
-
+            findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+        val floatUUID = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByUUID)
+        val floatDeviceName = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDeviceName)
+        val floatTester = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByTester)
+        val floatDate = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDate)
+        floatUUID.setOnClickListener {
+            filterEvent(getString(R.string.searchBytUUIDLabel))
+            floatingActionMenu.close(true)
         }
+        floatDeviceName.setOnClickListener {
+            filterEvent(getString(R.string.searchByDaviceNameLabel))
+            floatingActionMenu.close(true)
+        }
+        floatTester.setOnClickListener {
+            filterEvent(getString(R.string.searchByTester))
+            floatingActionMenu.close(true)
+        }
+        floatDate.setOnClickListener {
+            filterEvent(getString(R.string.searchByDate))
+            floatingActionMenu.close(true)
+        }
+
     }
 
     /**設置篩選功能*/
-    private fun filterEvent(){
+    private fun filterEvent(title:String) {
         val mBuilder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.history_filter_dialog, null)
         mBuilder.setView(view)
+        val titleTitle = view.findViewById<TextView>(R.id.textView_FilterDialogTitle)
         val dialog = mBuilder.create()
-        val spID: Spinner = view.findViewById(R.id.spinner_FilterId)
-        val spName: Spinner = view.findViewById(R.id.spinner_FilterName)
-        val spDate: Spinner = view.findViewById(R.id.spinner_FilterDate)
-        val spTester: Spinner = view.findViewById(R.id.spinner_FilterTester)
+        val spinner: Spinner = view.findViewById(R.id.spinner_FilterId)
         val btCancel: Button = view.findViewById(R.id.button_SettingDialogCancel)
         val btOK: Button = view.findViewById(R.id.button_SettingDialogOK)
         btCancel.setOnClickListener { dialog.dismiss() }
 
-        GetSavedHashArray(this,object :GetSavedHashArray.AsyncResponse{
-            override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
-                Log.d(TAG, "得到的回傳 $hashArray");
-
-                try {
-                    var uuidArray =toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
-                    var deviceNameArray = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
-                    var testerArray = toArrayList(hashArray[GetSavedHashArray.TESTER])
-                    var dateTimeArray = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
-
-                    uuidArray.add(0,"---Please select---")
-                    deviceNameArray.add(0,"---Please select---")
-                    testerArray.add(0,"---Please select---")
-                    dateTimeArray.add(0,"---Please select---")
-
-                    val uuidAdapter = ArrayAdapter(this@RecordHistoryActivity
-                        ,android.R.layout.simple_dropdown_item_1line, uuidArray )
-                    spID.adapter = uuidAdapter
-
-                    val deviceAdapter =  ArrayAdapter(this@RecordHistoryActivity
-                        ,android.R.layout.simple_dropdown_item_1line, deviceNameArray )
-                    spName.adapter = deviceAdapter
-
-                    val testerAdapter = ArrayAdapter(this@RecordHistoryActivity
-                        ,android.R.layout.simple_dropdown_item_1line, testerArray )
-                    spTester.adapter = testerAdapter
-
-                    val dateAdapter = ArrayAdapter(this@RecordHistoryActivity
-                        ,android.R.layout.simple_dropdown_item_1line, dateTimeArray )
-                    spDate.adapter = dateAdapter
-                    runOnUiThread {
-                        spID.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_UUID
-                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
-                        spName.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.DEVICE_NAME
-                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
-                        spTester.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TESTER
-                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
-                        spDate.onItemSelectedListener = SpinnerClickActivity(GetSavedHashArray.TIME_DATE
-                            ,this@RecordHistoryActivity,uuidArray,deviceNameArray,testerArray,dateTimeArray)
-                        btOK.setOnClickListener {
-                            Log.d(TAG, ": ${spID.selectedItem}");
-                        }
-                    }//runOnUI
-
-                }catch (e:Exception){
-                    Toast.makeText(this@RecordHistoryActivity,"ERROR?",Toast.LENGTH_SHORT).show()
-                    Log.w(TAG, e.message);
-                }
-            }
-        }).execute()
         dialog.show()
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val dm = DisplayMetrics()
@@ -144,16 +112,16 @@ class RecordHistoryActivity : AppCompatActivity(){
         dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
 
     }
+
     /**將HashSet轉為ArrayList*/
-    fun toArrayList(input: HashSet<String>?):ArrayList<String>{
-        val hashSet = input?.toArray()as Array<out Any>
+    fun toArrayList(input: HashSet<String>?): ArrayList<String> {
+        val hashSet = input?.toArray() as Array<out Any>
         var arrayList = ArrayList<String>()
 
         for (element in hashSet) arrayList.add(element.toString())
         return arrayList
 
     }
-
 
 
     /**讀取DB內資料*/
@@ -197,10 +165,10 @@ class RecordHistoryActivity : AppCompatActivity(){
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     super.onScrollStateChanged(recyclerView, newState)
                     val floatingActionMenu =
-                        findViewById<FloatingActionButton>(R.id.floatingActionMenuButton_Filter)
-                    if (isSlideToBottom(recyclerView)) {
-                        floatingActionMenu.hide(true)
-                    } else floatingActionMenu.show(true)
+                        findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+                    if (isSlideToBottom(recyclerView,arrayTotal)) {
+                        floatingActionMenu.hideMenu(true)
+                    } else floatingActionMenu.showMenu(true)
                 }
             })
             recycler.isNestedScrollingEnabled = false
@@ -216,12 +184,14 @@ class RecordHistoryActivity : AppCompatActivity(){
     }
 
     /**判斷RecyclerView是否已到底*/
-    fun isSlideToBottom(recyclerView: RecyclerView): Boolean {
+    fun isSlideToBottom(recyclerView: RecyclerView,arrayList: ArrayList<ArrayList<HashMap<String, String>>>): Boolean {
         if (recyclerView == null) return false
         if (recyclerView.computeVerticalScrollExtent() +
             recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
-        )
-            return true
+        ){
+            return arrayList.size >= 2
+        }
+
         return false
     }
 
@@ -239,7 +209,10 @@ class RecordHistoryActivity : AppCompatActivity(){
 
     /**設置使用者碰到螢幕後要做的事*/
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-
+        val floatingActionMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+        if (ev?.action == MotionEvent.ACTION_DOWN && floatingActionMenu.isOpened){
+            floatingActionMenu.close(true)
+        }
         return super.dispatchTouchEvent(ev)
     }
 
@@ -253,7 +226,7 @@ class RecordHistoryActivity : AppCompatActivity(){
     }
 
     /**第一個RecyclerView*/
-    private class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
+    class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
         val TAG = RecordHistoryActivity::class.java.simpleName + "My"
         private var data: MutableList<Data>
@@ -278,7 +251,44 @@ class RecordHistoryActivity : AppCompatActivity(){
                     notifyDataSetChanged()
                 }
             }.start()
+        }
 
+        fun updateFilterList(deviceName:String,deviceUUID:String,tester:String,date:String) {
+            Thread{
+//                Log.d(TAG, ":所選擇的條件 $deviceName , $deviceUUID , $tester , $date ");
+//                val mSaved = DataBase.getInstance(activity).dataUao.allData
+////                Log.d(TAG, ":${mSaved.size} ");
+//                var deviceNameArray:MutableList<Data> = ArrayList()
+//                var deviceUUIDArray:MutableList<Data> = ArrayList()
+//                var nameArray:MutableList<Data> = ArrayList()
+//                var dateArray:MutableList<Data> = ArrayList()
+//                for (i in 0 until mSaved.size){
+//                    if (mSaved[i].deviceName.contains(deviceName)){
+//                        deviceNameArray.add(mSaved[i])
+//                    }
+//                    if (mSaved[i].deviceName.contains(deviceUUID)){
+//                        deviceUUIDArray.add(mSaved[i])
+//                    }
+//                    if (mSaved[i].deviceName.contains(tester)){
+//                        nameArray.add(mSaved[i])
+//                    }
+//                    if (mSaved[i].deviceName.contains(date)){
+//                        dateArray.add(mSaved[i])
+//                    }
+//                }
+//                Log.d(TAG, ":DName:${deviceNameArray.size} ");
+//                Log.d(TAG, ":DID:${deviceUUIDArray.size} ");
+//                Log.d(TAG, ":Tester:${nameArray.size} ");
+//                Log.d(TAG, ":Date:${dateArray.size} ");
+//
+//
+//
+//                data = mSaved
+
+                activity.runOnUiThread{
+//                    notifyDataSetChanged()
+                }
+            }.start()
 
         }
 
@@ -377,12 +387,13 @@ class RecordHistoryActivity : AppCompatActivity(){
         ) {
             binderHelper.bind(holder.swipeLayout, position.toString())
             binderHelper.setOpenOnlyOne(true)
-            val title =holder.parent.context.getString(R.string.tester) + ": " + data[position].name
+            val title =
+                holder.parent.context.getString(R.string.tester) + ": " + data[position].name
             val context = holder.parent.context
             val deviceID = context.getString(R.string.deviceId) + data[position].deviceUUID
             val deviceName = context.getString(R.string.deviceName) + data[position].deviceName
             val time =
-                context.getString(R.string.measureTime) + data[position].date+" "+data[position].time
+                context.getString(R.string.measureTime) + data[position].date + " " + data[position].time
 
             holder.tvTitle.text = title
             holder.tvID.text = deviceID
@@ -477,7 +488,6 @@ class RecordHistoryActivity : AppCompatActivity(){
 
         }
     }
-
 
 
 }

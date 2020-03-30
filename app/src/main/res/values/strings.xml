@@ -68,5 +68,10 @@
     <string name="changePassword">Change Password</string>
     <string name="changeTester">Change Tester</string>
     <string name="changeDeviceName">Change DeviceName</string>
+    <string name="pleaseSelectSpinner">---Please select---</string>
+    <string name="searchBytUUIDLabel">Search By Device ID</string>
+    <string name="searchByDaviceNameLabel">Search By Device Name</string>
+    <string name="searchByTester">Search By Tester</string>
+    <string name="searchByDate">Search By Date</string>
 
 </resources>

@@ -1,7 +1,10 @@
 package com.jetec.usbmonitor.Model.RoomDBHelper;
 
+import androidx.room.ColumnInfo;
 import androidx.room.Dao;
 import androidx.room.Query;
+
+import com.google.gson.internal.$Gson$Preconditions;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -54,7 +57,7 @@ public interface DataUao {
     @Query("SELECT * FROM " + tableName + " WHERE name = :tester" )
     List<Data> searchByTester (String tester);
 
-    /**以時間(TimeDate)搜尋資料*/
+    /**以日期(Date)搜尋資料*/
     @Query("SELECT * FROM "+tableName+" WHERE date = :date ")
     List<Data> searchByTimeDate(String date);
 
@@ -70,6 +73,8 @@ public interface DataUao {
     @Query("SELECT * FROM " + tableName + " WHERE id = :id")
     List<Data> searchById(int id);
 
+
+
     /**
      * 寫入更新
      */
@@ -79,6 +84,5 @@ public interface DataUao {
             @Nullable String name,
             @Nullable String takeImage,
             @Nullable String note);
-
 
 }

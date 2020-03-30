@@ -413,14 +413,15 @@ class MainActivity : AppCompatActivity() {
 //            Log.d(TAG, ":${Tools.sendData("Request", 200, this, 0)}");
 
             runOnUiThread {
+                try {
                 if (selectChannel == 1/*刷新數值*/) {
                     var rValue = Tools.sendData(
                         "Request"
-                        , 100, this, 0
+                        , 200, this, 0
                     )
                     var rSetting = Tools.sendData(
                         "Get"
-                        , 100, this, 0
+                        , 200, this, 0
                     )
                     if (rValue.isEmpty()) {
                         Toast.makeText(this, getString(R.string.noSensorHint), Toast.LENGTH_SHORT)
@@ -429,6 +430,7 @@ class MainActivity : AppCompatActivity() {
                         mValue.clear()
                         mAdapter.notifyDataSetChanged()
                     }
+
                     /**刷新GET的部分*/
                     val mArrayList: ArrayList<ArrayList<String>> = ArrayList()
                     for (i in 0 until MyStatus.deviceRow) {
@@ -541,7 +543,9 @@ class MainActivity : AppCompatActivity() {
                     mAdapter = MyAdapter(mValue, mSetting)
                     dataList.adapter = mAdapter
                 }
-
+                }catch (e:Exception){
+                    Log.w(TAG, "收資料失誤: $e ");
+                }
 
             }
 
