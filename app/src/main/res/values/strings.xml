@@ -73,5 +73,6 @@
     <string name="searchByDaviceNameLabel">Search By Device Name</string>
     <string name="searchByTester">Search By Tester</string>
     <string name="searchByDate">Search By Date</string>
+    <string name="resultFilter">Result filter</string>
 
 </resources>

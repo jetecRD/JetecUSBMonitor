@@ -266,7 +266,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         Thread {
             SystemClock.sleep(1000)
             runOnUiThread {
-                arrayList = Tools.sendData("Request", 200, this,0)
+                arrayList = Tools.sendData("Rqs", 200, this,0)
                 arrayInfo = Tools.sendData("Get",200,this,0)
 //                Log.d(TAG, "$arrayList ");
                 if (arrayList.size>0){

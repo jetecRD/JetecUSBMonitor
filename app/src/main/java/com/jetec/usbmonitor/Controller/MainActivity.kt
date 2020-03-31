@@ -124,95 +124,120 @@ class MainActivity : AppCompatActivity() {
 
         fbFlashSave.setOnClickListener {
             floatMenu.close(true)
-            if (mValue.size != 0) {
 
-                var dialog = ProgressDialog.show(
-                    this, ""
-                    , getString(R.string.pleaseWait), true
-                )
-                Thread {
+            var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this, 1)
+            if (arrayList.size == 0) {
+                Toast.makeText(this, "Not available", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            for (i in 0 until arrayList.size) {
+                if (arrayList[i]!!.contains("OK")) {
+                    if (mValue.size != 0) {
 
-                    SystemClock.sleep(300)
-                    val bs: ByteArrayOutputStream = ByteArrayOutputStream()
-                    getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                        var dialog = ProgressDialog.show(
+                            this, ""
+                            , getString(R.string.pleaseWait), true
+                        )
+                        Thread {
 
-                    val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
-                    val now = Date()
-                    val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
-                    var arrayArray = returnValueList()
-                    var deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
-                    var deivceName = Tools.sendData("Name",200,this,1)
-                    while (deivceName.isEmpty()){
-                        deivceName = Tools.sendData("Name",200,this,1)
+                            SystemClock.sleep(300)
+                            val bs: ByteArrayOutputStream = ByteArrayOutputStream()
+                            getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+
+                            val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
+                            val now = Date()
+                            val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+                            var arrayArray = returnValueList()
+                            var deivceUUID = Tools.sendData("Name", 200, this, 0)//獲取裝置唯一碼
+                            var deivceName = Tools.sendData("Name", 200, this, 1)
+                            while (deivceName.isEmpty()) {
+                                deivceName = Tools.sendData("Name", 200, this, 1)
+                            }
+                            while (deivceUUID.isEmpty()) {
+                                deivceUUID = Tools.sendData("Name", 200, this, 0)//獲取裝置唯一碼
+                            }
+
+
+                            val json = Gson().toJson(arrayArray)
+                            val date = sdfyMd.format(now)
+                            val time = tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)
+
+
+                            DataBase.getInstance(this).dataUao.insertData(
+                                deivceUUID[0],
+                                deivceName[1].substring(4),
+                                MyStatus.deviceType,
+                                getString(R.string.unfilled),
+                                json,
+                                bs.toByteArray(),
+                                "",
+                                getString(R.string.flashSavetoNote),
+                                date,
+                                time
+                            )
+
+                            dialog.dismiss()
+                            Looper.prepare()
+                            Toast.makeText(
+                                this,
+                                getString(R.string.succesSaved),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            Looper.loop()
+
+                        }.start()
+
+
+                    } else {
+                        Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
                     }
-                    while (deivceUUID.isEmpty()){
-                        deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
-                    }
 
-
-                    val json = Gson().toJson(arrayArray)
-                    val date = sdfyMd.format(now)
-                    val time = tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)
-
-
-                    DataBase.getInstance(this).dataUao.insertData(
-                        deivceUUID[0],
-                        deivceName[1].substring(4),
-                        MyStatus.deviceType,
-                        getString(R.string.unfilled),
-                        json,
-                        bs.toByteArray(),
-                        "",
-                        getString(R.string.flashSavetoNote),
-                        date,
-                        time
-                    )
-
-                    dialog.dismiss()
-                    Looper.prepare()
-                    Toast.makeText(this,getString(R.string.succesSaved),Toast.LENGTH_SHORT).show()
-                    Looper.loop()
-
-                }.start()
-
-
-            } else {
-                Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+                }
             }
 
 
         }
         fbSave.setOnClickListener {
             floatMenu.close(true)
-            if (mValue.size != 0) {
-                Thread {
-                    SystemClock.sleep(300)
-                    val bs: ByteArrayOutputStream = ByteArrayOutputStream()
-                    getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
-                    var arrayArray = returnValueList()
-
-                    val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
-                    val now = Date()
-                    val intent = Intent(this, RecordActivity::class.java)
-                    /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
-
-                    intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
-                    intent.putExtra(RecordActivity.IntentMyNowYMd, sdfyMd.format(now))
-                    val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
-                    intent.putExtra(
-                        RecordActivity.IntentMyNowHms, tvTimeinfo.text
-                            .substring(tvTimeinfo.text.indexOf("\n") + 1)
-                    )
-
-                    intent.putExtra(RecordActivity.GetScreenShot, bs.toByteArray())
-                    runOnUiThread {
-                        startActivity(intent)
-                    }
-                }.start()
-
-            } else {
-                Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+            val arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this, 1)
+            if (arrayList.size == 0) {
+                Toast.makeText(this, "Not available", android.widget.Toast.LENGTH_SHORT).show()
             }
+            for (i in 0 until arrayList.size) {
+                if (arrayList[i]!!.contains("OK")) {
+                    if (mValue.size != 0) {
+                        Thread {
+                            SystemClock.sleep(300)
+                            val bs: ByteArrayOutputStream = ByteArrayOutputStream()
+                            getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                            var arrayArray = returnValueList()
+
+                            val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
+                            val now = Date()
+                            val intent = Intent(this, RecordActivity::class.java)
+                            /**@see MyStatus.IntentNowDataArray ...等等是傳送Intent的標籤*/
+
+                            intent.putExtra(RecordActivity.INTENTNOW, arrayArray)
+                            intent.putExtra(RecordActivity.IntentMyNowYMd, sdfyMd.format(now))
+                            val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
+                            intent.putExtra(
+                                RecordActivity.IntentMyNowHms, tvTimeinfo.text
+                                    .substring(tvTimeinfo.text.indexOf("\n") + 1)
+                            )
+
+                            intent.putExtra(RecordActivity.GetScreenShot, bs.toByteArray())
+                            runOnUiThread {
+                                startActivity(intent)
+                            }
+                        }.start()
+
+                    } else {
+                        Toast.makeText(this, "Not available", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
 
         }
     }
@@ -244,6 +269,7 @@ class MainActivity : AppCompatActivity() {
         return arrayArray
     }
 
+    /**螢幕截圖*/
     private fun getScreenShot(): Bitmap? {
         //藉由View來Cache全螢幕畫面後放入Bitmap
         val mView = window.decorView
@@ -410,140 +436,145 @@ class MainActivity : AppCompatActivity() {
                     getString(R.string.timeMeasrue) + "\n" + sdf.format(current)
             }
             val analysisValueInfo = AnalysisValueInfo()
-//            Log.d(TAG, ":${Tools.sendData("Request", 200, this, 0)}");
+//            Log.d(TAG, ":${Tools.sendData("Rqs", 200, this, 0)}");
 
             runOnUiThread {
                 try {
-                if (selectChannel == 1/*刷新數值*/) {
-                    var rValue = Tools.sendData(
-                        "Request"
-                        , 200, this, 0
-                    )
-                    var rSetting = Tools.sendData(
-                        "Get"
-                        , 200, this, 0
-                    )
-                    if (rValue.isEmpty()) {
-                        Toast.makeText(this, getString(R.string.noSensorHint), Toast.LENGTH_SHORT)
-                            .show()
-                        mSetting.clear()
-                        mValue.clear()
-                        mAdapter.notifyDataSetChanged()
-                    }
-
-                    /**刷新GET的部分*/
-                    val mArrayList: ArrayList<ArrayList<String>> = ArrayList()
-                    for (i in 0 until MyStatus.deviceRow) {
-                        val liArrayList: ArrayList<String> = ArrayList()
-                        for (x in 0 until rSetting.size) {
-                            if (rSetting[x].substring(0, 2).toInt() - 1 == i) {
-                                liArrayList.add(rSetting[x])
-                            }
+                    if (selectChannel == 1/*刷新數值*/) {
+                        var rValue = Tools.sendData(
+                            "Rqs"
+                            , 100, this, 0
+                        )
+                        var rSetting = Tools.sendData(
+                            "Get"
+                            , 100, this, 0
+                        )
+                        if (rValue.isEmpty()) {
+                            Toast.makeText(
+                                this,
+                                getString(R.string.noSensorHint),
+                                Toast.LENGTH_SHORT
+                            )
+                                .show()
+//                        mSetting.clear()
+//                        mValue.clear()
+//                        mAdapter.notifyDataSetChanged()
                         }
-                        mArrayList.add(liArrayList)
-                    }
-                    for (i in 0 until mArrayList.size) {
-                        for (x in 0 until mArrayList[i].size) {
-                            var row = mArrayList[i][x].substring(0, 4)
-                            var type = mArrayList[i][x].substring(2, 4)
-                            var dp = mArrayList[i][x].substring(4, 6)
-                            var value = mArrayList[i][x].substring(6, 10)
-                            var empty = mArrayList[i][x].substring(10, 12)
-                            var unit = mArrayList[i][x].substring(12, 14)
-                            when (returnType(type.toInt())) {
-                                "PV" -> {
-                                    mSetting[i].setPV("PV")
-                                    mSetting[i].setPVValue(
-                                        Tools.returnValue(
-                                            dp.toInt(),
-                                            Tools.hextoDecShort(value)
-                                        )
-                                    )
-                                    mSetting[i].setPVOrigin(mArrayList[i][x])
-                                }
-                                "EH" -> {
-                                    mSetting[i].setEH("EH")
-                                    mSetting[i].setEHValue(
-                                        Tools.returnValue(
-                                            dp.toInt(),
-                                            Tools.hextoDecShort(value)
-                                        )
-                                    )
-                                    mSetting[i].setEHOrigin(mArrayList[i][x])
-                                }
-                                "EL" -> {
-                                    mSetting[i].setEL("EL")
-                                    mSetting[i].setELValue(
-                                        Tools.returnValue(
-                                            dp.toInt(),
-                                            Tools.hextoDecShort(value)
-                                        )
-                                    )
-                                    mSetting[i].setELOrigin(mArrayList[i][x])
-                                }
-                                "trans℃" -> {
-                                    mSetting[i].setTR("TR")
-                                    mSetting[i].setTRValue(
-                                        Tools.returnValue(
-                                            dp.toInt(),
-                                            Tools.hextoDecShort(value)
-                                        )
-                                    )
-                                    mSetting[i].setTROrigin(mArrayList[i][x])
+
+                        /**刷新GET的部分*/
+                        val mArrayList: ArrayList<ArrayList<String>> = ArrayList()
+                        for (i in 0 until MyStatus.deviceRow) {
+                            val liArrayList: ArrayList<String> = ArrayList()
+                            for (x in 0 until rSetting.size) {
+                                if (rSetting[x].substring(0, 2).toInt() - 1 == i) {
+                                    liArrayList.add(rSetting[x])
                                 }
                             }
+                            mArrayList.add(liArrayList)
                         }
-                        mAdapter.notifyDataSetChanged()
-                    }
+                        for (i in 0 until mArrayList.size) {
+                            for (x in 0 until mArrayList[i].size) {
+                                var row = mArrayList[i][x].substring(0, 4)
+                                var type = mArrayList[i][x].substring(2, 4)
+                                var dp = mArrayList[i][x].substring(4, 6)
+                                var value = mArrayList[i][x].substring(6, 10)
+                                var empty = mArrayList[i][x].substring(10, 12)
+                                var unit = mArrayList[i][x].substring(12, 14)
+                                when (returnType(type.toInt())) {
+                                    "PV" -> {
+                                        mSetting[i].setPV("PV")
+                                        mSetting[i].setPVValue(
+                                            Tools.returnValue(
+                                                dp.toInt(),
+                                                Tools.hextoDecShort(value)
+                                            )
+                                        )
+                                        mSetting[i].setPVOrigin(mArrayList[i][x])
+                                    }
+                                    "EH" -> {
+                                        mSetting[i].setEH("EH")
+                                        mSetting[i].setEHValue(
+                                            Tools.returnValue(
+                                                dp.toInt(),
+                                                Tools.hextoDecShort(value)
+                                            )
+                                        )
+                                        mSetting[i].setEHOrigin(mArrayList[i][x])
+                                    }
+                                    "EL" -> {
+                                        mSetting[i].setEL("EL")
+                                        mSetting[i].setELValue(
+                                            Tools.returnValue(
+                                                dp.toInt(),
+                                                Tools.hextoDecShort(value)
+                                            )
+                                        )
+                                        mSetting[i].setELOrigin(mArrayList[i][x])
+                                    }
+                                    "trans℃" -> {
+                                        mSetting[i].setTR("TR")
+                                        mSetting[i].setTRValue(
+                                            Tools.returnValue(
+                                                dp.toInt(),
+                                                Tools.hextoDecShort(value)
+                                            )
+                                        )
+                                        mSetting[i].setTROrigin(mArrayList[i][x])
+                                    }
+                                }
+                            }
+                            mAdapter.notifyDataSetChanged()
+                        }
 
-                    /**刷新REQUEST的部分*/
-                    for (i in 0 until rValue.size) {
-                        var row = rValue[i].substring(0, 2)
-                        var type = rValue[i].substring(2, 4)
-                        var dp = rValue[i].substring(4, 6)
-                        var value = rValue[i].substring(6, 10)
-                        var empty = rValue[i].substring(10, 12)
-                        var unit = rValue[i].substring(12, 14)
+                        /**刷新REQUEST的部分*/
+                        for (i in 0 until rValue.size) {
+                            var row = rValue[i].substring(0, 2)
+                            var type = rValue[i].substring(2, 4)
+                            var dp = rValue[i].substring(4, 6)
+                            var value = rValue[i].substring(6, 10)
+                            var empty = rValue[i].substring(10, 12)
+                            var unit = rValue[i].substring(12, 14)
 
-                        mValue[i] = DeviceValue(
-                            row.toInt()
-                            , returnType(Tools.hex2Dec(type).toInt())
-                            , dp.toInt()
-                            , Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value))
-                            , empty
-                            , Tools.setUnit(Tools.hex2Dec(unit).toInt())
-                            , Tools.setLabel(Tools.hex2Dec(unit).toInt(), this)
-                            , rValue[i]
-                            , Tools.setColor(Tools.hex2Dec(unit).toInt())
-                            , Tools.setIcon(Tools.hex2Dec(unit).toInt())
-                        )
-                        mAdapter.notifyDataSetChanged()
-                    }
-
-                } else {
-                    /**刷新REQUEST的部分*/
-                    val layoutManager = LinearLayoutManager(this)
-                    layoutManager.orientation = LinearLayoutManager.VERTICAL
-                    val dataList = findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
-                    dataList.layoutManager = layoutManager
-                    mValue = analysisValueInfo
-                        .requestValue(
-                            this, Tools.sendData(
-                                "Request"
-                                , 100, this, 0
+                            mValue[i] = DeviceValue(
+                                row.toInt()
+                                , returnType(Tools.hex2Dec(type).toInt())
+                                , dp.toInt()
+                                , Tools.returnValue(dp.toInt(), Tools.hextoDecShort(value))
+                                , empty
+                                , Tools.setUnit(Tools.hex2Dec(unit).toInt())
+                                , Tools.setLabel(Tools.hex2Dec(unit).toInt(), this)
+                                , rValue[i]
+                                , Tools.setColor(Tools.hex2Dec(unit).toInt())
+                                , Tools.setIcon(Tools.hex2Dec(unit).toInt())
                             )
-                        )
-                    mSetting = analysisValueInfo
-                        .requestSetting(
-                            this, Tools.sendData(
-                                "Get"
-                                , 100, this, 0
+                            mAdapter.notifyDataSetChanged()
+                        }
+
+                    } else {
+                        /**刷新REQUEST的部分*/
+                        val layoutManager = LinearLayoutManager(this)
+                        layoutManager.orientation = LinearLayoutManager.VERTICAL
+                        val dataList =
+                            findViewById<RecyclerView>(R.id.recyclerView_MainValueDisplay)
+                        dataList.layoutManager = layoutManager
+                        mValue = analysisValueInfo
+                            .requestValue(
+                                this, Tools.sendData(
+                                    "Rqs"
+                                    , 100, this, 0
+                                )
                             )
-                        )
-                    mAdapter = MyAdapter(mValue, mSetting)
-                    dataList.adapter = mAdapter
-                }
-                }catch (e:Exception){
+                        mSetting = analysisValueInfo
+                            .requestSetting(
+                                this, Tools.sendData(
+                                    "Get"
+                                    , 100, this, 0
+                                )
+                            )
+                        mAdapter = MyAdapter(mValue, mSetting)
+                        dataList.adapter = mAdapter
+                    }
+                } catch (e: Exception) {
                     Log.w(TAG, "收資料失誤: $e ");
                 }
 
@@ -594,8 +625,17 @@ class MainActivity : AppCompatActivity() {
                     startActivity(intent)
                 }
                 R.id.action_Setting -> {
-                    intent = Intent(this, SettingActivity::class.java)
-                    startActivity(intent)
+                    var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this, 1)
+                    if (arrayList.size == 0) {
+                        Toast.makeText(this, "Not available", android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                    for (i in 0 until arrayList.size) {
+                        if (arrayList[i]!!.contains("OK")) {
+                            intent = Intent(this, SettingActivity::class.java)
+                            startActivity(intent)
+                        }
+                    }
+
 
                 }
                 R.id.action_Auto -> {

@@ -34,7 +34,9 @@ import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.SpinnerClickActivity
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
+import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
+import org.w3c.dom.Text
 import java.lang.Exception
 import java.util.*
 import kotlin.collections.ArrayList
@@ -45,6 +47,8 @@ import kotlin.collections.HashSet
 
 class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
+    var filtered:Boolean = false
+    lateinit var btFilterReturn:Button
 
     companion object {
         val RESULT_CODE = 1
@@ -61,9 +65,27 @@ class RecordHistoryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record_history)
         CrashHandler.getInstance().init(this)
+        returnSearchButton()
         setMenu()
-        readData()
+        initReadData()
         setClick()
+    }
+
+    /**設置回復搜尋的按鈕*/
+     fun returnSearchButton() {
+        btFilterReturn = findViewById(R.id.button_filterReturn)
+        if (!filtered) {
+            btFilterReturn.visibility = View.GONE
+        }else  btFilterReturn.visibility = View.VISIBLE
+
+        btFilterReturn.setOnClickListener {
+            filtered = false
+            returnSearchButton()
+            Toast.makeText(this,getString(R.string.resultFilter),Toast.LENGTH_LONG).show()
+            mAdapter.updateList()
+
+
+        }
     }
 
     /**設置點擊事件*/
@@ -98,13 +120,67 @@ class RecordHistoryActivity : AppCompatActivity() {
         val mBuilder = AlertDialog.Builder(this)
         val view = layoutInflater.inflate(R.layout.history_filter_dialog, null)
         mBuilder.setView(view)
-        val titleTitle = view.findViewById<TextView>(R.id.textView_FilterDialogTitle)
+        val titleTitle = view.findViewById<TextView>(R.id.textView_FilterDialogTitle)//主標題
+        titleTitle.text = title
+        val headerTitle = view.findViewById<TextView>(R.id.textView_FilterDialogHeader)//副標題
+        var headerString = title.substring(title.lastIndexOf(" "))
+        headerTitle.text = headerString
         val dialog = mBuilder.create()
         val spinner: Spinner = view.findViewById(R.id.spinner_FilterId)
         val btCancel: Button = view.findViewById(R.id.button_SettingDialogCancel)
         val btOK: Button = view.findViewById(R.id.button_SettingDialogOK)
         btCancel.setOnClickListener { dialog.dismiss() }
 
+        GetSavedHashArray(this,object :GetSavedHashArray.AsyncResponse{
+            override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
+                Log.d(TAG, ": $hashArray");
+                var arrayList = ArrayList<String>()
+                when(title){
+                    getString(R.string.searchBytUUIDLabel)->{
+                        arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
+                    }
+                    getString(R.string.searchByDaviceNameLabel)->{
+                        arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
+                    }
+                    getString(R.string.searchByTester)->{
+                        arrayList = toArrayList(hashArray[GetSavedHashArray.TESTER])
+                    }
+                    getString(R.string.searchByDate)->{
+                        arrayList = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+                    }
+
+                }
+                val arrayAdapter = ArrayAdapter(this@RecordHistoryActivity
+                    ,android.R.layout.simple_dropdown_item_1line,arrayList)
+                spinner.adapter = arrayAdapter
+                runOnUiThread {
+                    btOK.setOnClickListener {
+                        when(title){
+                            getString(R.string.searchBytUUIDLabel)->{
+                                mAdapter.updateFilterList(spinner.selectedItem.toString()
+                                    ,GetSavedHashArray.DEVICE_UUID)
+                            }
+                            getString(R.string.searchByDaviceNameLabel)->{
+                                mAdapter.updateFilterList(spinner.selectedItem.toString()
+                                    ,GetSavedHashArray.DEVICE_NAME)
+                            }
+                            getString(R.string.searchByTester)->{
+                                mAdapter.updateFilterList(spinner.selectedItem.toString()
+                                    ,GetSavedHashArray.TESTER)
+                            }
+                            getString(R.string.searchByDate)->{
+                                mAdapter.updateFilterList(spinner.selectedItem.toString()
+                                    ,GetSavedHashArray.TIME_DATE)
+                            }
+                        }
+                        dialog.dismiss()
+                        filtered = true
+                        returnSearchButton()
+
+                    }
+                }
+            }
+        }).execute()
         dialog.show()
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val dm = DisplayMetrics()
@@ -125,7 +201,7 @@ class RecordHistoryActivity : AppCompatActivity() {
 
 
     /**讀取DB內資料*/
-    private fun readData() {
+    private fun initReadData() {
         var dialog = ProgressDialog.show(this, "", "讀取中...", true)
         dialog.setCancelable(true)
         Thread {
@@ -166,7 +242,7 @@ class RecordHistoryActivity : AppCompatActivity() {
                     super.onScrollStateChanged(recyclerView, newState)
                     val floatingActionMenu =
                         findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
-                    if (isSlideToBottom(recyclerView,arrayTotal)) {
+                    if (isSlideToBottom(recyclerView)) {
                         floatingActionMenu.hideMenu(true)
                     } else floatingActionMenu.showMenu(true)
                 }
@@ -184,15 +260,19 @@ class RecordHistoryActivity : AppCompatActivity() {
     }
 
     /**判斷RecyclerView是否已到底*/
-    fun isSlideToBottom(recyclerView: RecyclerView,arrayList: ArrayList<ArrayList<HashMap<String, String>>>): Boolean {
+    fun isSlideToBottom(recyclerView: RecyclerView): Boolean {
         if (recyclerView == null) return false
+
         if (recyclerView.computeVerticalScrollExtent() +
             recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
         ){
-            return arrayList.size >= 2
+            return mAdapter.itemCount > 2
+
+        }else{
+            return false
         }
 
-        return false
+
     }
 
     /**設置標題列*/
@@ -232,7 +312,8 @@ class RecordHistoryActivity : AppCompatActivity() {
         private var data: MutableList<Data>
         private val binderHelper = ViewBinderHelper()
         private val activity: Activity
-        private val arrayList: ArrayList<ArrayList<HashMap<String, String>>>
+        private var arrayList: ArrayList<ArrayList<HashMap<String, String>>>
+        private lateinit var cAdapter:ChildRecyclerView
 
         constructor(
             data: MutableList<Data>,
@@ -244,53 +325,82 @@ class RecordHistoryActivity : AppCompatActivity() {
             this.arrayList = arrayList
         }
 
+
+
         fun updateList() {
             Thread {
+                data.clear()
                 data = DataBase.getInstance(activity).dataUao.allData
+                var arrayTotal = setChildValues()
+                arrayList = arrayTotal
                 activity.runOnUiThread {
                     notifyDataSetChanged()
+                    cAdapter.notifyDataSetChanged()
                 }
             }.start()
         }
 
-        fun updateFilterList(deviceName:String,deviceUUID:String,tester:String,date:String) {
-            Thread{
-//                Log.d(TAG, ":所選擇的條件 $deviceName , $deviceUUID , $tester , $date ");
-//                val mSaved = DataBase.getInstance(activity).dataUao.allData
-////                Log.d(TAG, ":${mSaved.size} ");
-//                var deviceNameArray:MutableList<Data> = ArrayList()
-//                var deviceUUIDArray:MutableList<Data> = ArrayList()
-//                var nameArray:MutableList<Data> = ArrayList()
-//                var dateArray:MutableList<Data> = ArrayList()
-//                for (i in 0 until mSaved.size){
-//                    if (mSaved[i].deviceName.contains(deviceName)){
-//                        deviceNameArray.add(mSaved[i])
-//                    }
-//                    if (mSaved[i].deviceName.contains(deviceUUID)){
-//                        deviceUUIDArray.add(mSaved[i])
-//                    }
-//                    if (mSaved[i].deviceName.contains(tester)){
-//                        nameArray.add(mSaved[i])
-//                    }
-//                    if (mSaved[i].deviceName.contains(date)){
-//                        dateArray.add(mSaved[i])
-//                    }
-//                }
-//                Log.d(TAG, ":DName:${deviceNameArray.size} ");
-//                Log.d(TAG, ":DID:${deviceUUIDArray.size} ");
-//                Log.d(TAG, ":Tester:${nameArray.size} ");
-//                Log.d(TAG, ":Date:${dateArray.size} ");
-//
-//
-//
-//                data = mSaved
-
-                activity.runOnUiThread{
-//                    notifyDataSetChanged()
+        private fun setChildValues(): ArrayList<ArrayList<HashMap<String, String>>> {
+            var arrayTotal = ArrayList<ArrayList<HashMap<String, String>>>()
+            for (i in 0 until data.size) {//表示有幾個儲存
+                var arrayList = ArrayList<HashMap<String, String>>()
+                var jsonArray = JSONArray(data[i].json_MySave)
+                for (x in 0 until jsonArray.length()) {//分解json的內容
+                    val jsonObject = jsonArray.getJSONObject(x)
+                    val hashMap = HashMap<String, String>()
+                    val strValue = jsonObject.getString("value")
+                    val strPV = jsonObject.getString("PV")
+                    val strEH = jsonObject.getString("EH")
+                    val strEL = jsonObject.getString("EL")
+                    val strTitle = jsonObject.getString("Title")
+                    val strOrigin = jsonObject.getString("Origin")
+                    hashMap["value"] = strValue
+                    hashMap["PV"] = strPV
+                    hashMap["EH"] = strEH
+                    hashMap["EL"] = strEL
+                    hashMap["Title"] = strTitle
+                    hashMap["Origin"] = strOrigin
+                    arrayList.add(hashMap)
                 }
-            }.start()
+                arrayTotal.add(arrayList)
+            }
+            return arrayTotal
+        }
+
+        fun updateFilterList(condition:String,search:Int) {
+                Thread{
+                    data.clear()
+                    var mSaved:MutableList<Data>
+                    when(search){
+                        GetSavedHashArray.DEVICE_UUID->{
+                            mSaved = DataBase.getInstance(activity).dataUao.searchByUUID(condition)
+                        }
+                        GetSavedHashArray.DEVICE_NAME->{
+                            mSaved = DataBase.getInstance(activity).dataUao.searchByDeviceName(condition)
+                        }
+                        GetSavedHashArray.TESTER->{
+                            mSaved = DataBase.getInstance(activity).dataUao.searchByTester(condition)
+                        }
+                        GetSavedHashArray.TIME_DATE->{
+                            mSaved = DataBase.getInstance(activity).dataUao.searchByTimeDate(condition)
+                        }
+                        else->{
+                            mSaved = DataBase.getInstance(activity).dataUao.allData
+                        }
+                    }
+                    data = mSaved
+                    var arrayTotal = setChildValues()
+                    arrayList = arrayTotal
+                    activity.runOnUiThread{
+                        notifyDataSetChanged()
+                        cAdapter.notifyDataSetChanged()
+
+                    }
+                }.start()
 
         }
+
+
 
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_RH_Title)
@@ -416,7 +526,7 @@ class RecordHistoryActivity : AppCompatActivity() {
                 val layoutManager =
                     StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.HORIZONTAL);
                 layoutManager.orientation = LinearLayoutManager.VERTICAL
-                val cAdapter = ChildRecyclerView(arrayList[position])
+                cAdapter = ChildRecyclerView(arrayList[position])
                 holder.recyclerChild.layoutManager = layoutManager
                 holder.recyclerChild.adapter = cAdapter
 
@@ -438,7 +548,7 @@ class RecordHistoryActivity : AppCompatActivity() {
     }
 
     /**包在第一個RecyclerView內的那個Recycler*/
-    private class ChildRecyclerView(val recordInfo: ArrayList<HashMap<String, String>>) :
+    private class ChildRecyclerView(var recordInfo: ArrayList<HashMap<String, String>>) :
         RecyclerView.Adapter<ChildRecyclerView.ViewHolder>() {
 
         val TAG = RecordHistoryActivity::class.java.simpleName + "My"

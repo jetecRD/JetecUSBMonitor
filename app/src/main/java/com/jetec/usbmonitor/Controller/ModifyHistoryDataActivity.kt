@@ -1,8 +1,10 @@
 package com.jetec.usbmonitor.Controller
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
@@ -56,6 +58,13 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_record)
         setMenu()
+        var hasGone = checkSelfPermission(Manifest.permission.CAMERA)
+        if (hasGone != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(
+                arrayOf(Manifest.permission.CAMERA),
+                RecordActivity.REQUEST_FINE_LOCATION_PERMISSION
+            )
+        }//get Permission
         val id = intent.getIntExtra("position", 0)
         Thread {
             val savedData: List<Data> = DataBase.getInstance(this).dataUao.searchById(id)

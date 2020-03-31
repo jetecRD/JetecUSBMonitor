@@ -9,7 +9,7 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolBarSetting"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:background="@drawable/shadow_view"
         android:elevation="5dp"
         app:buttonGravity="center_vertical"
@@ -24,6 +24,27 @@
             android:text="Record History"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
             android:textSize="20dp" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            >
+
+
+            <Button
+                android:id="@+id/button_filterReturn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@android:color/transparent"
+                android:drawableBottom="@drawable/noun_return_1207895"
+                android:gravity="center"
+                android:paddingBottom="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
     </androidx.appcompat.widget.Toolbar>
@@ -59,7 +80,7 @@
             app:fab_colorNormal="#129B30"
             app:fab_colorPressed="#129B30"
             app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以裝置編號搜尋"
+            app:fab_label="@string/searchBytUUIDLabel"
             android:src="@drawable/noun_face_id"
             />
         <com.github.clans.fab.FloatingActionButton
@@ -70,7 +91,7 @@
             app:fab_colorPressed="#FFAF39"
             app:fab_colorNormal="#FFAF39"
             app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以設備名稱搜尋"
+            app:fab_label="@string/searchByDaviceNameLabel"
             android:src="@drawable/noun_folder"
             />
         <com.github.clans.fab.FloatingActionButton
@@ -81,7 +102,7 @@
             app:fab_colorNormal="#39C1FF"
             app:fab_colorPressed="#39C1FF"
             app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以測試者搜尋"
+            app:fab_label="@string/searchByTester"
             android:src="@drawable/noun_person"
             />
         <com.github.clans.fab.FloatingActionButton
@@ -92,7 +113,7 @@
             app:fab_colorNormal="#F36B40"
             app:fab_colorPressed="#F36B40"
             app:fab_colorRipple="#99FFFFFF"
-            app:fab_label="以日期搜尋"
+            app:fab_label="@string/searchByDate"
             android:src="@drawable/noun_search_date"
             />
 
