@@ -141,7 +141,10 @@ class MainActivity : AppCompatActivity() {
 
                             SystemClock.sleep(300)
                             val bs: ByteArrayOutputStream = ByteArrayOutputStream()
-                            getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                            runOnUiThread {
+                                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                            }
+
 
                             val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
                             val now = Date()
@@ -210,7 +213,10 @@ class MainActivity : AppCompatActivity() {
                         Thread {
                             SystemClock.sleep(300)
                             val bs: ByteArrayOutputStream = ByteArrayOutputStream()
-                            getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                            runOnUiThread {
+                                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
+                            }
+
                             var arrayArray = returnValueList()
 
                             val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
@@ -272,6 +278,7 @@ class MainActivity : AppCompatActivity() {
     /**螢幕截圖*/
     private fun getScreenShot(): Bitmap? {
         //藉由View來Cache全螢幕畫面後放入Bitmap
+
         val mView = window.decorView
         mView.isDrawingCacheEnabled = true
         mView.buildDrawingCache()

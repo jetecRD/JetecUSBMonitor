@@ -51,10 +51,10 @@ class SettingActivity : AppCompatActivity() {
         var norSetting: ArrayList<String> = ArrayList()
         /**若需要新增APP設定就放這邊*/
         norSetting.add(getString(R.string.factoryReset))//恢復原廠
-        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
-        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
-        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
-        norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
+//        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
+//        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
+//        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
+//        norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
 //        norSetting.add(getString(R.string.nightMode))
         /**若需要新增APP設定就放這邊*/
         val layoutManager = LinearLayoutManager(this@SettingActivity)
