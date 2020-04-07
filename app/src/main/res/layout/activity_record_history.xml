@@ -36,7 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@android:color/transparent"
-                android:drawableBottom="@drawable/noun_return_1207895"
+                android:drawableBottom="@drawable/noun_return"
                 android:gravity="center"
                 android:paddingBottom="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"

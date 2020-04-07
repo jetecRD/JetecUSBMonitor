@@ -16,12 +16,12 @@ import android.util.Log
 import android.view.*
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.isNotEmpty
-import androidx.core.view.size
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.applandeo.materialcalendarview.CalendarView
+import com.applandeo.materialcalendarview.EventDay
 import com.bumptech.glide.Glide
 import com.chauthai.swipereveallayout.SwipeRevealLayout
 import com.chauthai.swipereveallayout.ViewBinderHelper
@@ -31,13 +31,11 @@ import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.GetSavedHashArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
-import com.jetec.usbmonitor.Model.SpinnerClickActivity
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
-import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONArray
-import org.w3c.dom.Text
 import java.lang.Exception
+import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
@@ -47,8 +45,8 @@ import kotlin.collections.HashSet
 
 class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
-    var filtered:Boolean = false
-    lateinit var btFilterReturn:Button
+    var filtered: Boolean = false
+    lateinit var btFilterReturn: Button
 
     companion object {
         val RESULT_CODE = 1
@@ -57,7 +55,6 @@ class RecordHistoryActivity : AppCompatActivity() {
 
     }
 
-    lateinit var imageView: ImageView
 
     private lateinit var mAdapter: MyAdapter
 
@@ -72,16 +69,16 @@ class RecordHistoryActivity : AppCompatActivity() {
     }
 
     /**設置回復搜尋的按鈕*/
-     fun returnSearchButton() {
+    fun returnSearchButton() {
         btFilterReturn = findViewById(R.id.button_filterReturn)
         if (!filtered) {
             btFilterReturn.visibility = View.GONE
-        }else  btFilterReturn.visibility = View.VISIBLE
+        } else btFilterReturn.visibility = View.VISIBLE
 
         btFilterReturn.setOnClickListener {
             filtered = false
             returnSearchButton()
-            Toast.makeText(this,getString(R.string.resultFilter),Toast.LENGTH_LONG).show()
+            Toast.makeText(this, getString(R.string.resultFilter), Toast.LENGTH_LONG).show()
             mAdapter.updateList()
 
 
@@ -93,8 +90,10 @@ class RecordHistoryActivity : AppCompatActivity() {
         val floatingActionMenu =
             findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
         val floatUUID = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByUUID)
-        val floatDeviceName = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDeviceName)
-        val floatTester = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByTester)
+        val floatDeviceName =
+            findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDeviceName)
+        val floatTester =
+            findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByTester)
         val floatDate = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDate)
         floatUUID.setOnClickListener {
             filterEvent(getString(R.string.searchBytUUIDLabel))
@@ -116,71 +115,143 @@ class RecordHistoryActivity : AppCompatActivity() {
     }
 
     /**設置篩選功能*/
-    private fun filterEvent(title:String) {
+    private fun filterEvent(title: String) {
         val mBuilder = AlertDialog.Builder(this)
-        val view = layoutInflater.inflate(R.layout.history_filter_dialog, null)
+        val view: View = if (title.contains(getString(R.string.searchByDate))) {
+            layoutInflater.inflate(R.layout.history_date_filter_dialog, null)
+        } else {
+            layoutInflater.inflate(R.layout.history_filter_dialog, null)
+        }
+
         mBuilder.setView(view)
         val titleTitle = view.findViewById<TextView>(R.id.textView_FilterDialogTitle)//主標題
         titleTitle.text = title
-        val headerTitle = view.findViewById<TextView>(R.id.textView_FilterDialogHeader)//副標題
-        var headerString = title.substring(title.lastIndexOf(" "))
-        headerTitle.text = headerString
         val dialog = mBuilder.create()
-        val spinner: Spinner = view.findViewById(R.id.spinner_FilterId)
         val btCancel: Button = view.findViewById(R.id.button_SettingDialogCancel)
         val btOK: Button = view.findViewById(R.id.button_SettingDialogOK)
         btCancel.setOnClickListener { dialog.dismiss() }
 
-        GetSavedHashArray(this,object :GetSavedHashArray.AsyncResponse{
-            override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
-                Log.d(TAG, ": $hashArray");
-                var arrayList = ArrayList<String>()
-                when(title){
-                    getString(R.string.searchBytUUIDLabel)->{
-                        arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
-                    }
-                    getString(R.string.searchByDaviceNameLabel)->{
-                        arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
-                    }
-                    getString(R.string.searchByTester)->{
-                        arrayList = toArrayList(hashArray[GetSavedHashArray.TESTER])
-                    }
-                    getString(R.string.searchByDate)->{
-                        arrayList = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
-                    }
+        if (!title.contains(getString(R.string.searchByDate))) {
+            /**以一般spinner做篩選*/
+            val spinner: Spinner = view.findViewById(R.id.spinner_FilterId)
+            val headerTitle = view.findViewById<TextView>(R.id.textView_FilterDialogHeader)//副標題
+            var headerString = title.substring(title.lastIndexOf(" "))
 
+            headerTitle.text = headerString
+            GetSavedHashArray(this, object : GetSavedHashArray.AsyncResponse {
+                override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
+                    Log.d(TAG, ": $hashArray");
+                    var arrayList = ArrayList<String>()
+                    when (title) {
+                        getString(R.string.searchBytUUIDLabel) -> {
+                            arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_UUID])
+                        }
+                        getString(R.string.searchByDaviceNameLabel) -> {
+                            arrayList = toArrayList(hashArray[GetSavedHashArray.DEVICE_NAME])
+                        }
+                        getString(R.string.searchByTester) -> {
+                            arrayList = toArrayList(hashArray[GetSavedHashArray.TESTER])
+                        }
+                        getString(R.string.searchByDate) -> {
+                            arrayList = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+                        }
+
+                    }
+                    val arrayAdapter = ArrayAdapter(
+                        this@RecordHistoryActivity
+                        , android.R.layout.simple_dropdown_item_1line, arrayList
+                    )
+                    spinner.adapter = arrayAdapter
+                    runOnUiThread {
+                        btOK.setOnClickListener {
+                            when (title) {
+                                getString(R.string.searchBytUUIDLabel) -> {
+                                    mAdapter.updateFilterList(
+                                        spinner.selectedItem.toString()
+                                        , GetSavedHashArray.DEVICE_UUID
+                                    )
+                                }
+                                getString(R.string.searchByDaviceNameLabel) -> {
+                                    mAdapter.updateFilterList(
+                                        spinner.selectedItem.toString()
+                                        , GetSavedHashArray.DEVICE_NAME
+                                    )
+                                }
+                                getString(R.string.searchByTester) -> {
+                                    mAdapter.updateFilterList(
+                                        spinner.selectedItem.toString()
+                                        , GetSavedHashArray.TESTER
+                                    )
+                                }
+                                getString(R.string.searchByDate) -> {
+
+                                }
+                            }
+                            dialog.dismiss()
+                            filtered = true
+                            returnSearchButton()
+
+                        }
+                    }
                 }
-                val arrayAdapter = ArrayAdapter(this@RecordHistoryActivity
-                    ,android.R.layout.simple_dropdown_item_1line,arrayList)
-                spinner.adapter = arrayAdapter
-                runOnUiThread {
-                    btOK.setOnClickListener {
-                        when(title){
-                            getString(R.string.searchBytUUIDLabel)->{
-                                mAdapter.updateFilterList(spinner.selectedItem.toString()
-                                    ,GetSavedHashArray.DEVICE_UUID)
-                            }
-                            getString(R.string.searchByDaviceNameLabel)->{
-                                mAdapter.updateFilterList(spinner.selectedItem.toString()
-                                    ,GetSavedHashArray.DEVICE_NAME)
-                            }
-                            getString(R.string.searchByTester)->{
-                                mAdapter.updateFilterList(spinner.selectedItem.toString()
-                                    ,GetSavedHashArray.TESTER)
-                            }
-                            getString(R.string.searchByDate)->{
-                                mAdapter.updateFilterList(spinner.selectedItem.toString()
-                                    ,GetSavedHashArray.TIME_DATE)
+            }).execute()
+        } else {
+            /**以Date日曆做篩選*/
+            var calendar: CalendarView = view.findViewById(R.id.calendarView_dataFilter)
+
+            GetSavedHashArray(this, object : GetSavedHashArray.AsyncResponse {
+                override fun processFinish(hashArray: HashMap<Int, HashSet<String>>) {
+                    var arrayList = ArrayList<String>()
+                    when (title) {
+                        getString(R.string.searchByDate) -> {
+                            arrayList = toArrayList(hashArray[GetSavedHashArray.TIME_DATE])
+                        }
+                    }
+                    var events: MutableList<EventDay> = ArrayList()
+                    for (i in 0 until arrayList.size) {
+                        val mCalender = Calendar.getInstance()
+                        val sdf = SimpleDateFormat("yyyy/MM/dd")
+                        var date: Date
+                        try {
+                            date = sdf.parse(arrayList[i])
+                        } catch (e: Exception) {
+                            date = sdf.parse("2019/12/01")
+                            Log.w(TAG, "錯誤: $e");
+                        }
+                        mCalender.time = date
+                        events.add(EventDay(mCalender, R.drawable.noun_save_calenders))
+                        runOnUiThread {
+                            calendar.setEvents(events)
+                        }
+                    }
+                    runOnUiThread {
+                        btOK.setOnClickListener {
+                            when (title) {
+                                getString(R.string.searchByDate) -> {
+                                    val sdf = SimpleDateFormat("yyyy/MM/dd")
+
+                                    for (calendar in calendar.selectedDates) {
+                                        val getCalender = sdf.format(calendar.time)
+                                        if (arrayList.contains(getCalender)) {
+                                            mAdapter.updateFilterList(getCalender
+                                                , GetSavedHashArray.TIME_DATE)
+                                            dialog.dismiss()
+                                            filtered = true
+                                            returnSearchButton()
+                                        } else {
+                                            Toast.makeText(this@RecordHistoryActivity
+                                                ,"The $getCalender is no data",Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                }
                             }
                         }
-                        dialog.dismiss()
-                        filtered = true
-                        returnSearchButton()
-
                     }
                 }
-            }
-        }).execute()
+            }).execute()
+        }
+
+
         dialog.show()
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         val dm = DisplayMetrics()
@@ -265,13 +336,12 @@ class RecordHistoryActivity : AppCompatActivity() {
 
         if (recyclerView.computeVerticalScrollExtent() +
             recyclerView.computeVerticalScrollOffset() >= recyclerView.computeVerticalScrollRange()
-        ){
+        ) {
             return mAdapter.itemCount > 2
 
-        }else{
+        } else {
             return false
         }
-
 
     }
 
@@ -289,8 +359,9 @@ class RecordHistoryActivity : AppCompatActivity() {
 
     /**設置使用者碰到螢幕後要做的事*/
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        val floatingActionMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
-        if (ev?.action == MotionEvent.ACTION_DOWN && floatingActionMenu.isOpened){
+        val floatingActionMenu =
+            findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
+        if (ev?.action == MotionEvent.ACTION_DOWN && floatingActionMenu.isOpened) {
             floatingActionMenu.close(true)
         }
         return super.dispatchTouchEvent(ev)
@@ -313,7 +384,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         private val binderHelper = ViewBinderHelper()
         private val activity: Activity
         private var arrayList: ArrayList<ArrayList<HashMap<String, String>>>
-        private lateinit var cAdapter:ChildRecyclerView
+        private lateinit var cAdapter: ChildRecyclerView
 
         constructor(
             data: MutableList<Data>,
@@ -324,7 +395,6 @@ class RecordHistoryActivity : AppCompatActivity() {
             this.activity = activity
             this.arrayList = arrayList
         }
-
 
 
         fun updateList() {
@@ -367,39 +437,39 @@ class RecordHistoryActivity : AppCompatActivity() {
             return arrayTotal
         }
 
-        fun updateFilterList(condition:String,search:Int) {
-                Thread{
-                    data.clear()
-                    var mSaved:MutableList<Data>
-                    when(search){
-                        GetSavedHashArray.DEVICE_UUID->{
-                            mSaved = DataBase.getInstance(activity).dataUao.searchByUUID(condition)
-                        }
-                        GetSavedHashArray.DEVICE_NAME->{
-                            mSaved = DataBase.getInstance(activity).dataUao.searchByDeviceName(condition)
-                        }
-                        GetSavedHashArray.TESTER->{
-                            mSaved = DataBase.getInstance(activity).dataUao.searchByTester(condition)
-                        }
-                        GetSavedHashArray.TIME_DATE->{
-                            mSaved = DataBase.getInstance(activity).dataUao.searchByTimeDate(condition)
-                        }
-                        else->{
-                            mSaved = DataBase.getInstance(activity).dataUao.allData
-                        }
+        fun updateFilterList(condition: String, search: Int) {
+            Thread {
+                data.clear()
+                var mSaved: MutableList<Data>
+                when (search) {
+                    GetSavedHashArray.DEVICE_UUID -> {
+                        mSaved = DataBase.getInstance(activity).dataUao.searchByUUID(condition)
                     }
-                    data = mSaved
-                    var arrayTotal = setChildValues()
-                    arrayList = arrayTotal
-                    activity.runOnUiThread{
-                        notifyDataSetChanged()
-                        cAdapter.notifyDataSetChanged()
+                    GetSavedHashArray.DEVICE_NAME -> {
+                        mSaved =
+                            DataBase.getInstance(activity).dataUao.searchByDeviceName(condition)
+                    }
+                    GetSavedHashArray.TESTER -> {
+                        mSaved = DataBase.getInstance(activity).dataUao.searchByTester(condition)
+                    }
+                    GetSavedHashArray.TIME_DATE -> {
+                        mSaved = DataBase.getInstance(activity).dataUao.searchByTimeDate(condition)
+                    }
+                    else -> {
+                        mSaved = DataBase.getInstance(activity).dataUao.allData
+                    }
+                }
+                data = mSaved
+                var arrayTotal = setChildValues()
+                arrayList = arrayTotal
+                activity.runOnUiThread {
+                    notifyDataSetChanged()
+                    cAdapter.notifyDataSetChanged()
 
-                    }
-                }.start()
+                }
+            }.start()
 
         }
-
 
 
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {

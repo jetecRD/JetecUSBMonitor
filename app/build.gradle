@@ -6,6 +6,10 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 29
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
     defaultConfig {
         applicationId "com.jetec.usbmonitor"
         minSdkVersion 24
@@ -27,6 +31,7 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'androidx.core:core-ktx:1.2.0'
@@ -60,6 +65,8 @@ dependencies {
     implementation 'com.chauthai.swipereveallayout:swipe-reveal-layout:1.4.1'//RecyclerView側滑出現選單
     //https://github.com/chthai64/SwipeRevealLayout
 
+    implementation 'com.applandeo:material-calendar-view:1.7.0'//日曆元件
+    //https://github.com/Applandeo/Material-Calendar-View
     //Room資料庫
     def room_version = "2.2.1"
     def lifecycle_version = "2.2.0"
