@@ -1,34 +1,49 @@
 package com.jetec.usbmonitor.Controller
 
+import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Typeface
-import androidx.appcompat.app.AppCompatActivity
-import android.os.Bundle
-import android.os.Looper
+import android.net.Uri
+import android.os.*
+import android.os.StrictMode.VmPolicy
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
+import com.itextpdf.text.*
+import com.itextpdf.text.pdf.BaseFont
+import com.itextpdf.text.pdf.PdfWriter
+import com.itextpdf.text.pdf.draw.LineSeparator
+import com.jetec.usbmonitor.Model.MakeSinglePDFReport
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
-import java.lang.StringBuilder
+import java.io.File
+import java.io.FileOutputStream
+import kotlin.math.log
+
 
 class ReviewDataActivity : AppCompatActivity() {
+    val TAG:String = ReviewDataActivity::class.java.simpleName+"My"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContentView(R.layout.activity_review_data)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1000);
+        }
         setMenu()
         setValue()
 
@@ -104,6 +119,15 @@ class ReviewDataActivity : AppCompatActivity() {
                 }
                 val mAdapter = MySetRecycler(arrayList)
                 runOnUiThread {
+                    var btExportPDF = findViewById<ImageButton>(R.id.button_ReviewDataExport)
+                    btExportPDF.setOnClickListener {
+//                        makePDF(saved, arrayList);
+                        val makePDF = MakeSinglePDFReport()
+                        makePDF.makeSinglePDF(this,saved, arrayList)
+                        output(makePDF.fileName)
+
+
+                    }
                     tvTester.text = tester
                     tvUUID.text = uuid
                     tvDeviceName.text = deviceName
@@ -119,11 +143,26 @@ class ReviewDataActivity : AppCompatActivity() {
 
         }.start()
     }
+    /**輸出檔案*/
+    private fun output(fileName: String) {
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val builder = VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+        builder.detectFileUriExposure()
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val filelocation = File(Environment.getExternalStorageDirectory(), fileName)
+        val path: Uri = Uri.fromFile(filelocation)
+        val fileIntent = Intent(Intent.ACTION_SEND)
+        fileIntent.type = "text/plain"
+        fileIntent.putExtra(Intent.EXTRA_SUBJECT, "我的資料")
+        fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        fileIntent.putExtra(Intent.EXTRA_STREAM, path)
+        startActivity(Intent.createChooser(fileIntent, "Send Mail"))
+    }
 
-
+    /**設置參數顯示的RecyclerView*/
     private class MySetRecycler : RecyclerView.Adapter<MySetRecycler.ViewHolder> {
         private var arrayList:ArrayList<HashMap<String,String>>
-
 
         class ViewHolder(v:View): RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_item_RecordTitle)
@@ -162,5 +201,3 @@ class ReviewDataActivity : AppCompatActivity() {
         }
     }
 }
-
-

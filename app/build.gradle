@@ -67,6 +67,9 @@ dependencies {
 
     implementation 'com.applandeo:material-calendar-view:1.7.0'//日曆元件
     //https://github.com/Applandeo/Material-Calendar-View
+
+    implementation 'com.itextpdf:itextpdf:5.5.13.1'//寫PDF
+    //https://mvnrepository.com/artifact/com.itextpdf/itextpdf/5.5.13.1
     //Room資料庫
     def room_version = "2.2.1"
     def lifecycle_version = "2.2.0"
