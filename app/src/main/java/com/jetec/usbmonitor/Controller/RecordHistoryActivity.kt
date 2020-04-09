@@ -9,7 +9,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
+import android.os.StrictMode
 import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.Log
@@ -31,9 +34,11 @@ import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.GetSavedHashArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
+import com.jetec.usbmonitor.Model.PDFModel.PDFReportMaker
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
+import java.io.File
 import java.lang.Exception
 import java.text.SimpleDateFormat
 import java.util.*
@@ -46,7 +51,7 @@ import kotlin.collections.HashSet
 class RecordHistoryActivity : AppCompatActivity() {
     val TAG = RecordHistoryActivity::class.java.simpleName + "My"
     var filtered: Boolean = false
-    lateinit var btFilterReturn: Button
+    lateinit var btFilterReturn: ImageButton
 
     companion object {
         val RESULT_CODE = 1
@@ -87,6 +92,8 @@ class RecordHistoryActivity : AppCompatActivity() {
 
     /**設置點擊事件*/
     private fun setClick() {
+        val btExportPDF: ImageButton =
+            findViewById(R.id.button_HistoryDataExport)
         val floatingActionMenu =
             findViewById<FloatingActionMenu>(R.id.floatingActionMenuButton_Filter)
         val floatUUID = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByUUID)
@@ -95,6 +102,12 @@ class RecordHistoryActivity : AppCompatActivity() {
         val floatTester =
             findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByTester)
         val floatDate = findViewById<FloatingActionButton>(R.id.floatingActionButton_FilterByDate)
+        btExportPDF.setOnClickListener {
+            val maker = PDFReportMaker()
+            val mSaved = mAdapter.getNowDisplayData()
+            maker.makeMultiplePDF(this,mSaved)
+            maker.getFileName()?.let { it1 -> output(it1) }
+        }
         floatUUID.setOnClickListener {
             filterEvent(getString(R.string.searchBytUUIDLabel))
             floatingActionMenu.close(true)
@@ -112,6 +125,23 @@ class RecordHistoryActivity : AppCompatActivity() {
             floatingActionMenu.close(true)
         }
 
+    }
+
+    /**輸出檔案*/
+    private fun output(fileName: String) {
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val builder = StrictMode.VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+        builder.detectFileUriExposure()
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val filelocation = File(Environment.getExternalStorageDirectory(), fileName)
+        val path: Uri = Uri.fromFile(filelocation)
+        val fileIntent = Intent(Intent.ACTION_SEND)
+        fileIntent.type = "text/plain"
+        fileIntent.putExtra(Intent.EXTRA_SUBJECT, "我的資料")
+        fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        fileIntent.putExtra(Intent.EXTRA_STREAM, path)
+        startActivity(Intent.createChooser(fileIntent, "Send Mail"))
     }
 
     /**設置篩選功能*/
@@ -233,14 +263,18 @@ class RecordHistoryActivity : AppCompatActivity() {
                                     for (calendar in calendar.selectedDates) {
                                         val getCalender = sdf.format(calendar.time)
                                         if (arrayList.contains(getCalender)) {
-                                            mAdapter.updateFilterList(getCalender
-                                                , GetSavedHashArray.TIME_DATE)
+                                            mAdapter.updateFilterList(
+                                                getCalender
+                                                , GetSavedHashArray.TIME_DATE
+                                            )
                                             dialog.dismiss()
                                             filtered = true
                                             returnSearchButton()
                                         } else {
-                                            Toast.makeText(this@RecordHistoryActivity
-                                                ,"The $getCalender is no data",Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(
+                                                this@RecordHistoryActivity
+                                                , "The $getCalender is no data", Toast.LENGTH_SHORT
+                                            ).show()
                                         }
                                     }
                                 }
@@ -395,7 +429,9 @@ class RecordHistoryActivity : AppCompatActivity() {
             this.activity = activity
             this.arrayList = arrayList
         }
-
+        fun getNowDisplayData():List<Data>{
+            return data
+        }
 
         fun updateList() {
             Thread {

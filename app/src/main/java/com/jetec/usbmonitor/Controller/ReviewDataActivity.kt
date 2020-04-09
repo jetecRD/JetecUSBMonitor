@@ -1,13 +1,11 @@
 package com.jetec.usbmonitor.Controller
 
-import android.app.ProgressDialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.*
 import android.os.StrictMode.VmPolicy
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -18,19 +16,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
-import com.itextpdf.text.*
-import com.itextpdf.text.pdf.BaseFont
-import com.itextpdf.text.pdf.PdfWriter
-import com.itextpdf.text.pdf.draw.LineSeparator
-import com.jetec.usbmonitor.Model.MakeSinglePDFReport
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
+import com.jetec.usbmonitor.Model.PDFModel.PDFReportMaker
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
 import java.io.File
-import java.io.FileOutputStream
-import kotlin.math.log
 
 
 class ReviewDataActivity : AppCompatActivity() {
@@ -121,17 +113,15 @@ class ReviewDataActivity : AppCompatActivity() {
                 runOnUiThread {
                     var btExportPDF = findViewById<ImageButton>(R.id.button_ReviewDataExport)
                     btExportPDF.setOnClickListener {
-//                        makePDF(saved, arrayList);
-                        val makePDF = MakeSinglePDFReport()
+                        val makePDF =
+                            PDFReportMaker()
                         makePDF.makeSinglePDF(this,saved, arrayList)
-                        output(makePDF.fileName)
-
-
+                        makePDF.getFileName()?.let { it1 -> output(it1) }
                     }
                     tvTester.text = tester
                     tvUUID.text = uuid
                     tvDeviceName.text = deviceName
-                    tvTime.text = date+" "+time
+                    tvTime.text = "$date $time"
                     edNote.setText(note)
                     Glide.with(this).load(saved[0].screenShot).fitCenter()
                         .placeholder(R.drawable.create_image).into(imageScreenShot)

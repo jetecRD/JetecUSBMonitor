@@ -30,17 +30,34 @@
             android:layout_height="match_parent"
             >
 
-
-            <Button
+            <ImageButton
                 android:id="@+id/button_filterReturn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@android:color/transparent"
-                android:drawableBottom="@drawable/noun_return"
-                android:gravity="center"
-                android:paddingBottom="10dp"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/button_ripple"
+                android:backgroundTint="#00FFFFFF"
+                android:foregroundGravity="center"
+                android:padding="10dp"
+                android:src="@drawable/noun_return"
+                android:tint="#000000"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/button_HistoryDataExport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="16dp"
+                android:background="@drawable/button_ripple"
+                android:backgroundTint="#00FFFFFF"
+                android:foregroundGravity="center"
+                android:padding="10dp"
+                android:src="@drawable/noun_export"
+                android:tint="#000000"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/button_filterReturn"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
