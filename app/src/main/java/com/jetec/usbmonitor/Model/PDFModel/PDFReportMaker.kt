@@ -2,11 +2,17 @@ package com.jetec.usbmonitor.Model.PDFModel
 
 import android.app.Activity
 import android.app.ProgressDialog
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.net.Uri
 import android.os.Environment
+import android.os.Looper
+import android.os.StrictMode
+import android.os.SystemClock
 import android.util.Log
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import com.itextpdf.text.*
 import com.itextpdf.text.pdf.*
 import com.itextpdf.text.pdf.draw.LineSeparator
@@ -14,7 +20,9 @@ import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.Tools.Tools.Companion.hex2Dec
 import com.jetec.usbmonitor.Model.Tools.Tools.Companion.setUnit
 import com.jetec.usbmonitor.R
+import org.json.JSONArray
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -23,7 +31,7 @@ import java.util.*
 
 class PDFReportMaker {
     val TAG = PDFReportMaker::class.java.simpleName + "My"
-    private var fileName:String
+    private var fileName: String
     private var deviceUUID: String? = null
     private var deviceName: String? = null
     private var deviceType: String? = null
@@ -31,22 +39,19 @@ class PDFReportMaker {
     private var date: String? = null
     private var time: String? = null
     private var note: String? = null
-    private var screenShot:ByteArray? = null
-    private var takeImage:String? = null
+    private var screenShot: ByteArray? = null
+    private var takeImage: String? = null
 
-    constructor(){
-        val sdf = SimpleDateFormat("yyyyMMddHHmm")
-        val now = Date()
-//        fileName = "/USB_" + sdf.format(now) + ".pdf"
+    constructor() {
         fileName = "/USB_Monitor.pdf"
     }
 
     class Header : PdfPageEventHelper() {
-        private lateinit var header:Phrase
-        private lateinit var fileName:String
+        private var header: Phrase? = null
+        private var fileName: String? = null
 
 
-        fun setHeader(header:Phrase,fileName:String){
+        fun setHeader(header: Phrase, fileName: String) {
             this.header = header
             this.fileName = fileName
         }
@@ -64,15 +69,30 @@ class PDFReportMaker {
                 80f,
                 0f
             )
-            ColumnText.showTextAligned(canvas, Element.ALIGN_RIGHT, Phrase("FileName: " + fileName.replace("/", "")), 559f, 60f, 0f)
+            ColumnText.showTextAligned(
+                canvas,
+                Element.ALIGN_RIGHT,
+                Phrase("FileName: " + fileName?.replace("/", "")),
+                559f,
+                60f,
+                0f
+            )
         }
 
     }
+
     /**設置單份PDF輸出*/
-    fun  makeSinglePDF(activity:Activity,saved:List<Data>,arrayList: ArrayList<HashMap<String,String>>){
-        val dialog = ProgressDialog.show(activity, "", activity.getString(R.string.pleaseWait), true)
-        dialog.setCancelable(true)
-        Thread{
+    fun makeSinglePDF(
+        activity: Activity,
+        saved: List<Data>,
+        arrayList: ArrayList<HashMap<String, String>>
+    ) {
+        val dialog =
+            ProgressDialog.show(activity, "", activity.getString(R.string.pleaseWait), true)
+        val sdf = SimpleDateFormat("yyyyMMddHHmm")
+        val now = Date()
+        fileName = "/USB_${sdf.format(now)}.pdf"
+        Thread {
             try {
                 deviceUUID = saved[0].deviceUUID
                 deviceName = saved[0].deviceName
@@ -83,7 +103,8 @@ class PDFReportMaker {
                 note = saved[0].note
                 screenShot = saved[0].screenShot
                 takeImage = saved[0].takeImage
-                val mFilePath = Environment.getExternalStorageDirectory().toString() + fileName //決定路徑
+                val mFilePath =
+                    Environment.getExternalStorageDirectory().toString() + fileName //決定路徑
                 val document = Document(PageSize.A4) //設置紙張大小
                 val writer = PdfWriter.getInstance(document, FileOutputStream(mFilePath))
                 val event =
@@ -98,15 +119,23 @@ class PDFReportMaker {
                 setSettingParameterInfo(activity, arrayList, document) //設置參數顯示(第二層)
                 setSubtitle(document, "Measured Image") //設置灰色底分項標題(第三層)
                 setImage(activity, document) //放入圖片
-                val segoe = BaseFont.createFont("assets/segoe_print.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED)
+                val segoe = BaseFont.createFont(
+                    "assets/segoe_print.ttf",
+                    BaseFont.IDENTITY_H,
+                    BaseFont.NOT_EMBEDDED
+                )
                 val footerSegoe =
                     Font(segoe, 14f, Font.NORMAL)
-                event.setHeader(Phrase("Jetec Electronics Co., Ltd.", footerSegoe),fileName)
+                event.setHeader(Phrase("Jetec Electronics Co., Ltd.", footerSegoe), fileName)
                 document.newPage()
                 /**===============================================================================*/
                 document.close()
                 dialog.dismiss()
-            }catch (e:Exception){
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Success!", Toast.LENGTH_SHORT).show()
+                    output(fileName, activity)
+                }
+            } catch (e: Exception) {
                 dialog.dismiss()
                 Log.w(TAG, "makeSinglePDF: $e")
                 Toast.makeText(activity, "輸出失敗，請聯繫開發人員", Toast.LENGTH_SHORT).show()
@@ -114,19 +143,24 @@ class PDFReportMaker {
 
         }.start()
     }
+
     /**設置一次多筆PDF輸出*/
-    fun makeMultiplePDF(activity:Activity,saved:List<Data>){
+    fun makeMultiplePDF(activity: Activity, saved: List<Data>) {
         if (saved.isEmpty()) return
-        val dialog = ProgressDialog.show(activity, "", activity.getString(R.string.pleaseWait), true)
-        dialog.setCancelable(true)
-        Thread{
+        val dialog =
+            ProgressDialog.show(activity, "", activity.getString(R.string.pleaseWait), true)
+        val sdf = SimpleDateFormat("yyyyMMddHHmm")
+        val now = Date()
+        fileName = "/All_${sdf.format(now)}.pdf"
+        Thread {
             try {
-                val mFilePath = Environment.getExternalStorageDirectory().toString() + fileName //決定路徑
+                val mFilePath =
+                    Environment.getExternalStorageDirectory().toString() + fileName //決定路徑
                 val document = Document(PageSize.A4) //設置紙張大小
                 val writer = PdfWriter.getInstance(document, FileOutputStream(mFilePath))
-
                 val word = BaseFont.createFont(
-                    "assets/helvetica.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED) //設置字體
+                    "assets/helvetica.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED
+                ) //設置字體
                 val event = SetPDFPageNum(word, 13, PageSize.A4)
                 var eventLogo = Header()
                 writer.pageEvent = eventLogo
@@ -134,7 +168,7 @@ class PDFReportMaker {
                 document.open()
 
                 /**===============================================================================*/
-                for (x in saved.indices){//這裡會決定生出幾張
+                for (x in saved.indices) {//這裡會決定生出幾張
                     deviceUUID = saved[x].deviceUUID
                     deviceName = saved[x].deviceName
                     deviceType = saved[x].deviceType
@@ -144,30 +178,58 @@ class PDFReportMaker {
                     note = saved[x].note
                     screenShot = saved[x].screenShot
                     takeImage = saved[x].takeImage
+                    var jsonArray = JSONArray(saved[x].json_MySave)
+                    var arrayList = ArrayList<HashMap<String, String>>()
+                    for (i in 0 until jsonArray.length()) {//分解json的內容
+                        val jsonObject = jsonArray.getJSONObject(i)
+                        val hashMap = HashMap<String, String>()
+                        val strValue = jsonObject.getString("value")
+                        val strPV = jsonObject.getString("PV")
+                        val strEH = jsonObject.getString("EH")
+                        val strEL = jsonObject.getString("EL")
+                        val strTitle = jsonObject.getString("Title")
+                        val strOrigin = jsonObject.getString("Origin")
+                        hashMap["value"] = strValue
+                        hashMap["PV"] = strPV
+                        hashMap["EH"] = strEH
+                        hashMap["EL"] = strEL
+                        hashMap["Title"] = strTitle
+                        hashMap["Origin"] = strOrigin
+                        arrayList.add(hashMap)
+                    }
+
                     setTitle(document)
                     setSubtitle(document, "Device Information") //設置灰色底分項標題
                     setDeviceInformation(document) //設置第一層的裝置資訊
                     setSubtitle(document, "Device Setting & Measured Data") //設置灰色底分項標題(第二層)
-//                    setSettingParameterInfo(activity, arrayList, document) //設置參數顯示(第二層)
+                    setSettingParameterInfo(activity, arrayList, document) //設置參數顯示(第二層)
                     setSubtitle(document, "Measured Image") //設置灰色底分項標題(第三層)
-//                    setImage(activity, document) //放入圖片
-                    val segoe = BaseFont.createFont("assets/segoe_print.ttf", BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED)
+                    setImage(activity, document) //放入圖片
+                    val segoe = BaseFont.createFont(
+                        "assets/segoe_print.ttf",
+                        BaseFont.IDENTITY_H,
+                        BaseFont.NOT_EMBEDDED
+                    )
                     val footerSegoe =
                         Font(segoe, 14f, Font.NORMAL)
-                    eventLogo.setHeader(Phrase("Jetec Electronics Co., Ltd.", footerSegoe),fileName)
-
-
-
+                    eventLogo.setHeader(
+                        Phrase("Jetec Electronics Co., Ltd.", footerSegoe),
+                        fileName
+                    )
                     document.newPage()
                 }
 
 
                 /**===============================================================================*/
                 document.close()
-                dialog.dismiss()
-            }catch (e:Exception){
+                activity.runOnUiThread {
+                    Toast.makeText(activity, "Success!", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                    output(fileName, activity)
+                }
+            } catch (e: Exception) {
                 Log.w(TAG, "makeSinglePDF: $e")
-                activity.runOnUiThread{
+                activity.runOnUiThread {
                     Toast.makeText(activity, "輸出失敗，請聯繫開發人員", Toast.LENGTH_SHORT).show()
                     dialog.dismiss()
                 }
@@ -234,8 +296,15 @@ class PDFReportMaker {
     private fun setImage(activity: Activity, document: Document) {
         val table = PdfPTable(2)
         table.horizontalAlignment = 100
+        val bos = ByteArrayOutputStream()
+        val bitmap: Bitmap = if (screenShot!!.isNotEmpty()) {
+            BitmapFactory.decodeByteArray(screenShot, 0, screenShot!!.size)
+        } else BitmapFactory.decodeResource(activity.resources, R.drawable.no_image)
+
+        bitmap.compress(Bitmap.CompressFormat.PNG, 30, bos)
+        val bytes = bos.toByteArray()
         val imageL =
-            Image.getInstance(screenShot)
+            Image.getInstance(bytes)
         val cellL = PdfPCell(imageL, true)
         cellL.border = Rectangle.NO_BORDER
         cellL.horizontalAlignment = Element.ALIGN_CENTER
@@ -243,6 +312,7 @@ class PDFReportMaker {
         cellL.paddingTop = 10f
         cellL.paddingRight = 10f
         table.addCell(cellL)
+
         val imageR: Image
         if (takeImage?.isNotEmpty()!!) {
             imageR = Image.getInstance(takeImage)
@@ -276,47 +346,13 @@ class PDFReportMaker {
     }
 
 
-    /**設置所量測到的數值 */
-    @Throws(DocumentException::class, IOException::class)
-    private fun setValue(arrayList: ArrayList<HashMap<String, String>>, document: Document) {
-        val chinese = BaseFont.createFont(
-            "assets/taipei.ttf"
-            , BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED
-        )
-        val titleChinese =
-            Font(chinese, 16f, Font.NORMAL)
-        val table = PdfPTable(arrayList.size)
-        table.widthPercentage = 100f
-        for (i in arrayList.indices) {
-            val unit = setUnit(
-                hex2Dec(arrayList[i]["Origin"]!!.substring(12, 14)).toInt()
-            )
-            val setValue =
-                """
-                ${arrayList[i]["Title"].toString()}
-                ${arrayList[i]["value"]}$unit
-                """.trimIndent()
-            val cell = PdfPCell(Paragraph(Phrase(0f, setValue, titleChinese)))
-            cell.border = Rectangle.NO_BORDER
-            cell.paddingBottom = 5f
-            cell.paddingTop = 5f
-            table.addCell(cell)
-        }
-        document.add(table)
-        val line =
-            LineSeparator(
-                2f,
-                100f,
-                BaseColor.BLACK,
-                Element.ALIGN_CENTER,
-                0f
-            ) //設定一條黑粗橫線
-        document.add(line)
-    }
-
     /**設置參數顯示(第二層) */
     @Throws(DocumentException::class, IOException::class)
-    private fun setSettingParameterInfo(activity: Activity, arrayList: ArrayList<HashMap<String, String>>, document: Document) {
+    private fun setSettingParameterInfo(
+        activity: Activity,
+        arrayList: ArrayList<HashMap<String, String>>,
+        document: Document
+    ) {
         val chinese = BaseFont.createFont(
             "assets/taipei.ttf"
             , BaseFont.IDENTITY_H, BaseFont.NOT_EMBEDDED
@@ -371,7 +407,7 @@ class PDFReportMaker {
         val cellContent = arrayOf(
             "Device ID: $deviceUUID", "Device Name: $deviceName"
             , "Device's Sensor Type: $deviceType", "Tester: $tester"
-            , "Measure Time: $date$time", "Note: $note"
+            , "Measure Time: $date $time", "Note: $note"
         )
         for (i in cellContent.indices) {
             val titleChinese =
@@ -386,9 +422,21 @@ class PDFReportMaker {
         document.add(Paragraph(" ")) //空白行
     }
 
-    /**設置接口令PDF的檔案名稱可輸出至外部 */
-    fun getFileName(): String? {
-        return fileName
+    /**輸出檔案*/
+    private fun output(fileName: String, activity: Activity) {
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val builder = StrictMode.VmPolicy.Builder()
+        StrictMode.setVmPolicy(builder.build())
+        builder.detectFileUriExposure()
+        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
+        val filelocation = File(Environment.getExternalStorageDirectory(), fileName)
+        val path: Uri = Uri.fromFile(filelocation)
+        val fileIntent = Intent(Intent.ACTION_SEND)
+        fileIntent.type = "text/plain"
+        fileIntent.putExtra(Intent.EXTRA_SUBJECT, "我的資料")
+        fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        fileIntent.putExtra(Intent.EXTRA_STREAM, path)
+        activity.startActivity(Intent.createChooser(fileIntent, "Send Mail"))
     }
 
 

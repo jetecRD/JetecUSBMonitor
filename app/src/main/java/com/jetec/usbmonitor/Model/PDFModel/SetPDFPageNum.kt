@@ -38,7 +38,7 @@ class SetPDFPageNum: PdfPageEventHelper {
             e.printStackTrace()
         }
         val pageS = writer!!.pageNumber
-        val foot1 = "$pageS/"
+        val foot1 = "$pageS  /"
         val footer = Phrase(foot1, fontDetail)
         val len = bf!!.getWidthPoint(foot1, presentFontSize)
 

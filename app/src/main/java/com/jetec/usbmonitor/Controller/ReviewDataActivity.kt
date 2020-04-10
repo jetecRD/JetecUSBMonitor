@@ -115,8 +115,8 @@ class ReviewDataActivity : AppCompatActivity() {
                     btExportPDF.setOnClickListener {
                         val makePDF =
                             PDFReportMaker()
-                        makePDF.makeSinglePDF(this,saved, arrayList)
-                        makePDF.getFileName()?.let { it1 -> output(it1) }
+                            makePDF.makeSinglePDF(this,saved, arrayList)
+
                     }
                     tvTester.text = tester
                     tvUUID.text = uuid
@@ -133,22 +133,7 @@ class ReviewDataActivity : AppCompatActivity() {
 
         }.start()
     }
-    /**輸出檔案*/
-    private fun output(fileName: String) {
-        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
-        val builder = VmPolicy.Builder()
-        StrictMode.setVmPolicy(builder.build())
-        builder.detectFileUriExposure()
-        //->遇上exposed beyond app through ClipData.Item.getUri() 錯誤時在onCreate加上這行
-        val filelocation = File(Environment.getExternalStorageDirectory(), fileName)
-        val path: Uri = Uri.fromFile(filelocation)
-        val fileIntent = Intent(Intent.ACTION_SEND)
-        fileIntent.type = "text/plain"
-        fileIntent.putExtra(Intent.EXTRA_SUBJECT, "我的資料")
-        fileIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        fileIntent.putExtra(Intent.EXTRA_STREAM, path)
-        startActivity(Intent.createChooser(fileIntent, "Send Mail"))
-    }
+
 
     /**設置參數顯示的RecyclerView*/
     private class MySetRecycler : RecyclerView.Adapter<MySetRecycler.ViewHolder> {
