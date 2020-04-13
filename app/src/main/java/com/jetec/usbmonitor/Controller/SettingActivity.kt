@@ -7,7 +7,10 @@ import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.SystemClock
 import android.text.Editable
+import android.text.InputFilter
+import android.text.InputType
 import android.text.TextWatcher
+import android.text.method.DigitsKeyListener
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.LayoutInflater
@@ -23,9 +26,11 @@ import com.jetec.usbmonitor.Model.AnalysisValueInfo
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.Initialization
+import com.jetec.usbmonitor.Model.Tools.MyInputFilter
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
+
 //import kotlinx.android.synthetic.main.activity_setting.*
 
 
@@ -54,7 +59,7 @@ class SettingActivity : AppCompatActivity() {
 //        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
 //        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
 //        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
-//        norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
+        norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
 //        norSetting.add(getString(R.string.nightMode))
         /**若需要新增APP設定就放這邊*/
         val layoutManager = LinearLayoutManager(this@SettingActivity)
@@ -65,21 +70,22 @@ class SettingActivity : AppCompatActivity() {
         dataList.adapter = mNormalAdapter
         mNormalAdapter?.setOnClick(object : NormalAdapter.OnItemClickListener {
             override fun onItemClick(view: View, position: Int, string: String) {
+                val mBuilder = AlertDialog.Builder(this@SettingActivity)
                 when (string) {
                     getString(R.string.factoryReset) -> {
-                        val mBuilder = AlertDialog.Builder(this@SettingActivity)
                         mBuilder.setTitle(getString(R.string.notice_AlarmTitle))
                         mBuilder.setMessage(getString(R.string.factoryResetCheckMessage))
                         mBuilder.setPositiveButton(getString(R.string.oK_Button)) { dialog, which ->
                             var dialog = ProgressDialog.show(
-                                this@SettingActivity,getString(R.string.progressing)
-                                ,getString(R.string.progressDialogMessage),false)
+                                this@SettingActivity, getString(R.string.progressing)
+                                , getString(R.string.progressDialogMessage), false
+                            )
                             Thread {
                                 Initialization(this@SettingActivity, MyStatus.deviceType).startINI()
                                 SystemClock.sleep(2000)
                                 var array = Tools.sendData("Get", 100, this@SettingActivity, 0)
                                 Log.d("Initialization", "GET=:$array ");
-                                while (array.size==0){
+                                while (array.size == 0) {
                                     array = Tools.sendData("Get", 100, this@SettingActivity, 0)
                                     SystemClock.sleep(500)
                                 }
@@ -103,16 +109,84 @@ class SettingActivity : AppCompatActivity() {
                         mBuilder.setNegativeButton(getString(R.string.cancelButton), null)
                         mBuilder.show()
                     }
-                    getString(R.string.lockTester)->{}
-                    getString(R.string.changePassword)->{
+                    getString(R.string.lockTester) -> {
+                    }
+                    getString(R.string.changePassword) -> {
 
                     }
-                    getString(R.string.changeTester)->{
+                    getString(R.string.changeTester) -> {
 
                     }
-                    getString(R.string.changeDeviceName)->{
-
+                    getString(R.string.changeDeviceName) -> {
+                        setDeviceName(mBuilder, string)
                     }
+                }
+            }
+
+            /**設置裝置名稱(綁定感測器的名字)*/
+            private fun setDeviceName(mBuilder: AlertDialog.Builder, title: String) {
+                var deviceName = Tools.sendData(
+                    "Name", 100
+                    , this@SettingActivity, 1
+                )
+                if (deviceName.contains("Error1") || deviceName.isEmpty()) {
+                    Toast.makeText(this@SettingActivity, "錯誤，請嘗試重新接線或通知原廠", Toast.LENGTH_LONG)
+                        .show()
+                    finish()
+                    return
+                }
+                var view = layoutInflater.inflate(R.layout.setting_dialog, null)
+                val originName = deviceName[deviceName.size - 1].substring(4)
+
+                mBuilder.setView(view)
+                var btOK = view.findViewById<Button>(R.id.button_SettingDialogOK)
+                var btCancel = view.findViewById<Button>(R.id.button_SettingDialogCancel)
+                var edINput = view.findViewById<EditText>(R.id.editText_SettingDialogInput)
+                var tvTitle = view.findViewById<TextView>(R.id.textView_SettingDialogTitle)
+                tvTitle.text = title
+                val dialog = mBuilder.create()
+                dialog.show()
+                val dm = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(dm)
+                dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+                edINput.hint = originName
+                edINput.inputType = InputType.TYPE_CLASS_TEXT
+                edINput.filters = arrayOf(MyInputFilter(this@SettingActivity))
+                btCancel.setOnClickListener {
+                    dialog.dismiss()
+                }
+                btOK.setOnClickListener {
+                    val input = edINput.text.toString()
+                    if (input.isEmpty()) {
+                        Toast.makeText(
+                            this@SettingActivity,
+                            getString(R.string.dontBlank),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    val buffer = StringBuffer()
+                    val sendByte = Tools.byteArrayToHexStr(input.toByteArray())
+                    buffer.append(Tools.byteArrayToHexStr("Name".toByteArray()))
+                    buffer.append(sendByte)
+                    for (i in 0 until (40 - buffer.length)) {
+                        buffer.append("0")
+                    }
+                    if (buffer.length > 40) {
+                        Toast.makeText(
+                            this@SettingActivity
+                            , getString(R.string.tooLongInput), Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    Tools.fromHexString(buffer.toString())?.let { it1 ->
+                        Tools.sendData(
+                            it1, 100
+                            , this@SettingActivity, 0
+                        )
+                    }
+                    dialog.dismiss()
                 }
             }
         })
@@ -194,32 +268,19 @@ class SettingActivity : AppCompatActivity() {
         val dm = DisplayMetrics()
         windowManager.defaultDisplay.getMetrics(dm)
         dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-        dialog.window!!.setLayout(dm.widthPixels-180, ViewGroup.LayoutParams.WRAP_CONTENT)
+        dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
         tvTitle.text = settingList[position].getLabel()
         dpFilter = settingList[position].getDP()
         edINput.hint =
             String.format("%." + dpFilter + "f", settingList[position].getValue().toDouble())
-        edINput.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                if (s.toString().contains(".")) {
-                    val s1 = s.toString()
-                    if (s1.length - dpFilter - 1 > 2) {
-                        s!!.delete(dpFilter + 3, s1.length)
-                    }
-                }
-                if (dpFilter == 0 && s.toString().contains(".")) {
-                    s!!.delete(s.toString().length - 1, s.toString().length)
-                }
-
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-        })
+        edINput.filters = arrayOf(MyInputFilter(this@SettingActivity, dpFilter))
+        edINput.inputType = InputType.TYPE_CLASS_NUMBER
+        edINput.inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL
+        edINput.keyListener = DigitsKeyListener.getInstance("0123456789-.")
 
         btCancel.setOnClickListener { dialog.dismiss() }
         btOK.setOnClickListener {
-            if(edINput.text.toString().isNotEmpty() && Numornot(edINput.text.toString())){
+            if (edINput.text.toString().isNotEmpty() && Numornot(edINput.text.toString())) {
                 var originValue = settingList[position].getOriginValue()
                 val value =
                     Tools.toHex(
@@ -257,11 +318,12 @@ class SettingActivity : AppCompatActivity() {
                 }.start()
 
             }//if
-            else{
+            else {
                 dialog.dismiss()
             }
         }
     }
+
     fun Numornot(msg: String): Boolean {
         return try {
             msg.toDouble()
@@ -270,6 +332,7 @@ class SettingActivity : AppCompatActivity() {
             false
         }
     }
+
     /**以回傳的值找出特定index的方法*/
     private fun getModifyIndex(s: String?): Int {
         var comp = s!!.substring(0, 4)
@@ -428,11 +491,11 @@ class SettingActivity : AppCompatActivity() {
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
             holder.tvTitle.text = norSetting[position]
             var title = holder.tvTitle.text.toString()
-            if (title.contains(holder.parent.context.getString(R.string.nightMode))){
+            if (title.contains(holder.parent.context.getString(R.string.nightMode))) {
                 holder.checkBox.visibility = View.VISIBLE
-            }else if (title.contains(holder.parent.context.getString(R.string.lockTester))){
+            } else if (title.contains(holder.parent.context.getString(R.string.lockTester))) {
                 holder.checkBox.visibility = View.VISIBLE
-            }else holder.checkBox.visibility = View.GONE
+            } else holder.checkBox.visibility = View.GONE
 
 
             holder.parent.setOnClickListener {

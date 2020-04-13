@@ -74,5 +74,7 @@
     <string name="searchByTester">Search By Tester</string>
     <string name="searchByDate">Search By Date</string>
     <string name="resultFilter">Result filter</string>
+    <string name="tooLongInput">Input was too long!Please less as 15 word</string>
+    <string name="dontBlank">Do not blank!</string>
 
 </resources>

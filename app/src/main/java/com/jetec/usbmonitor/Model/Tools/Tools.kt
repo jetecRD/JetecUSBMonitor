@@ -16,6 +16,7 @@ import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import kotlin.math.roundToInt
 
 
 class Tools() {
@@ -45,7 +46,7 @@ class Tools() {
         }
 
         fun toHex(t: Int): String? {
-            val it = Math.round(t.toDouble() * 1).toShort()
+            val it = (t.toDouble() * 1).roundToInt().toShort()
             return String.format("%04x", it)
         }
 
