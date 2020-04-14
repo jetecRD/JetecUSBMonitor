@@ -81,5 +81,7 @@
     <string name="oldPasswordIsWrong">The old Password is wrong!</string>
     <string name="inputNewPasswordHint">Please input New Password...</string>
     <string name="inputOldPasswordHint">Please input Old Password...</string>
+    <string name="pswIsWrong">Wrong password</string>
+    <string name="pleaseInput">Please input...</string>
 
 </resources>

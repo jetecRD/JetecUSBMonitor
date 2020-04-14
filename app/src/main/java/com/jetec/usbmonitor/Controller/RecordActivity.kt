@@ -30,10 +30,15 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.facebook.stetho.Stetho
 import com.google.gson.Gson
 import com.jetec.usbmonitor.Model.CrashHandler
+import com.jetec.usbmonitor.Model.EventBusModel.ImageEvent
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
+import kotlinx.android.synthetic.main.activity_record.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -44,7 +49,7 @@ import java.util.concurrent.atomic.AtomicReference
 class RecordActivity : AppCompatActivity() {
     val TAG = RecordActivity::class.java.simpleName + "My"
     private var currentImagePath = ""
-
+    private lateinit var screenShot: ByteArray
     companion object {
         const val IMAGE_REQUEST = 100
         const val REQUEST_FINE_LOCATION_PERMISSION = 101;
@@ -102,12 +107,14 @@ class RecordActivity : AppCompatActivity() {
                 = intent.getStringArrayListExtra(INTENTNOW)as ArrayList<HashMap<String,String>>
         val date = intent.getStringExtra(IntentMyNowYMd)
         val time = intent.getStringExtra(IntentMyNowHms)
-        val b = intent.getByteArrayExtra(GetScreenShot)
+//        val b = intent.getByteArrayExtra(GetScreenShot)
+
 //        val bs:ByteArrayOutputStream = ByteArrayOutputStream()
 //                getScreenShot()?.compress(Bitmap.CompressFormat.JPEG,100,bs)
 //                intent.putExtra(RecordActivity.GetScreenShot,bs.toByteArray())
-        var screenShot = BitmapFactory.decodeByteArray(b, 0, b.size);
-        //        imageView_RecordTakePhoto.setImageBitmap(SSB)
+//        var screenShot = BitmapFactory.decodeByteArray(b, 0, b.size);
+
+//                imageView_RecordTakePhoto.setImageBitmap(screenShot)
         var edTime = findViewById<EditText>(R.id.editText_RecordTime)
             edTime.setText("$date $time")
         val layoutManager = StaggeredGridLayoutManager(3,StaggeredGridLayoutManager.VERTICAL);
@@ -124,15 +131,29 @@ class RecordActivity : AppCompatActivity() {
             edName.isFocusableInTouchMode = false
             edName.setText(tester)}
         btRecordSave.setOnClickListener {
-            saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = "$date $time")
+            saveData2DataBase(inforArray = infoArrayList,screenShot = screenShot,dateTime = "$date $time")
         }
         btRecordCancel.setOnClickListener {
             finish()
         }
     }
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
+    }
 
+    override fun onStop() {
+        super.onStop()
+        EventBus.getDefault().unregister(this)
+    }
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    open fun onMessageEvent(event: ImageEvent){
+        BitmapFactory.decodeByteArray(event.image, 0, event.image.size)
+        screenShot = event.image
+    }
     private fun saveData2DataBase(inforArray:ArrayList<HashMap<String,String>>
                                   ,screenShot:ByteArray,dateTime:String){
+
         val deivceUUID = Tools.sendData("Name",200,this,0)//獲取裝置唯一碼
         val deivceName = Tools.sendData("Name",200,this,1)
 //        Log.d(TAG, ":$deivceUUID ");
@@ -153,8 +174,9 @@ class RecordActivity : AppCompatActivity() {
         }
         var dialog = ProgressDialog.show(this,getString(R.string.saving),getString(R.string.pleaseWait),true)
         dialog.setCancelable(true)
+        var lock:Int = if (MyStatus.lock) 1 else 0
         Thread{
-
+            Log.d(TAG, ":$screenShot ");
             DataBase.getInstance(this).dataUao.insertData(
                 deivceUUID[0]
                 ,deivceName[1].substring(4)
@@ -165,7 +187,8 @@ class RecordActivity : AppCompatActivity() {
                 ,currentImagePath
                 ,noteString
                 ,dateTime.substring(0,dateTime.indexOf(" "))
-                ,dateTime.substring(dateTime.indexOf(" ")))
+                ,dateTime.substring(dateTime.indexOf(" "))
+                ,lock)
             runOnUiThread{
                 dialog.dismiss()
                 finish()

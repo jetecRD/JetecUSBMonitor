@@ -76,6 +76,7 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                 var date = savedData[0].date
                 var time = savedData[0].time
                 var note = savedData[0].note
+                val lock = savedData[0].lockTester
                 val jsonArray = JSONArray(savedData[0].json_MySave)
                 currentImagePath = savedData[0].takeImage
 
@@ -112,6 +113,7 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                 val btSave = findViewById<Button>(R.id.button_RecordSave)
                 imageView = findViewById(R.id.imageView_RecordTakePhoto)
                 runOnUiThread {
+                    if (lock == 1){edTester.isFocusableInTouchMode = false}
                     edTester.setText(tester)
                     edDateTime.setText("$date\n$time")
                     edNote.setText(note)

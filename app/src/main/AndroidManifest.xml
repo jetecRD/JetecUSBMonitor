@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Controller.ModifyHistoryDataActivity"></activity>
+        <activity android:name=".Controller.ImageTryyyyyyyyyyyyy"></activity>
+        <activity android:name=".Controller.ModifyHistoryDataActivity" />
         <activity android:name=".Controller.ReviewDataActivity" />
         <activity android:name=".Controller.RecordActivity" />
         <activity android:name=".Controller.RecordHistoryActivity" />

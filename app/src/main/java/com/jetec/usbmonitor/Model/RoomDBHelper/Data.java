@@ -21,6 +21,17 @@ public class Data {
 
     private String date;//紀錄日期
     private String time;//紀錄時間
+    private int lockTester;//鎖定測試員
+
+    public int getLockTester() {
+        return lockTester;
+    }
+
+    public void setLockTester(int lockTester) {
+        this.lockTester = lockTester;
+    }
+
+
 
     public String getDate() {
         return date;

@@ -80,6 +80,6 @@ dependencies {
     // Lifecycle components
     implementation "androidx.lifecycle:lifecycle-extensions:$lifecycle_version"
     annotationProcessor "androidx.lifecycle:lifecycle-compiler:$lifecycle_version"
-
+    implementation 'org.greenrobot:eventbus:3.2.0'
 
 }

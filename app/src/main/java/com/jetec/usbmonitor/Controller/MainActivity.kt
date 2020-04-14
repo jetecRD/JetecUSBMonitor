@@ -1,5 +1,6 @@
 package com.jetec.usbmonitor.Controller
 
+//import kotlinx.android.synthetic.main.activity_main.*
 import android.app.PendingIntent
 import android.app.ProgressDialog
 import android.app.Service
@@ -11,7 +12,6 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.Typeface
-import android.hardware.camera2.params.RecommendedStreamConfigurationMap
 import android.hardware.usb.UsbDevice
 import android.hardware.usb.UsbManager
 import android.os.*
@@ -27,7 +27,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.facebook.stetho.Stetho
 import com.github.clans.fab.FloatingActionButton
 import com.github.clans.fab.FloatingActionMenu
 import com.google.gson.Gson
@@ -39,11 +38,14 @@ import com.jetec.usbmonitor.Model.AnalysisValueInfo
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.DeviceValue
+import com.jetec.usbmonitor.Model.EventBusModel.ImageEvent
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.Tools.MyStatus
 import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
-//import kotlinx.android.synthetic.main.activity_main.*
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import org.greenrobot.eventbus.ThreadMode
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -145,7 +147,6 @@ class MainActivity : AppCompatActivity() {
                                 getScreenShot()?.compress(Bitmap.CompressFormat.JPEG, 100, bs)
                             }
 
-
                             val sdfyMd = SimpleDateFormat("yyyy/MM/dd")
                             val now = Date()
                             val tvTimeinfo = findViewById<TextView>(R.id.textView_timeInfo)
@@ -164,7 +165,7 @@ class MainActivity : AppCompatActivity() {
                             val date = sdfyMd.format(now)
                             val time = tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)
                             var tester:String = if (MyStatus.lock) MyStatus.lockedTester else getString(R.string.unfilled)
-
+                            var lock:Int = if (MyStatus.lock) 1 else 0
                             DataBase.getInstance(this).dataUao.insertData(
                                 deivceUUID[0],
                                 deivceName[1].substring(4),
@@ -175,7 +176,8 @@ class MainActivity : AppCompatActivity() {
                                 "",
                                 getString(R.string.flashSavetoNote),
                                 date,
-                                time
+                                time,
+                                lock
                             )
 
                             dialog.dismiss()
@@ -231,9 +233,10 @@ class MainActivity : AppCompatActivity() {
                                 RecordActivity.IntentMyNowHms, tvTimeinfo.text
                                     .substring(tvTimeinfo.text.indexOf("\n") + 1)
                             )
-
-                            intent.putExtra(RecordActivity.GetScreenShot, bs.toByteArray())
                             runOnUiThread {
+                                val msg = ImageEvent()
+                                msg.image = bs.toByteArray()
+                                EventBus.getDefault().postSticky(msg)
                                 startActivity(intent)
                             }
                         }.start()
@@ -243,10 +246,16 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
-
-
         }
     }
+
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onMessageEvent(event: ImageEvent) {}
+    override fun onStart() {
+        super.onStart()//另一個在onStop
+        EventBus.getDefault().register(this)
+    }
+
 
     /**紀錄時取得值的基本資訊*/
     private fun returnValueList(): ArrayList<HashMap<String, String>> {
@@ -678,6 +687,7 @@ class MainActivity : AppCompatActivity() {
         MyStatus.autoMeasurement = false
         toolBar.menu.findItem(R.id.action_Auto).isChecked = MyStatus.autoMeasurement
         autoMeasure()
+        EventBus.getDefault().unregister(this)
     }
 
     /**自動偵測*/

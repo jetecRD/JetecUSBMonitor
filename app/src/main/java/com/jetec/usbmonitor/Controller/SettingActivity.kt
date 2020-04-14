@@ -51,14 +51,14 @@ class SettingActivity : AppCompatActivity() {
 
     }
 
-    /**設置設定應用程式設定部分&新增APP功能設定*/
+    /**設置設定應用程式設定部分 & 新增APP功能設定*/
     private fun applicationSetting() {
         var norSetting: ArrayList<String> = ArrayList()
         /**若需要新增APP設定就放這邊*/
         norSetting.add(getString(R.string.factoryReset))//恢復原廠
         norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
         norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
-//        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
+        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
         norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
 //        norSetting.add(getString(R.string.nightMode))//夜間模式
         /**若需要新增APP設定就放這邊*/
@@ -120,7 +120,7 @@ class SettingActivity : AppCompatActivity() {
                         ).show()
                         return@setOnClickListener
                     }
-                    if (!oldW.contentEquals(MyStatus.password)) {
+                    if (oldW != MyStatus.password) {
                         Toast.makeText(
                             this@SettingActivity
                             , getString(R.string.oldPasswordIsWrong), Toast.LENGTH_SHORT
@@ -244,11 +244,44 @@ class SettingActivity : AppCompatActivity() {
         })
 
         mNormalAdapter?.setOnChange(object :NormalAdapter.OnChangeClickListener{
-            override fun onChangeClick(view: View, position: Int, string: String,status: Boolean) {
+            override fun onChangeClick(checkBox: CheckBox, position: Int, string: String,status: Boolean) {
+                val mBuilder = AlertDialog.Builder(this@SettingActivity)
+                if (!checkBox.isPressed) return//解決設定為true時直接被觸發
                 when(string){
                     getString(R.string.lockTester)->{
-                        MyStatus.lock = status
-
+                        var view = layoutInflater.inflate(R.layout.setting_dialog, null)
+                        mBuilder.setView(view)
+                        var btOK = view.findViewById<Button>(R.id.button_SettingDialogOK)
+                        var btCancel = view.findViewById<Button>(R.id.button_SettingDialogCancel)
+                        var edINput = view.findViewById<EditText>(R.id.editText_SettingDialogInput)
+                        var tvTitle = view.findViewById<TextView>(R.id.textView_SettingDialogTitle)
+                        val dialog = mBuilder.create()
+                        dialog.show()
+                        val dm = DisplayMetrics()
+                        windowManager.defaultDisplay.getMetrics(dm)
+                        dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+                        edINput.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                        tvTitle.text = string
+                        edINput.hint = getString(R.string.pleaseInput)
+                        btCancel.setOnClickListener {
+                            checkBox.isChecked = !status
+                            dialog.dismiss() }
+                        btOK.setOnClickListener {
+                            val input = edINput.text.toString()
+                            if (input.isEmpty()) {
+                                checkBox.isChecked = !status
+                                Toast.makeText(this@SettingActivity,getString(R.string.dontBlank),Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener}
+                            if (input != MyStatus.password){
+                                checkBox.isChecked = !status
+                                Toast.makeText(this@SettingActivity,
+                                        getString(R.string.pswIsWrong),Toast.LENGTH_SHORT).show()
+                                return@setOnClickListener
+                            }
+                            MyStatus.lock = status
+                            dialog.dismiss()
+                        }
                     }
                 }
             }
@@ -571,7 +604,7 @@ class SettingActivity : AppCompatActivity() {
                 onItemClick.onItemClick(holder.parent, position, holder.tvTitle.text.toString())
             }
             holder.checkBox.setOnCheckedChangeListener { compoundButton, b ->
-                onCheckBoxClick.onChangeClick(holder.parent,position,holder.tvTitle.text.toString(),holder.checkBox.isChecked)
+                onCheckBoxClick.onChangeClick(holder.checkBox,position,holder.tvTitle.text.toString(),holder.checkBox.isChecked)
             }
         }
 
@@ -580,7 +613,7 @@ class SettingActivity : AppCompatActivity() {
 
         }
         interface OnChangeClickListener {
-            fun onChangeClick(view: View, position: Int, string: String,status:Boolean)
+            fun onChangeClick(view: CheckBox, position: Int, string: String,status:Boolean)
         }
 
     }
