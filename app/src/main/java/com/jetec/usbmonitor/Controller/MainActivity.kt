@@ -163,13 +163,13 @@ class MainActivity : AppCompatActivity() {
                             val json = Gson().toJson(arrayArray)
                             val date = sdfyMd.format(now)
                             val time = tvTimeinfo.text.substring(tvTimeinfo.text.indexOf("\n") + 1)
-
+                            var tester:String = if (MyStatus.lock) MyStatus.lockedTester else getString(R.string.unfilled)
 
                             DataBase.getInstance(this).dataUao.insertData(
                                 deivceUUID[0],
                                 deivceName[1].substring(4),
                                 MyStatus.deviceType,
-                                getString(R.string.unfilled),
+                                tester,
                                 json,
                                 bs.toByteArray(),
                                 "",

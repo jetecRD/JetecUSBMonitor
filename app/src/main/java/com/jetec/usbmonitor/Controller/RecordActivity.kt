@@ -118,6 +118,11 @@ class RecordActivity : AppCompatActivity() {
 
         val btRecordSave = findViewById<Button>(R.id.button_RecordSave)
         val btRecordCancel = findViewById<Button>(R.id.button_RecordCancel)
+        val edName = findViewById<EditText>(R.id.editText_RecordName)
+        var tester:String = if (MyStatus.lock) MyStatus.lockedTester else ""
+        if (MyStatus.lock){
+            edName.isFocusableInTouchMode = false
+            edName.setText(tester)}
         btRecordSave.setOnClickListener {
             saveData2DataBase(inforArray = infoArrayList,screenShot = b,dateTime = "$date $time")
         }
@@ -149,6 +154,7 @@ class RecordActivity : AppCompatActivity() {
         var dialog = ProgressDialog.show(this,getString(R.string.saving),getString(R.string.pleaseWait),true)
         dialog.setCancelable(true)
         Thread{
+
             DataBase.getInstance(this).dataUao.insertData(
                 deivceUUID[0]
                 ,deivceName[1].substring(4)

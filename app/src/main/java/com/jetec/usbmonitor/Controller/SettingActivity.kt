@@ -51,16 +51,16 @@ class SettingActivity : AppCompatActivity() {
 
     }
 
-    /**設置設定應用程式設定部分*/
+    /**設置設定應用程式設定部分&新增APP功能設定*/
     private fun applicationSetting() {
         var norSetting: ArrayList<String> = ArrayList()
         /**若需要新增APP設定就放這邊*/
         norSetting.add(getString(R.string.factoryReset))//恢復原廠
-//        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
-//        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
+        norSetting.add(getString(R.string.lockTester))//鎖定測試者(解鎖要驗證)
+        norSetting.add(getString(R.string.changePassword))//變更密碼(需驗證)
 //        norSetting.add(getString(R.string.changeTester))//變更測試人員(需驗證)
         norSetting.add(getString(R.string.changeDeviceName))//變更感測器名稱
-//        norSetting.add(getString(R.string.nightMode))
+//        norSetting.add(getString(R.string.nightMode))//夜間模式
         /**若需要新增APP設定就放這邊*/
         val layoutManager = LinearLayoutManager(this@SettingActivity)
         layoutManager.orientation = LinearLayoutManager.VERTICAL
@@ -73,46 +73,13 @@ class SettingActivity : AppCompatActivity() {
                 val mBuilder = AlertDialog.Builder(this@SettingActivity)
                 when (string) {
                     getString(R.string.factoryReset) -> {
-                        mBuilder.setTitle(getString(R.string.notice_AlarmTitle))
-                        mBuilder.setMessage(getString(R.string.factoryResetCheckMessage))
-                        mBuilder.setPositiveButton(getString(R.string.oK_Button)) { dialog, which ->
-                            var dialog = ProgressDialog.show(
-                                this@SettingActivity, getString(R.string.progressing)
-                                , getString(R.string.progressDialogMessage), false
-                            )
-                            Thread {
-                                Initialization(this@SettingActivity, MyStatus.deviceType).startINI()
-                                SystemClock.sleep(2000)
-                                var array = Tools.sendData("Get", 100, this@SettingActivity, 0)
-                                Log.d("Initialization", "GET=:$array ");
-                                while (array.size == 0) {
-                                    array = Tools.sendData("Get", 100, this@SettingActivity, 0)
-                                    SystemClock.sleep(500)
-                                }
-                                for (i in 0 until array.size) {
-                                    if (getModifyIndex(array[i]) != -1) {
-                                        settingList[getModifyIndex(array[i])]
-                                            .setValue(
-                                                Tools.returnValue(
-                                                    array[i]!!.substring(4, 6).toInt(),
-                                                    Tools.hextoDecShort(array[i]!!.substring(6, 10))
-                                                )
-                                            )
-                                        runOnUiThread {
-                                            mAdapter?.notifyDataSetChanged()
-                                            dialog.dismiss()
-                                        }
-                                    }
-                                }
-                            }.start()
-                        }
-                        mBuilder.setNegativeButton(getString(R.string.cancelButton), null)
-                        mBuilder.show()
+                        resetFactorySetting(mBuilder)
                     }
                     getString(R.string.lockTester) -> {
+
                     }
                     getString(R.string.changePassword) -> {
-
+                        changePassword(mBuilder, string)
                     }
                     getString(R.string.changeTester) -> {
 
@@ -121,6 +88,91 @@ class SettingActivity : AppCompatActivity() {
                         setDeviceName(mBuilder, string)
                     }
                 }
+            }
+            /**更改企業密碼*/
+            private fun changePassword(
+                mBuilder: AlertDialog.Builder,
+                string: String
+            ) {
+                val view = layoutInflater.inflate(R.layout.change_password_dialog, null)
+                mBuilder.setView(view)
+                var title = view.findViewById<TextView>(R.id.textView_SettingDialogTitle)
+                var edOld = view.findViewById<EditText>(R.id.editText_OldPassword)
+                var edNew = view.findViewById<EditText>(R.id.editText_NewPassword)
+                var btOK = view.findViewById<Button>(R.id.button_SettingDialogOK)
+                var btCancel = view.findViewById<Button>(R.id.button_SettingDialogCancel)
+                val dialog = mBuilder.create()
+                dialog.show()
+                val dm = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(dm)
+                dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+
+                title.text = string
+                btCancel.setOnClickListener { dialog.dismiss() }
+                btOK.setOnClickListener {
+                    val oldW = edOld.text.toString()
+                    val newW = edNew.text.toString()
+                    if (oldW.isEmpty() || newW.isEmpty()) {
+                        Toast.makeText(
+                            this@SettingActivity
+                            , getString(R.string.dontBlank), Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    if (!oldW.contentEquals(MyStatus.password)) {
+                        Toast.makeText(
+                            this@SettingActivity
+                            , getString(R.string.oldPasswordIsWrong), Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    MyStatus.password = newW
+                    Toast.makeText(
+                        this@SettingActivity
+                        , getString(R.string.successModify), Toast.LENGTH_SHORT
+                    ).show()
+                    dialog.dismiss()
+                }
+            }
+
+            /**恢復原廠設定*/
+            private fun resetFactorySetting(mBuilder: AlertDialog.Builder) {
+                mBuilder.setTitle(getString(R.string.notice_AlarmTitle))
+                mBuilder.setMessage(getString(R.string.factoryResetCheckMessage))
+                mBuilder.setPositiveButton(getString(R.string.oK_Button)) { dialog, which ->
+                    var dialog = ProgressDialog.show(
+                        this@SettingActivity, getString(R.string.progressing)
+                        , getString(R.string.progressDialogMessage), false
+                    )
+                    Thread {
+                        Initialization(this@SettingActivity, MyStatus.deviceType).startINI()
+                        SystemClock.sleep(2000)
+                        var array = Tools.sendData("Get", 100, this@SettingActivity, 0)
+                        Log.d("Initialization", "GET=:$array ");
+                        while (array.size == 0) {
+                            array = Tools.sendData("Get", 100, this@SettingActivity, 0)
+                            SystemClock.sleep(500)
+                        }
+                        for (i in 0 until array.size) {
+                            if (getModifyIndex(array[i]) != -1) {
+                                settingList[getModifyIndex(array[i])]
+                                    .setValue(
+                                        Tools.returnValue(
+                                            array[i]!!.substring(4, 6).toInt(),
+                                            Tools.hextoDecShort(array[i]!!.substring(6, 10))
+                                        )
+                                    )
+                                runOnUiThread {
+                                    mAdapter?.notifyDataSetChanged()
+                                    dialog.dismiss()
+                                }
+                            }
+                        }
+                    }.start()
+                }
+                mBuilder.setNegativeButton(getString(R.string.cancelButton), null)
+                mBuilder.show()
             }
 
             /**設置裝置名稱(綁定感測器的名字)*/
@@ -189,6 +241,18 @@ class SettingActivity : AppCompatActivity() {
                     dialog.dismiss()
                 }
             }
+        })
+
+        mNormalAdapter?.setOnChange(object :NormalAdapter.OnChangeClickListener{
+            override fun onChangeClick(view: View, position: Int, string: String,status: Boolean) {
+                when(string){
+                    getString(R.string.lockTester)->{
+                        MyStatus.lock = status
+
+                    }
+                }
+            }
+
         })
     }
 
@@ -463,6 +527,7 @@ class SettingActivity : AppCompatActivity() {
     class NormalAdapter : RecyclerView.Adapter<NormalAdapter.ViewHolder> {
         private var norSetting: ArrayList<String>
         private lateinit var onItemClick: OnItemClickListener
+        private lateinit var onCheckBoxClick: OnChangeClickListener
 
         class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
             val tvTitle = v.findViewById<TextView>(R.id.textView_norSettingTitle)!!
@@ -472,6 +537,9 @@ class SettingActivity : AppCompatActivity() {
 
         fun setOnClick(listener: OnItemClickListener) {
             this.onItemClick = listener
+        }
+        fun setOnChange(listener: OnChangeClickListener){
+            this.onCheckBoxClick = listener
         }
 
         constructor(arrayList: ArrayList<String>) : super() {
@@ -495,16 +563,24 @@ class SettingActivity : AppCompatActivity() {
                 holder.checkBox.visibility = View.VISIBLE
             } else if (title.contains(holder.parent.context.getString(R.string.lockTester))) {
                 holder.checkBox.visibility = View.VISIBLE
+                holder.checkBox.isChecked = MyStatus.lock
             } else holder.checkBox.visibility = View.GONE
 
 
             holder.parent.setOnClickListener {
                 onItemClick.onItemClick(holder.parent, position, holder.tvTitle.text.toString())
             }
+            holder.checkBox.setOnCheckedChangeListener { compoundButton, b ->
+                onCheckBoxClick.onChangeClick(holder.parent,position,holder.tvTitle.text.toString(),holder.checkBox.isChecked)
+            }
         }
 
         interface OnItemClickListener {
             fun onItemClick(view: View, position: Int, string: String)
+
+        }
+        interface OnChangeClickListener {
+            fun onChangeClick(view: View, position: Int, string: String,status:Boolean)
         }
 
     }

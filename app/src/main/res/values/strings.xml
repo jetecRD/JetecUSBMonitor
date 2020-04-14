@@ -76,5 +76,10 @@
     <string name="resultFilter">Result filter</string>
     <string name="tooLongInput">Input was too long!Please less as 15 word</string>
     <string name="dontBlank">Do not blank!</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="oldPasswordIsWrong">The old Password is wrong!</string>
+    <string name="inputNewPasswordHint">Please input New Password...</string>
+    <string name="inputOldPasswordHint">Please input Old Password...</string>
 
 </resources>
