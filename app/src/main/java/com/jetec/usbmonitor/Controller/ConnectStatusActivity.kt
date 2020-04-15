@@ -3,6 +3,7 @@ package com.jetec.usbmonitor.Controller
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.PendingIntent
+import android.app.Service
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -13,6 +14,7 @@ import android.hardware.usb.UsbManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.SystemClock
+import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import android.view.Window
@@ -36,7 +38,7 @@ import java.sql.RowId
 class ConnectStatusActivity : AppCompatActivity() {
     val TAG: String = ConnectStatusActivity::class.java.simpleName + "my"
     val ACTION_USB_PERMISSION: String = "com.jetec.usbmonitor"
-    lateinit var btGoHistory:Button
+    lateinit var btGoHistory: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,7 +51,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         setContentView(R.layout.activity_connect_status)
         btGoHistory = findViewById(R.id.button_Start2History)
         btGoHistory.setOnClickListener {
-            val intent = Intent(this,RecordHistoryActivity::class.java)
+            val intent = Intent(this, RecordHistoryActivity::class.java)
             startActivity(intent)
         }
         val filter = IntentFilter()
@@ -59,7 +61,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         registerReceiver(usbStatus, filter)
         val tvTitle = findViewById<TextView>(R.id.textView_Title)
         tvTitle.typeface = Typeface.createFromAsset(this.assets, "segoe_print.ttf")//設置字形
-
+        openEngineerMode(tvTitle)//開啟工程師模式的步驟
         val intent = intent
         var status: Boolean = intent.getBooleanExtra("ConnectedStatus", false)
         when (status) {
@@ -75,6 +77,80 @@ class ConnectStatusActivity : AppCompatActivity() {
 
 
     }//onCreate
+
+    /**開啟工程師模式的步驟
+     * 1.長按左上角藍色背景字直到震動
+     * 2.狂點左上角藍色背景字，必須一秒10下過關，會有大震動提示
+     * 3.長按中間的usb圖樣，直到顯示doge圖片*/
+    private fun openEngineerMode(tvTitle: TextView) {
+        var firstStep = false
+        var secondStep = false
+        tvTitle.setOnLongClickListener {
+            if (!firstStep) {
+                val v = application.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+                v.vibrate(100)
+                firstStep = true
+                Toast.makeText(this, "離解鎖工程師模式還有2個步驟", Toast.LENGTH_SHORT).show()
+                return@setOnLongClickListener true
+            }
+            true
+        }
+        var lastClick: Long = 0
+        var clickCount = 0
+        tvTitle.setOnClickListener {
+
+            if (secondStep) {
+                Toast.makeText(this, "已解除第二步驟囉~再猜猜看下一步是幹嘛吧", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            if (!firstStep) return@setOnClickListener
+            var currentClick = System.currentTimeMillis()
+            if (clickCount < 10) {
+                val a = currentClick - lastClick
+                if (a < 1000) {
+                    clickCount++
+                } else {
+                    clickCount = 0
+                }
+            } else {
+                secondStep = true
+                Toast.makeText(this, "離解鎖工程師模式剩1個步驟", Toast.LENGTH_SHORT).show()
+                val v = application.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+                v.vibrate(1000)
+            }
+            lastClick = currentClick
+
+        }
+        val igMark = findViewById<ImageView>(R.id.imageView_USBMark)
+        igMark.setOnLongClickListener {
+            if (!firstStep || !secondStep) return@setOnLongClickListener true
+            val v = application.getSystemService(Service.VIBRATOR_SERVICE) as Vibrator
+            v.vibrate(100)
+            val rotateAnimator = ObjectAnimator.ofFloat(igMark, "rotationY", 0f, 720f, 0f)
+            rotateAnimator.duration = 1000
+            rotateAnimator.start()
+            when ((Math.random() * 4).toInt()) {
+                0 -> {
+                    igMark.setImageDrawable(getDrawable(R.drawable.doge_engineer))
+                }
+                1 -> {
+                    igMark.setImageDrawable(getDrawable(R.drawable.dogememe))
+                }
+                2 -> {
+                    igMark.setImageDrawable(getDrawable(R.drawable.maxresdefault))
+                }
+                else -> {
+                    igMark.setImageDrawable(getDrawable(R.drawable.dogewow))
+                }
+            }
+            rotateAnimator.duration = 1000
+            rotateAnimator.start()
+            MyStatus.engineerModel = true
+            Toast.makeText(this, "已解鎖工程師模式!", Toast.LENGTH_SHORT).show()
+
+            true
+        }
+    }
 
     override fun onDestroy() {
         super.onDestroy()
@@ -101,7 +177,7 @@ class ConnectStatusActivity : AppCompatActivity() {
 
         try {
             if (manager.hasPermission(drivers!![0].device)) {
-                var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this,1)
+                var arrayList: ArrayList<String> = Tools.sendData("Jetec", 20, this, 1)
                 for (i in 0 until arrayList.size) {
                     if (arrayList[i]!!.contains("OK")) {
                         Thread {
@@ -149,7 +225,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         constraintBack.setBackgroundResource(R.drawable.background_r)
         textView_ConnectInfo.text = getString(R.string.pleaseInputDevice)
-        rotationYAnumationfield()
+        rotationYAnimationFail()
     }
 
     /**已通過認證後的行為*/
@@ -159,7 +235,7 @@ class ConnectStatusActivity : AppCompatActivity() {
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         constraintBack.setBackgroundResource(R.drawable.background_g)
         textView_ConnectInfo.text = getString(R.string.gettingDeviceInfo)
-        rotationYAnumationSuccess()
+        rotationYAnimationSuccess()
     }
 
     /**廣播包:偵測是否有拔除、插入以及完成權限確認等行為*/
@@ -195,7 +271,7 @@ class ConnectStatusActivity : AppCompatActivity() {
     }
 
     /**當正確連接到時旋轉icon*/
-    private fun rotationYAnumationSuccess() {
+    private fun rotationYAnimationSuccess() {
         val imageView_AuthIcon = findViewById<ImageView>(R.id.imageView_AuthIcon)
         val rotateAnimator = ObjectAnimator.ofFloat(imageView_AuthIcon, "rotationY", 0f, 180f, 0f)
         imageView_AuthIcon.setImageDrawable(getDrawable(R.drawable.noun_success))
@@ -204,7 +280,7 @@ class ConnectStatusActivity : AppCompatActivity() {
     }
 
     /**當拔除連線時旋轉icon*/
-    private fun rotationYAnumationfield() {
+    private fun rotationYAnimationFail() {
         val imageView_AuthIcon = findViewById<ImageView>(R.id.imageView_AuthIcon)
         val rotateAnimator = ObjectAnimator.ofFloat(imageView_AuthIcon, "rotationY", 0f, 180f, 0f)
         imageView_AuthIcon.setImageDrawable(getDrawable(R.drawable.noun_no_connection))
@@ -261,27 +337,27 @@ class ConnectStatusActivity : AppCompatActivity() {
     /**取得裝置資訊*/
     private fun getDeviceInfo() {
         var arrayList: ArrayList<String> = ArrayList()
-        var arrayInfo:ArrayList<String> = ArrayList()
+        var arrayInfo: ArrayList<String> = ArrayList()
         val textView_ConnectInfo = findViewById<TextView>(R.id.textView_ConnectInfo)
         Thread {
             SystemClock.sleep(1000)
             runOnUiThread {
-                arrayList = Tools.sendData("Rqs", 200, this,0)
-                arrayInfo = Tools.sendData("Get",200,this,0)
+                arrayList = Tools.sendData("Rqs", 200, this, 0)
+                arrayInfo = Tools.sendData("Get", 200, this, 0)
 //                Log.d(TAG, "$arrayList ");
-                if (arrayList.size>0){
+                if (arrayList.size > 0) {
                     textView_ConnectInfo.text = getString(R.string.successConnected)
-                }else{
+                } else {
                     textView_ConnectInfo.text = getString(R.string.pleaseInputDevice)
                 }
 
             }//結束第一個UI線程
             SystemClock.sleep(800)
-            if (arrayList.size>0){
-                runOnUiThread{
-                    var intent = Intent(this,MainActivity::class.java)
-                    intent.putExtra("Value",arrayList)//送值
-                    intent.putExtra("DeviceInfo",arrayInfo)//送參數
+            if (arrayList.size > 0) {
+                runOnUiThread {
+                    var intent = Intent(this, MainActivity::class.java)
+                    intent.putExtra("Value", arrayList)//送值
+                    intent.putExtra("DeviceInfo", arrayInfo)//送參數
                     startActivity(intent)
                     finish()
                 }

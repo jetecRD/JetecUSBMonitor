@@ -294,7 +294,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         var dialog = ProgressDialog.show(this, "", "讀取中...", true)
         dialog.setCancelable(true)
         Thread {
-            val savedData: MutableList<Data> = DataBase.getInstance(this).dataUao.allData
+            val savedData: MutableList<Data> = DataBase.getInstance(this).dataUao.allData.reversed().toMutableList()
 
             var arrayTotal = ArrayList<ArrayList<HashMap<String, String>>>()
             for (i in 0 until savedData.size) {//表示有幾個儲存
@@ -420,7 +420,7 @@ class RecordHistoryActivity : AppCompatActivity() {
         fun updateList() {
             Thread {
                 data.clear()
-                data = DataBase.getInstance(activity).dataUao.allData
+                data = DataBase.getInstance(activity).dataUao.allData.reversed().toMutableList()
                 var arrayTotal = setChildValues()
                 arrayList = arrayTotal
                 activity.runOnUiThread {

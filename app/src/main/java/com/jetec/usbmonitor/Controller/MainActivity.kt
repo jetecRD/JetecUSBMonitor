@@ -88,6 +88,8 @@ class MainActivity : AppCompatActivity() {
         autoMeasure()//自動偵測(程式內自行判斷)
         setFloatButton()//設置FloatButton
 
+        EngineerMode(this).engineer()//使用工程師模式
+
 
     }//onCreate
 

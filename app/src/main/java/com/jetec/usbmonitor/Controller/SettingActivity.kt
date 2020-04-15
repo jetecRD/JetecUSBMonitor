@@ -513,8 +513,8 @@ class SettingActivity : AppCompatActivity() {
     }
 
     /**設定感測器的RecyclerView的Adapter內容*/
-    class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
-        private var mSetting: MutableList<DeviceSetting>
+    class MyAdapter(private var mSetting: MutableList<DeviceSetting>) :
+        RecyclerView.Adapter<MyAdapter.ViewHolder>() {
         private lateinit var onItemClickListener: OnItemClickListener
         private lateinit var onSwitehClickListener: OnSwitchChangedListener
         val TAG = "SettingActivityMy"
@@ -526,11 +526,6 @@ class SettingActivity : AppCompatActivity() {
 
         fun setOnSwitchClickLinster(check: OnSwitchChangedListener) {
             this.onSwitehClickListener = check
-        }
-
-
-        constructor(mSetting: MutableList<DeviceSetting>) : super() {
-            this.mSetting = mSetting
         }
 
 

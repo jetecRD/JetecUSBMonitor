@@ -85,5 +85,7 @@
     <string name="pleaseInput">Please input...</string>
     <string name="plzInputPassword">Please input the password</string>
     <string name="plzInputChangeTester">Please input new TesterName</string>
+    <string name="IH">High Range</string>
+    <string name="IL">Low Range</string>
 
 </resources>

@@ -133,6 +133,12 @@ class Tools() {
                 4 -> {
                     return id2String(activity, R.string.C2F)
                 }
+                5->{
+                    return id2String(activity, R.string.IH)
+                }
+                6->{
+                    return id2String(activity, R.string.IL)
+                }
                 else -> {
                     return ""
                 }
