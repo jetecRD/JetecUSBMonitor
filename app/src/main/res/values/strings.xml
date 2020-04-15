@@ -83,5 +83,7 @@
     <string name="inputOldPasswordHint">Please input Old Password...</string>
     <string name="pswIsWrong">Wrong password</string>
     <string name="pleaseInput">Please input...</string>
+    <string name="plzInputPassword">Please input the password</string>
+    <string name="plzInputChangeTester">Please input new TesterName</string>
 
 </resources>

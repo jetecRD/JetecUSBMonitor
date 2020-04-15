@@ -75,20 +75,71 @@ class SettingActivity : AppCompatActivity() {
                     getString(R.string.factoryReset) -> {
                         resetFactorySetting(mBuilder)
                     }
-                    getString(R.string.lockTester) -> {
-
-                    }
+                    getString(R.string.lockTester) -> {}
                     getString(R.string.changePassword) -> {
                         changePassword(mBuilder, string)
                     }
                     getString(R.string.changeTester) -> {
-
+                        changeTester(mBuilder, string)
                     }
                     getString(R.string.changeDeviceName) -> {
                         setDeviceName(mBuilder, string)
                     }
                 }
             }
+            /**切換所綁定的測試人員*/
+            private fun changeTester(
+                mBuilder: AlertDialog.Builder,
+                string: String
+            ) {
+                val view = layoutInflater.inflate(R.layout.change_password_dialog, null)
+                mBuilder.setView(view)
+                val titleOld = view.findViewById<TextView>(R.id.textView_OldTitle)
+                val titleNew = view.findViewById<TextView>(R.id.textView_NewTitle)
+                var title = view.findViewById<TextView>(R.id.textView_SettingDialogTitle)
+                var edOld = view.findViewById<EditText>(R.id.editText_OldPassword)
+                var edNew = view.findViewById<EditText>(R.id.editText_NewPassword)
+                var btOK = view.findViewById<Button>(R.id.button_SettingDialogOK)
+                var btCancel = view.findViewById<Button>(R.id.button_SettingDialogCancel)
+                val dialog = mBuilder.create()
+                dialog.show()
+                val dm = DisplayMetrics()
+                windowManager.defaultDisplay.getMetrics(dm)
+                dialog.window!!.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                dialog.window!!.setLayout(dm.widthPixels - 180, ViewGroup.LayoutParams.WRAP_CONTENT)
+                edOld.inputType = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+                edNew.hint = MyStatus.lockedTester
+                title.text = string
+                titleOld.text = getString(R.string.plzInputPassword)
+                titleNew.text = getString(R.string.plzInputChangeTester)
+                btCancel.setOnClickListener { dialog.dismiss() }
+                btOK.setOnClickListener {
+                    val passWord = edOld.text.toString()
+                    val tester = edNew.text.toString()
+                    if (passWord.isEmpty() || tester.isEmpty()) {
+                        Toast.makeText(
+                            this@SettingActivity,
+                            getString(R.string.dontBlank),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    if (!passWord.contentEquals(MyStatus.password)) {
+                        Toast.makeText(
+                            this@SettingActivity
+                            , getString(R.string.oldPasswordIsWrong), Toast.LENGTH_SHORT
+                        ).show()
+                        return@setOnClickListener
+                    }
+                    MyStatus.lockedTester = tester
+                    Toast.makeText(
+                        this@SettingActivity
+                        , getString(R.string.successModify), Toast.LENGTH_SHORT
+                    ).show()
+                    dialog.dismiss()
+                }
+            }
+
             /**更改企業密碼*/
             private fun changePassword(
                 mBuilder: AlertDialog.Builder,
