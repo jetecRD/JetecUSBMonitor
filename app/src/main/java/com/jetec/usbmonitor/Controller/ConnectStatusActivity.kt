@@ -105,7 +105,7 @@ class ConnectStatusActivity : AppCompatActivity() {
             }
             if (!firstStep) return@setOnClickListener
             var currentClick = System.currentTimeMillis()
-            if (clickCount < 10) {
+            if (clickCount < 6) {
                 val a = currentClick - lastClick
                 if (a < 1000) {
                     clickCount++

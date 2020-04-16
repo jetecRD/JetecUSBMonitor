@@ -9,9 +9,11 @@ import android.hardware.usb.UsbManager
 import android.os.SystemClock
 import com.hoho.android.usbserial.driver.*
 import com.hoho.android.usbserial.util.SerialInputOutputManager
+import com.jetec.usbmonitor.Controller.EngineerMode
 import com.jetec.usbmonitor.R
 import java.math.BigInteger
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList
@@ -76,6 +78,7 @@ class Tools() {
             }
 
         }
+
         fun sendValueMultiplyDP(input:Double,dp: Int):Int{
             return when (dp) {
                 1 -> {
@@ -408,7 +411,7 @@ class Tools() {
             MyStatus.deviceRow = 0
             MyStatus.usbType = ""
             MyStatus.engineerModel = false
-
+            EngineerMode.engArrayList.clear()
         }
 
         /**@param activity 取得該Activity
@@ -458,6 +461,9 @@ class Tools() {
             returnWho: Int
         ): ArrayList<String> {
             try {
+                EngineerMode.engArrayList.add("-----------------------------------------------------------")
+                EngineerMode.engArrayList.add("#$sendWord<String送出")
+                EngineerMode.engAdapter.upDataData(EngineerMode.engArrayList)
                 val manager: UsbManager =
                     activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
@@ -526,6 +532,9 @@ class Tools() {
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
+                            EngineerMode.engArrayList.add("Byte回傳>${byteArrayToHexStr(data)}")
+                            EngineerMode.engArrayList.add("String回傳>${ascii2String(data)}")
+                            EngineerMode.engAdapter.upDataData(EngineerMode.engArrayList)
                             when (returnWho) {
                                 0 -> {
                                     byteArrayToHexStr(data)?.let { arrayList.add(it) }
@@ -565,6 +574,9 @@ class Tools() {
             returnWho: Int
         ): ArrayList<String> {
             try {
+                EngineerMode.engArrayList.add("-----------------------------------------------------------")
+                EngineerMode.engArrayList.add("#${byteArrayToHexStr(sendWord)}<Byte送出")
+                EngineerMode.engAdapter.upDataData(EngineerMode.engArrayList)
                 val manager: UsbManager =
                     activity.getSystemService(Context.USB_SERVICE) as UsbManager
                 var deviceList: HashMap<String, UsbDevice> = manager.deviceList
@@ -639,6 +651,9 @@ class Tools() {
                 val mL: SerialInputOutputManager.Listener =
                     object : SerialInputOutputManager.Listener {
                         override fun onNewData(data: ByteArray) {
+                            EngineerMode.engArrayList.add("Byte回傳>${byteArrayToHexStr(data)}")
+                            EngineerMode.engArrayList.add("String回傳>${ascii2String(data)}")
+                            EngineerMode.engAdapter.upDataData(EngineerMode.engArrayList)
                             when (returnWho) {
                                 0 -> {
                                     byteArrayToHexStr(data)?.let { arrayList.add(it) }

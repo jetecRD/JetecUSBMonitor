@@ -25,6 +25,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.GravityCompat
+import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.clans.fab.FloatingActionButton
@@ -89,6 +91,10 @@ class MainActivity : AppCompatActivity() {
         setFloatButton()//設置FloatButton
 
         EngineerMode(this).engineer()//使用工程師模式
+        //決定是否開啟工程師模式視窗
+        val drawer = findViewById<DrawerLayout>(R.id.drawerLayout_Eng)
+        if(MyStatus.engineerModel) drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
+        else drawer.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
 
 
     }//onCreate
@@ -724,6 +730,7 @@ class MainActivity : AppCompatActivity() {
     /**設置按下音量建功能*/
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         val floatMenu = findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+        val drawer = findViewById<DrawerLayout>(R.id.drawerLayout_Eng)
         return when (keyCode) {
             KeyEvent.KEYCODE_VOLUME_UP, KeyEvent.KEYCODE_VOLUME_DOWN -> {
                 meansureModel(1)
@@ -733,9 +740,15 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             KeyEvent.KEYCODE_BACK -> {
-                if (floatMenu.isOpened) {
-                    floatMenu.close(true)
-                } else finish()
+                when {
+                    floatMenu.isOpened -> {
+                        floatMenu.close(true)
+                    }
+                    drawer.isDrawerOpen(GravityCompat.START) -> {
+                        drawer.closeDrawers()
+                    }
+                    else -> finish()
+                }
                 true
             }
             else -> false
@@ -812,5 +825,17 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onTouchEvent(event)
     }
+
+    /**設置使用者碰到螢幕後要做的事*/
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        val floatingActionMenu =
+            findViewById<FloatingActionMenu>(R.id.floatingActionMenu_Menu)
+        if (ev?.action == MotionEvent.ACTION_DOWN && floatingActionMenu.isOpened) {
+            floatingActionMenu.close(true)
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+
 }
 
