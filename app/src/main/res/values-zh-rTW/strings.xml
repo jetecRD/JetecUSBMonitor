@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">USB\nMonitor</string>
+    <string name="Temp">溫度</string>
+    <string name="Humidity">濕度</string>
+    <string name="CO2">二氧化碳</string>
+    <string name="CO">一氧化碳</string>
+    <string name="Pressure">壓力</string>
+    <string name="PM2_5">PM2.5</string>
+    <string name="PM10">PM10</string>
+    <string name="Noise">噪音</string>
+    <string name="Flow">流量</string>
+    <string name="Proportional">PROPO</string>
+    <string name="Level">LEVEL</string>
+
+    <string name="connectedDevice">已連線</string>
+    <string name="successConnected">連線成功!</string>
+    <string name="disConnectedDevice">未連線</string>
+    <string name="tryConnect">連線中..</string>
+    <string name="gettingDeviceInfo">取得感測器資訊</string>
+    <string name="pleaseInputDevice">請插入感測器</string>
+    <string name="pleaseWait">請稍後..</string>
+    <string name="record_history">歷史紀錄</string>
+    <string name="setting">設定</string>
+    <string name="advise">建議</string>
+
+    <string name="timeMeasrue">量測時間</string>
+    <string name="sensorHasBeenPullOut">已拔除感測器</string>
+    <string name="sensorPullIn">插入感測器</string>
+    <string name="autoMeasure">自動檢測</string>
+    <string name="autoMeasuringButton">自動檢測</string>
+    <string name="measureButton">檢測</string>
+    <string name="autoMeasureOpenLabel">開啟自動檢測</string>
+    <string name="autoMeasureTurnOff">關閉自動檢測</string>
+
+    <string name="PV">補正</string>
+    <string name="EH">上限警報</string>
+    <string name="EL">下限警報</string>
+    <string name="C2F">華/攝氏切換</string>
+
+    <string name="factoryReset">回復原廠設定</string>
+    <string name="nightMode">夜間模式</string>
+    <string name="cancelButton">取消</string>
+    <string name="notice_AlarmTitle">注意</string>
+    <string name="oK_Button">確定</string>
+    <string name="progressing">處理中</string>
+    <string name="progressDialogMessage">請稍後..</string>
+    <string name="factoryResetCheckMessage">本操作將會將所有設定值回復原廠，確定要繼續操作嗎?</string>
+    <string name="noSensorHint">請插入感測器</string>
+    <string name="unfilled">未知人員</string>
+    <string name="tester">測試員: </string>
+    <string name="deviceId">"感測器編號: "</string>
+    <string name="deviceName">"感測器名稱: "</string>
+    <string name="measureTime">"檢測時間: "</string>
+    <string name="measureValue">"檢測數值: "</string>
+    <string name="write_data">寫入資料</string>
+    <string name="recorder">測試員:</string>
+    <string name="date_time">時間/日期</string>
+    <string name="note">備註</string>
+    <string name="please_input">請輸入..</string>
+    <string name="record_data">紀錄資料</string>
+    <string name="save">儲存</string>
+    <string name="flashSavetoNote">本資料為快速紀錄</string>
+    <string name="saving">儲存中..</string>
+    <string name="succesSaved">已儲存!</string>
+    <string name="successModify">已修改!</string>
+    <string name="noImageWasTaken">未拍攝任何照片</string>
+    <string name="lockTester">鎖定測試員</string>
+    <string name="changePassword">更改密碼</string>
+    <string name="changeTester">切換測試員</string>
+    <string name="changeDeviceName">更改裝置名稱</string>
+    <string name="pleaseSelectSpinner">---請選擇---</string>
+    <string name="searchBytUUIDLabel">以裝置編號篩選</string>
+    <string name="searchByDaviceNameLabel">以裝置名稱篩選</string>
+    <string name="searchByTester">以測試人員篩選</string>
+    <string name="searchByDate">以日期篩選</string>
+    <string name="resultFilter">重置篩選</string>
+    <string name="tooLongInput">輸入太長了!請輸入小於6個中文字或是15個英數字</string>
+    <string name="dontBlank">請勿空白!</string>
+    <string name="old_password">舊密碼</string>
+    <string name="new_password">新密碼</string>
+    <string name="oldPasswordIsWrong">舊密碼錯誤!</string>
+    <string name="inputNewPasswordHint">請輸入舊密碼..</string>
+    <string name="inputOldPasswordHint">請輸入新密碼..</string>
+    <string name="pswIsWrong">密碼錯誤!</string>
+    <string name="pleaseInput">請輸入..</string>
+    <string name="plzInputPassword">請輸入密碼</string>
+    <string name="plzInputChangeTester">請輸入新的測試人員</string>
+    <string name="IH">最大量程</string>
+    <string name="IL">最小量程</string>
+    <string name="delete">刪除</string>
+    <string name="review">檢視</string>
+    <string name="modify">修改</string>
+
+    <string name="flashSave">快速儲存</string>
+    <string name="sensor_setting">感測器設定</string>
+    <string name="application_setting">應用程式設定</string>
+
+</resources>

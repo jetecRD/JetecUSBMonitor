@@ -39,9 +39,10 @@ import com.jetec.usbmonitor.Model.Tools.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
 import java.io.File
-import java.lang.Exception
+
 import java.text.SimpleDateFormat
 import java.util.*
+
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import kotlin.collections.HashSet
@@ -149,7 +150,13 @@ class RecordHistoryActivity : AppCompatActivity() {
             /**以一般spinner做篩選*/
             val spinner: Spinner = view.findViewById(R.id.spinner_FilterId)
             val headerTitle = view.findViewById<TextView>(R.id.textView_FilterDialogHeader)//副標題
-            var headerString = title.substring(title.lastIndexOf(" "))
+            var headerString = title
+            try {
+                headerString = title.substring(title.lastIndexOf(" "))
+            }catch (e:Exception){
+
+            }
+
 
             headerTitle.text = headerString
             GetSavedHashArray(this, object : GetSavedHashArray.AsyncResponse {

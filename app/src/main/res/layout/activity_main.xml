@@ -131,7 +131,7 @@
                 app:fab_colorNormal="#4CAF50"
                 app:fab_colorPressed="#72A675"
                 app:fab_colorRipple="#99FFFFFF"
-                app:fab_label="Flash save"
+                app:fab_label="@string/flashSave"
                 app:fab_size="mini" />
 
             <com.github.clans.fab.FloatingActionButton
@@ -142,7 +142,7 @@
                 app:fab_colorNormal="#D2481C"
                 app:fab_colorPressed="#FD815A"
                 app:fab_colorRipple="#99FFFFFF"
-                app:fab_label="Save"
+                app:fab_label="@string/save"
                 app:fab_size="mini" />
         </com.github.clans.fab.FloatingActionMenu>
 

@@ -58,7 +58,7 @@
     <string name="note">Note</string>
     <string name="please_input">Please input...</string>
     <string name="record_data">Record Data</string>
-    <string name="save">save</string>
+    <string name="save">Save</string>
     <string name="flashSavetoNote">By flash save.</string>
     <string name="saving">Saving..</string>
     <string name="succesSaved">Success saved!</string>
@@ -90,5 +90,9 @@
     <string name="delete">Delete</string>
     <string name="review">Review</string>
     <string name="modify">Modify</string>
+
+    <string name="flashSave">Flash save</string>
+    <string name="sensor_setting">Sensor Setting</string>
+    <string name="application_setting">Application Setting</string>
 
 </resources>
