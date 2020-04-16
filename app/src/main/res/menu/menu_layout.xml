@@ -9,10 +9,10 @@
         android:id="@+id/action_Setting"
         android:title="@string/setting"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/action_Advise"
-        android:title="@string/advise"
-        app:showAsAction="never" />
+<!--    <item-->
+<!--        android:id="@+id/action_Advise"-->
+<!--        android:title="@string/advise"-->
+<!--        app:showAsAction="never" />-->
     <item
         android:title="@string/autoMeasure"
         app:showAsAction="never">

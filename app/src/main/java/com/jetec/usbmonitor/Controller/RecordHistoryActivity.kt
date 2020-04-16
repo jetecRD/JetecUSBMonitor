@@ -394,6 +394,16 @@ class RecordHistoryActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
+    /**回傳修改後的值*/
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+//        Log.d(TAG, ":$requestCode $resultCode ${data?.getStringExtra("RESULT")} ");
+        if (requestCode == RESULT_CODE && resultCode == 1) {
+            val id = data?.getIntExtra("modifiedIndex", 0)
+            mAdapter.updateList()
+        }
+    }
+
     /**第一個RecyclerView*/
     class MyAdapter : RecyclerView.Adapter<MyAdapter.ViewHolder> {
 
@@ -588,7 +598,7 @@ class RecordHistoryActivity : AppCompatActivity() {
             binderHelper.bind(holder.swipeLayout, position.toString())
             binderHelper.setOpenOnlyOne(true)
             val title =
-                holder.parent.context.getString(R.string.tester) + ": " + data[position].name
+                holder.parent.context.getString(R.string.tester) + data[position].name
             val context = holder.parent.context
             val deviceID = context.getString(R.string.deviceId) + data[position].deviceUUID
             val deviceName = context.getString(R.string.deviceName) + data[position].deviceName
@@ -624,16 +634,6 @@ class RecordHistoryActivity : AppCompatActivity() {
             }.start()
 
 
-        }
-    }
-
-    /**回傳修改後的值*/
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-//        Log.d(TAG, ":$requestCode $resultCode ${data?.getStringExtra("RESULT")} ");
-        if (requestCode == RESULT_CODE && resultCode == 1) {
-            val id = data?.getIntExtra("modifiedIndex", 0)
-            mAdapter.updateList()
         }
     }
 

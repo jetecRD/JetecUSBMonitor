@@ -25,7 +25,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:backgroundTint="#FD5454"
-            android:text="刪除"
+            android:text="@string/delete"
             android:textColor="@android:color/background_light" />
 
         <Button
@@ -35,7 +35,7 @@
             android:layout_weight="1"
             android:backgroundTint="#5869C8"
             android:textColor="@android:color/background_light"
-            android:text="檢視" />
+            android:text="@string/review" />
 
         <Button
             android:id="@+id/button_RH_Modify"
@@ -44,7 +44,7 @@
             android:layout_weight="1"
             android:backgroundTint="#4DA251"
             android:textColor="@android:color/background_light"
-            android:text="修改" />
+            android:text="@string/modify" />
     </LinearLayout>
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"

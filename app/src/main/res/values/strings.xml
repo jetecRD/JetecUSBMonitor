@@ -47,7 +47,7 @@
     <string name="factoryResetCheckMessage">It will RESET all of custom setting,continue?</string>
     <string name="noSensorHint">Need pull in sensor</string>
     <string name="unfilled">unfilled</string>
-    <string name="tester">Tester</string>
+    <string name="tester">Tester: </string>
     <string name="deviceId">"Device ID: "</string>
     <string name="deviceName">"Device Name: "</string>
     <string name="measureTime">"Measure time: "</string>
@@ -87,5 +87,8 @@
     <string name="plzInputChangeTester">Please input new TesterName</string>
     <string name="IH">High Range</string>
     <string name="IL">Low Range</string>
+    <string name="delete">Delete</string>
+    <string name="review">Review</string>
+    <string name="modify">Modify</string>
 
 </resources>
