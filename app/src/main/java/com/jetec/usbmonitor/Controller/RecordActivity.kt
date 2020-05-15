@@ -5,6 +5,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.ProgressDialog
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -74,6 +75,7 @@ class RecordActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestedOrientation = (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)//保持螢幕直向
         setContentView(R.layout.activity_record)
         CrashHandler.getInstance().init(this)
         Stetho.initializeWithDefaults(this)

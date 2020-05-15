@@ -1,6 +1,7 @@
 package com.jetec.usbmonitor.Controller
 
 import android.app.ProgressDialog
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
@@ -44,6 +45,7 @@ class SettingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_setting)
+        requestedOrientation = (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)//保持螢幕直向
         CrashHandler.getInstance().init(this)
         setMenu()//設置Toolbar
         setSensorSetting()//設置設定sensor的RecyclerView部分
