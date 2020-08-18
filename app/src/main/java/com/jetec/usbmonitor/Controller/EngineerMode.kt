@@ -18,10 +18,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Switch
 import android.widget.TextView
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 
 

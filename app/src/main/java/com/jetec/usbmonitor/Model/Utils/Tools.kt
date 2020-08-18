@@ -1,4 +1,4 @@
-package com.jetec.usbmonitor.Model.Tools
+package com.jetec.usbmonitor.Model.Utils
 
 import android.app.Activity
 import android.content.Context
@@ -13,7 +13,6 @@ import com.jetec.usbmonitor.Controller.EngineerMode
 import com.jetec.usbmonitor.R
 import java.math.BigInteger
 import java.text.DecimalFormat
-import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import kotlin.collections.ArrayList

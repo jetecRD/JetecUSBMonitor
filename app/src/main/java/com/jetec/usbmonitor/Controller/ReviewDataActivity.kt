@@ -1,12 +1,9 @@
 package com.jetec.usbmonitor.Controller
 
-import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Typeface
-import android.net.Uri
 import android.os.*
-import android.os.StrictMode.VmPolicy
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -20,10 +17,9 @@ import com.bumptech.glide.Glide
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.PDFModel.PDFReportMaker
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
-import java.io.File
 
 
 class ReviewDataActivity : AppCompatActivity() {

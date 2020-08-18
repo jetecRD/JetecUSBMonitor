@@ -7,10 +7,7 @@ import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.os.SystemClock
-import android.text.Editable
-import android.text.InputFilter
 import android.text.InputType
-import android.text.TextWatcher
 import android.text.method.DigitsKeyListener
 import android.util.DisplayMetrics
 import android.util.Log
@@ -27,9 +24,9 @@ import com.jetec.usbmonitor.Model.AnalysisValueInfo
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.Initialization
-import com.jetec.usbmonitor.Model.Tools.MyInputFilter
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.MyInputFilter
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 
 //import kotlinx.android.synthetic.main.activity_setting.*

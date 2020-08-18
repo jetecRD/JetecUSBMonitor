@@ -10,10 +10,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.graphics.Typeface
 import android.graphics.drawable.ColorDrawable
-import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.os.StrictMode
 import android.os.SystemClock
 import android.util.DisplayMetrics
 import android.util.Log
@@ -36,10 +33,9 @@ import com.jetec.usbmonitor.Model.GetSavedHashArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
 import com.jetec.usbmonitor.Model.PDFModel.PDFReportMaker
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
-import java.io.File
 
 import java.text.SimpleDateFormat
 import java.util.*

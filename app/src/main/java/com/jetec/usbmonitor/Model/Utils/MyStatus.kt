@@ -1,4 +1,4 @@
-package com.jetec.usbmonitor.Model.Tools
+package com.jetec.usbmonitor.Model.Utils
 
 class MyStatus{
     companion object{

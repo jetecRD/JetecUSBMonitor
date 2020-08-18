@@ -24,17 +24,14 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.core.content.FileProvider
 import androidx.core.widget.ContentLoadingProgressBar
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.bumptech.glide.Glide
-import com.google.gson.JsonArray
 import com.jetec.usbmonitor.Model.RoomDBHelper.Data
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -153,17 +150,11 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
                             runOnUiThread {
                                 dialog.dismiss()
                                 finish()
-
-
                             }
                             Looper.prepare()
                             Toast.makeText(this,getString(R.string.successModify),Toast.LENGTH_LONG).show()
                             Looper.loop()
                         }.start()
-
-
-
-
                     }
                 }
             }
@@ -185,7 +176,7 @@ class ModifyHistoryDataActivity : AppCompatActivity() {
             if (imageFile != null) {
                 val imageUri = FileProvider.getUriForFile(
                     this,
-                    "com.example.android.fileprovider",
+                    "com.jetec.android.fileprovider",
                     imageFile
                 )
                 cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)

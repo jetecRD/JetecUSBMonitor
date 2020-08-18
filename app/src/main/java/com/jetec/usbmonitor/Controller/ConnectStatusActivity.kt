@@ -29,12 +29,11 @@ import com.hoho.android.usbserial.driver.*
 import com.jetec.usbmonitor.Model.BreathInterpolator
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.R
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 //import kotlinx.android.synthetic.main.activity_connect_status.*
 import java.io.IOException
 import java.lang.Exception
-import java.sql.RowId
 
 class ConnectStatusActivity : AppCompatActivity() {
     val TAG: String = ConnectStatusActivity::class.java.simpleName + "my"

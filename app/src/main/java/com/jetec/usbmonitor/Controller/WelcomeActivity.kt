@@ -19,8 +19,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.facebook.stetho.Stetho
 import com.jetec.usbmonitor.Model.CrashHandler
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 import pl.droidsonroids.gif.GifDrawable
 

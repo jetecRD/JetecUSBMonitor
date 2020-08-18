@@ -11,7 +11,6 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.graphics.Typeface
-import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.os.Environment
 import android.os.Looper
@@ -33,14 +32,12 @@ import com.google.gson.Gson
 import com.jetec.usbmonitor.Model.CrashHandler
 import com.jetec.usbmonitor.Model.EventBusModel.ImageEvent
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
-import kotlinx.android.synthetic.main.activity_record.*
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -224,7 +221,7 @@ class RecordActivity : AppCompatActivity() {
                 if (imageFile != null) {
                     val imageUri = FileProvider.getUriForFile(
                         this,
-                        "com.example.android.fileprovider",
+                        "com.jetec.android.fileprovider",
                         imageFile
                     )
                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri)

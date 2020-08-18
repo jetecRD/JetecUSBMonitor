@@ -2,7 +2,7 @@ package com.jetec.usbmonitor.Model
 
 import android.app.Activity
 import android.util.Log
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.Tools
 
 class Initialization {
     private val TAG = Initialization::class.java.simpleName

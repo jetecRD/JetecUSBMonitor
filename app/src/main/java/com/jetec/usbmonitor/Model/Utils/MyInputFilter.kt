@@ -1,13 +1,10 @@
-package com.jetec.usbmonitor.Model.Tools
+package com.jetec.usbmonitor.Model.Utils
 
-import android.R.string
 import android.app.Activity
 import android.text.InputFilter
 import android.text.Spanned
 import android.util.Log
-import android.widget.Toast
 import com.jetec.usbmonitor.Controller.SettingActivity
-import com.jetec.usbmonitor.R
 
 
 class MyInputFilter:InputFilter {

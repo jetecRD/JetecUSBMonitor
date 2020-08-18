@@ -43,8 +43,8 @@ import com.jetec.usbmonitor.Model.DeviceSetting
 import com.jetec.usbmonitor.Model.DeviceValue
 import com.jetec.usbmonitor.Model.EventBusModel.ImageEvent
 import com.jetec.usbmonitor.Model.RoomDBHelper.DataBase
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 import com.jetec.usbmonitor.R
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe

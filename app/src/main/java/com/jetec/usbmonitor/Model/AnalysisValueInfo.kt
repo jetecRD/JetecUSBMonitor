@@ -2,9 +2,8 @@ package com.jetec.usbmonitor.Model
 
 import android.app.Activity
 import android.util.Log
-import com.jetec.usbmonitor.Model.Tools.MyStatus
-import com.jetec.usbmonitor.Model.Tools.Tools
-import java.text.DecimalFormat
+import com.jetec.usbmonitor.Model.Utils.MyStatus
+import com.jetec.usbmonitor.Model.Utils.Tools
 
 class AnalysisValueInfo() {
     val TAG: String = AnalysisValueInfo::class.java.simpleName
