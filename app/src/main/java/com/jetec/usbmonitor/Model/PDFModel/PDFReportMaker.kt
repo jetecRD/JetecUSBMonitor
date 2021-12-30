@@ -58,6 +58,7 @@ class PDFReportMaker {
             document: Document
         ) {
             val canvas = writer.directContentUnder
+
             ColumnText.showTextAligned(
                 canvas,
                 Element.ALIGN_RIGHT,
